@@ -1,0 +1,32 @@
+# --- Java ---
+*.class
+*.log
+*.jar
+*.war
+
+# --- Directorios de compilación ---
+bin/
+build/
+target/
+out/
+
+# --- Eclipse ---
+.metadata/
+.recommenders/
+remote-systems-tempfiles/
+.tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# --- Archivos de proyecto de Eclipse ---
+.project
+.classpath
+
+# --- OS específicos ---
+.DS_Store
+Thumbs.db
