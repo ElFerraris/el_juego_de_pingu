@@ -1,16 +1,16 @@
 package el_juego_de_pingu;
 
-public class Casilla {
+public abstract class Casilla extends Tablero {
 	
 	protected int posicion;
 	protected String tipo;
 	
 	
-	/*
-	public void activarEfecto(jugador: Jugador) {
+	
+	public void activarEfecto(Jugador jugador) {
 		
 	}
-	*/
+	
 	
 	
 	
