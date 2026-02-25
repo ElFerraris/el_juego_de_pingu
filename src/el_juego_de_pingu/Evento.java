@@ -2,7 +2,7 @@ package el_juego_de_pingu;
 
 public class Evento extends CasillaInterrogante {
 	private String tipo;
-	private double provabilidad;
+	private double probabilidad;
 	
 	
 	
