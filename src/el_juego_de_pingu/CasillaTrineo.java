@@ -6,6 +6,13 @@ public class CasillaTrineo extends Casilla {
 	private int posicionSiguienteTrineo;
 	
 	
+	public CasillaTrineo(int posicion, String tipo, int posicionSiguienteTrineo) {
+		super(posicion, tipo);
+		this.posicionSiguienteTrineo = posicionSiguienteTrineo;
+	}
+	
+	
+	
 	@Override
 	public void activarEfecto(Jugador jugador) {
 		

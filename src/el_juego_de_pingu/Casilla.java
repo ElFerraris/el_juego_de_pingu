@@ -5,7 +5,10 @@ public abstract class Casilla extends Tablero {
 	protected int posicion;
 	protected String tipo;
 	
-	
+	public Casilla(int posicion, String tipo) {
+		this.posicion = posicion;
+		this.tipo = tipo;
+	}
 	
 	public void activarEfecto(Jugador jugador) {
 		
