@@ -11,7 +11,7 @@ public class BBDD {
 	/**
 	 * ESTABLECER CONEXION CON LA BASE DE DATOS
 	 * 
-	 * @return 
+	 * @return Conexion a la BD
 	 */
 	
 	public static Connection conectarBD() {
@@ -51,6 +51,30 @@ public class BBDD {
 		
 		return null;
 	}
+	
+	/**
+	 * DESCONEXION DE LA BASDE DE DATOS
+	 * 
+	 * @param con Conexion a Base de Datos
+	 */
+	
+	public static void desconectarBD(Connection con) {
+		
+		try {
+			// Comprovar que la Conexion no sea nula ni que ya este cerrada
+			if (con != null && !con.isClosed()) {
+				con.close();
+				System.out.println("►Conexion cerrada correctamente.");
+			}
+		} catch (SQLException e) {
+			System.out.println("►Error al cerrar la conexion: " + e.getMessage());
+		}
+	}
+	
+	
+	
+	
+	
 	
 	public static void main(String[] args) {
 		conectarBD();
