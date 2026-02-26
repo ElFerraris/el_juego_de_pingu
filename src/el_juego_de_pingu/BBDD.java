@@ -20,8 +20,8 @@ public class BBDD {
 		
 		// 1) Datos para la conexion
 		String url = "jdbc:oracle:thin:@//oracle.ilerna.com:1521/XEPDB2";
-		String usr = "DW2526_GUE_DANIEL";
-		String pwd = "A47122795G";
+		String usr = "DW2526_GR08_PINGU";
+		String pwd = "ADGAIBS";
 		
 		try {
 			// 2) Llamamos a jdbc8.jar
@@ -71,13 +71,76 @@ public class BBDD {
 		}
 	}
 	
+	/* FUNCIONES POR IMPLEMENTAR CON EL RESTO DEL JUEGO */
 	
-	
-	
-	
-	
-	public static void main(String[] args) {
-		conectarBD();
+	/*
+	public boolean guardarPartida(Connection con, Juego juego) {
+
 	}
+
+	public Juego cargarPartida(Connection conConnection con) {
+
+	}
+
+	public String encriptarDatos(Connection con, String datos) {
+
+	}
+
+	public String desencriptarDatos(Connection con, String datos) {
+	
+	}
+
+	public boolean existePartidaGuardada(Connection con) {
+
+	}
+	*/	
+	
+	// EJEMPLO DE METODO PARA GUARDAR COSITAS
+	/*
+	public static void guardarPuntuacion(Connection con, String nombre, int puntos) {
+		String sql = "INSERT INTO RANKING VALUES (?, ?)";
+		
+		// El 'try' aquí cierra automáticamente el PreparedStatement al terminar el método,
+		// ¡PERO NO CIERRA 'con' (la conexión)!
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, nombre);
+			pstmt.setInt(2, puntos);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
+		}
+	}
+	*/
+	
+	// EJEMPLO DE METODO PARA VER COSITAS
+	/*
+	public static void mostrarRanking(Connection con) {
+		String sql = "SELECT nombre, puntos FROM ranking ORDER BY puntos DESC";
+		
+		// Preparamos la sentencia y ejecutamos la consulta
+		try (PreparedStatement pstmt = con.prepareStatement(sql);
+				ResultSet rs = pstmt.executeQuery()) { // <--- executeQuery para SELECT
+			
+			System.out.println("\n--- RANKING DE PINGÜINOS ---");
+			System.out.println("NOMBRE\t\tPUNTOS");
+			System.out.println("---------------------------");
+			
+			// El ResultSet es como un puntero que empieza antes de la primera fila.
+			// rs.next() salta a la siguiente fila. Si devuelve 'false', es que ya no hay más datos.
+			while (rs.next()) {
+				// Sacamos los datos de las columnas por su nombre o posición
+				String nombre = rs.getString("nombre");
+	            int puntos = rs.getInt("puntos");
+	            
+	            System.out.println(nombre + "\t\t" + puntos);
+			}
+			System.out.println("---------------------------\n");
+			
+		} catch (SQLException e) {
+			System.out.println("► Error al leer el ranking: " + e.getMessage());
+		}
+	}
+	*/
+	
 	
 }
