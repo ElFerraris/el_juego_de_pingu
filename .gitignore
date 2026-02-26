@@ -4,6 +4,8 @@
 *.jar
 *.war
 
+!ojdbc8.jar
+
 # --- Directorios de compilación ---
 bin/
 build/
