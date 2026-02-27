@@ -13,6 +13,16 @@ public class CasillaTrineo extends Casilla {
 	
 	
 	
+	
+	
+	public int getPosicionSiguienteTrineo() {
+		return posicionSiguienteTrineo;
+	}
+
+
+
+
+
 	@Override
 	public void activarEfecto(Jugador jugador) {
 		
