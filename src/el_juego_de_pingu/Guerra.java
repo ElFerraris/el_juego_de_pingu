@@ -11,7 +11,7 @@ public class Guerra extends Jugador{
 	}
 
 	public Jugador calcularGanador(Jugador jugador1, Jugador jugador2) {
-		
+
 	}
 
 	public Jugador resolverCombate() {
