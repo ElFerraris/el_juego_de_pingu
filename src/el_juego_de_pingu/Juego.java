@@ -2,7 +2,7 @@ package el_juego_de_pingu;
 
 import java.util.ArrayList;
 
-public class Juego extends BaseDatos{
+public class Juego extends BBDD{
 
 	private Tablero tablero;
     ArrayList<Jugador> jugadores = new ArrayList<Jugador>();
