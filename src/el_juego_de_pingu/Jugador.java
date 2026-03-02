@@ -26,7 +26,12 @@ public class Jugador extends Juego{
     }
 	*/
 
-    public void moverFicha(int numeroDeCasillasQueAvanza) {
+    public Inventario getInventario() {
+		return inventario;
+	}
+
+
+	public void moverFicha(int numeroDeCasillasQueAvanza) {
     
     	int posicionsiguiente = this.posicion + numeroDeCasillasQueAvanza; 
     	if(posicionsiguiente < 50) {
