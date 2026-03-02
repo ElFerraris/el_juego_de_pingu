@@ -20,11 +20,13 @@ public class Jugador extends Juego{
 	
 	
     
-    /*
+    
     public int tirarDado() {
-
+    	
+            return (int) (Math.random() * (1 - 6 + 1)) + 1;
+    	
     }
-	*/
+	
 
     public int getTurnosBloqueados() {
 		return turnosBloqueados;
@@ -52,11 +54,6 @@ public class Jugador extends Juego{
     		this.posicion = 50;
     	}
     }
-	
-	
-    public void atacarConBolasNieve(Jugador jugador) {
-    	
-    }
 
 
 	public String getNombre() {
@@ -71,11 +68,19 @@ public class Jugador extends Juego{
 
 
     
-    /*
+    
     public boolean sobornarOso() {
     
+    	if(this.inventario.tieneObjeto("Pez")) {
+    		return true;
+    	}else {
+    		return false;
+    	}
+    	
+    	
     }
-
+    
+    /*
     public boolean estaBloqueado() {
     
     }
