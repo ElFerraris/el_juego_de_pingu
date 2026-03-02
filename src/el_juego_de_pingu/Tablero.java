@@ -1,20 +1,20 @@
 package el_juego_de_pingu;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Tablero extends Juego{
 	
+	
 	public static void main(String[] args) {
-		
 		Tablero t1 = new Tablero();
-		
 		t1.generarSeedAleatorioa();
 	}
 	
 	
 	
 	private int midaTablero = 50;
-    ArrayList<Casilla> casillas = new ArrayList<Casilla>();
+    private ArrayList<Casilla> casillas = new ArrayList<Casilla>();
     
 	
     //GENERAR SEED ALEATORIA
@@ -35,9 +35,13 @@ public class Tablero extends Juego{
     }
     
     
-    
+    //INTRODUCIR SEED PARA GENERAR
     public void introducirSeed(String seed) {
-    	
+    	if (validarSeed(seed)) {
+    		generarTablero(seed);
+    	} else {
+    		System.out.println("Error con esta seed");
+    	}
     }
     
     
@@ -61,12 +65,12 @@ public class Tablero extends Juego{
     	}
     }
     
+    
+    
+    //GENERACIO TABLERO
 	public void generarTablero(String seed) {
 		
 		casillas.add(new CasillaNormal(0, "Casilla NORMAL"));	//Generar primera casilla
-
-		
-		
 		//Generación tablero en base a seed
 		for (int i = 1; i < midaTablero - 1; i++) {
 			switch (seed.charAt(i - 1)) {
@@ -93,39 +97,12 @@ public class Tablero extends Juego{
 					break;		
 			}
 		}
-		
-		
 		casillas.add(new CasillaNormal(midaTablero - 1, "Casilla NORMAL")); //Generar ultima casilla	
 
-		
-		/*Bucle generación tablero
-		for (int i = 1; i < midaTablero - 1; i++) {
-			int aleatorio = (int)(Math.random() * 100) + 1;
-			
-			if (aleatorio >= 1 && aleatorio <= 40) {
-				casillas.add(new CasillaNormal(i, "Casilla NORMAL"));
-			} else if (aleatorio >= 41 && aleatorio <= 50) {
-				casillas.add(new CasillaOso(i, "Casilla OSO"));
-			} else if (aleatorio >= 51 && aleatorio <= 60) {
-				casillas.add(new CasillaAgujero(i, "Casilla AGUJERO", 0)); 
-				HACER FORMULA PARA SABER LA CASILLA AGUJERO ANTERIOR
-				SI NO HAY CASILLA ANTEIROR VUELVE AL PRINCIPIO
-			} else if (aleatorio >= 61 && aleatorio <= 75) {
-				casillas.add(new CasillaTrineo(i, "Casilla TRINEO", 0));
-				HACER FORMULA PARA SABER LA CASILLA TRINEO SIGUIENTE
-			} else if (aleatorio >= 76 && aleatorio <= 90) {
-				casillas.add(new CasillaInterrogante(i, "Casilla INTERROGANTE"));
-			} else if (aleatorio >= 90 && aleatorio <= 100) {
-				casillas.add(new CasillaRompedizas(i, "Casilla ROMPEDIZAS"));
-			} else {
-				System.out.println("ERROR AL GENERAR TABLERO");
-			}
-			
-			System.out.println((i + 1 )+ " TIPO: " + casillas.get(i).tipo); //PRINT PRUEBA
-		}*/
-		
-		
 	
+		
+		
+		
 		
 		//DETERMINAR SIGUIENTE CASILLA DE CADA TRINEO
 		for (int i = 1; i < midaTablero - 1; i++) {
@@ -137,20 +114,39 @@ public class Tablero extends Juego{
 					}
 				}
 			}
+			if (casillas.get(i).tipo.equals("Casilla TRINEO") && ((CasillaTrineo) casillas.get(i)).getPosicionSiguienteTrineo() == 0) {
+				casillas.set(i, new CasillaTrineo(i, "Casilla TRINEO", i));
+			}
+		}
+
+		
+		
+		//DETERMINAR AGUJERO ANTERIOR DE CADA AGUJERO
+		for (int i = midaTablero - 1; i > 0; i--) {
+			if (casillas.get(i).tipo.equals("Casilla AGUJERO")) {
+				for (int y = i - 1; y > 0; y--) {
+					if(casillas.get(y).tipo.equals("Casilla AGUJERO")) {
+						casillas.set(i, new CasillaAgujero(i, "Casilla AGUJERO", y));
+						y = -1; //Como un brake, hace que salga del bucle y que vaya a buscar el siguiente trineo
+					}
+				}
+			}
 		}
 		
 		
-		
-		
-		
-	
-		
+
 		
 		
 		
 		//IMPRESION CASILLAS
 		for (int i = 0; i < midaTablero; i++) {
-			System.out.println(i + " " + casillas.get(i).tipo);
+			if (casillas.get(i).tipo.equals("Casilla TRINEO")) {
+				System.out.println(i + " " + casillas.get(i).tipo + " " + ((CasillaTrineo) casillas.get(i)).getPosicionSiguienteTrineo());
+			} else if (casillas.get(i).tipo.equals("Casilla AGUJERO")) {
+				System.out.println(i + " " + casillas.get(i).tipo + " " + ((CasillaAgujero) casillas.get(i)).getPosicionAgujeroAnterior());
+			} else {
+				System.out.println(i + " " + casillas.get(i).tipo);
+			}
 			}
 		}
 			
@@ -168,8 +164,6 @@ public class Tablero extends Juego{
 	}
 	*/
 	
-	public void moverJugador(Jugador jugador, int posicion) {
-		
-	}
+
 	
 }

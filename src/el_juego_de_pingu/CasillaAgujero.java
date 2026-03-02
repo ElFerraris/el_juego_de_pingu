@@ -12,6 +12,18 @@ public class CasillaAgujero extends Casilla{
 	
 	
 	
+	
+	
+	
+	public int getPosicionAgujeroAnterior() {
+		return posicionAgujeroAnterior;
+	}
+
+
+
+
+
+
 	@Override
 	public void activarEfecto(Jugador jugador) {
 		

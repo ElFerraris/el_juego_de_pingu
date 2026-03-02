@@ -18,4 +18,5 @@ public class CasillaNormal extends Casilla {
 	}
 	
 	
+	
 }
