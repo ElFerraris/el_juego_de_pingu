@@ -1,17 +1,8 @@
 package el_juego_de_pingu;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Tablero extends Juego{
-	
-	
-	public static void main(String[] args) {
-		Tablero t1 = new Tablero();
-		t1.generarSeedAleatorioa();
-	}
-	
-	
 	
 	private int midaTablero = 50;
     private ArrayList<Casilla> casillas = new ArrayList<Casilla>();
