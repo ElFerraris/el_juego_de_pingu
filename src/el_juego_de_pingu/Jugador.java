@@ -26,7 +26,17 @@ public class Jugador extends Juego{
     }
 	*/
 
-    public Inventario getInventario() {
+    public int getTurnosBloqueados() {
+		return turnosBloqueados;
+	}
+
+
+	public void setTurnosBloqueados(int turnosBloqueados) {
+		this.turnosBloqueados = turnosBloqueados;
+	}
+
+
+	public Inventario getInventario() {
 		return inventario;
 	}
 
