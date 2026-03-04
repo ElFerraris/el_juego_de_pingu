@@ -8,6 +8,13 @@ public class Inventario{
 	private int peces;        // max = 2
 	private int bolasNieve;   // max = 6
 	
+	
+	
+	
+	public Inventario() {
+
+	}
+
 	public boolean agregarObjeto(String tipo) {
 	    switch (tipo) {
 	        case "Pez":

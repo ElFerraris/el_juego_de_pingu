@@ -1,6 +1,6 @@
 package el_juego_de_pingu;
 
-public class Guerra extends Jugador{
+public class Guerra{
 	
 	private Jugador jugador1;
 	private Jugador jugador2;
