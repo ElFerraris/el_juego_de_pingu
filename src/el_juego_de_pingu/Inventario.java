@@ -120,4 +120,12 @@ public class Inventario{
 	    return this.dados;
 	}
 	
+	public boolean tieneObjetoEspecifico(String subTipo) {
+	    for (Objeto d : dados) {
+	        if (subTipo.equals("Rapido") && d instanceof DadoRapido) return true;
+	        if (subTipo.equals("Lento") && d instanceof DadoLento) return true;
+	    }
+	    return false;
+	}
+	
 }

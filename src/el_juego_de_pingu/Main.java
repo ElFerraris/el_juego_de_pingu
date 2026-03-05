@@ -41,12 +41,14 @@ public class Main {
             }
         }
         
+        //Foca CPU
+        CPU foca = new CPU("CPU01", "Foca Loca", "Normal");
+        partida.jugadores.add(foca);
+        
         // 3. Añadir jugadores a la partida (incluyendo la CPU que ya está en Juego)
         partida.iniciarPartida(); 
         
         boolean hayGanador = false;
-        
-        
         
         
         
@@ -58,10 +60,19 @@ public class Main {
             
             System.out.println("------------------------------------");
             System.out.println("TURNO DE: " + jugadorActual.getNombre());
+            if(!jugadorActual.estaBloqueado()) {
+            
             System.out.println("Posición actual: " + jugadorActual.getPosicion());
             
-            // Si el jugador es una CPU, podrías llamar a su lógica automática aquí
-            // if (jugadorActual instanceof CPU) { ... }
+            if (jugadorActual instanceof CPU) {
+                System.out.println("La foca está pensando su movimiento...");
+                try { Thread.sleep(2000); } catch (InterruptedException e) {} // Pausa dramática
+                
+                // La foca usa su propia lógica (decidir si usa dados o no)
+                ((CPU) jugadorActual).decidirAccion();
+                
+            } else {
+            
             
             System.out.println("Presiona ENTER para tirar el dado...");
             sc.nextLine();
@@ -108,7 +119,15 @@ public class Main {
             System.out.println("Nueva posición: " + jugadorActual.getPosicion());
             
             partida.comprobarGuerra(jugadorActual);
-
+            
+            }
+            
+            }
+            else {
+            	System.out.println("Esta BLOQUEADO no se puede mover ");
+            	jugadorActual.setTurnosBloqueados(jugadorActual.getTurnosBloqueados() -1);
+            	System.out.println("Turnos restantes de bloqueo: " + jugadorActual.getTurnosBloqueados());
+            }
             
             // 5. Comprobar Ganador
             if (partida.comprobarGanador()) {

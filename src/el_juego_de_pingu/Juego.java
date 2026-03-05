@@ -92,21 +92,42 @@ public class Juego extends BBDD{
     
     public void comprobarGuerra(Jugador jugadorActual) {
         for (Jugador oponente : jugadores) {
-            // No puede luchar contra sí mismo
-            // Y deben estar en la misma casilla (que no sea la salida 0)
-            if (!oponente.equals(jugadorActual) && 
-                oponente.getPosicion() == jugadorActual.getPosicion() && 
-                jugadorActual.getPosicion() != 0) {
+            // 1. No pelear contra uno mismo y que estén en la misma casilla
+            if (!oponente.equals(jugadorActual) && oponente.getPosicion() == jugadorActual.getPosicion() && jugadorActual.getPosicion() != 0) {
                 
-                System.out.println("\n¡ALERTA DE COMBATE! Casilla " + jugadorActual.getPosicion());
-                
-                // Instanciamos la clase Guerra que creamos antes
-                Guerra combate = new Guerra();
-                combate.iniciarGuerra(jugadorActual, oponente);
-                
-                // Una vez hay guerra, salimos del bucle para evitar múltiples guerras 
-                // si hubiera más de 2 personas (aunque el dossier dice 1vs1)
-                break; 
+                System.out.println("\n¡COINCIDENCIA EN CASILLA " + jugadorActual.getPosicion() + "!");
+
+                // 2. ¿Uno de los dos es la Foca (CPU)?
+                if (jugadorActual instanceof CPU || oponente instanceof CPU) {
+                    
+                    // Buscamos quién es el pingüino humano
+                    Jugador humano = (jugadorActual instanceof CPU) ? oponente : jugadorActual;
+                    
+                    System.out.println("¡La Foca te ha visto!");
+
+                    // Regla del Pez: Si el humano tiene pez, bloquea a la foca
+                    if (humano.getInventario().tieneObjeto("Pez")) {
+                        System.out.println(humano.getNombre() + " usa un Pez para distraer a la foca. ¡Foca bloqueada 2 turnos!");
+                        humano.getInventario().usarObjeto("Pez", humano);
+                        
+                        // Bloqueamos a la foca (buscándola en la lista)
+                        if (jugadorActual instanceof CPU) jugadorActual.setTurnosBloqueados(2);
+                        else oponente.setTurnosBloqueados(2);
+                        
+                    } else {
+                        // Si no hay pez, golpe de cola y al forat anterior
+                        System.out.println("¡ZAS! Golpe de cola. " + humano.getNombre() + " vuelve al forat anterior.");
+                        // Aquí llamarías a: tablero.irAlForatAnterior(humano);
+                    }
+
+                } else {
+                    // 3. Guerra normal entre humanos
+                    System.out.println("¡Guerra de bolas de nieve entre " + jugadorActual.getNombre() + " y " + oponente.getNombre() + "!");
+                    Guerra combate = new Guerra();
+                    combate.iniciarGuerra(jugadorActual, oponente);
+                }
+
+                return; // Finaliza el método porque ya hemos resuelto el conflicto de esta casilla
             }
         }
     }
