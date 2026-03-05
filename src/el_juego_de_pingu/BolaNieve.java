@@ -7,10 +7,10 @@ public class BolaNieve extends Objeto{
 	public BolaNieve(String nombre, String tipo) {
 		super(nombre, tipo);
 	}
-
-	/**
-     * Este método recibe al jugador que quieres atacar.
-     */
+	
+	/*
+     Este método recibe al jugador que quieres atacar.
+     
     public void atacar(Jugador oponente) {
         if (oponente != null) {
             System.out.println("¡Impacto! Lanzando bola a " + oponente.getNombre());
@@ -20,6 +20,7 @@ public class BolaNieve extends Objeto{
             oponente.retroceder(this.potencia); 
         }
     }
+    
 
     @Override
     public void usar(Jugador jugadorQueLaUsa) {
@@ -27,5 +28,6 @@ public class BolaNieve extends Objeto{
         // Pero para la estructura básica, podrías dejarlo preparado:
         System.out.println(jugadorQueLaUsa.getNombre() + " se prepara para lanzar una bola.");
     }
+	*/
 	
 }
