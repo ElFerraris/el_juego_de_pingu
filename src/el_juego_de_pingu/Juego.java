@@ -11,25 +11,105 @@ public class Juego extends BBDD{
     
     public void iniciarPartida() {
     	
+    	System.out.println("--- Iniciando El Juego de Pingu ---");
+    	
+
+    	this.turnoActual = 0;
     }
     
     public void guardarPartida() {
-    	
+    	//Base de datos
     }
     
     public void cargarPartida() {
-    	
+    	//Base de datos
     }
     
-    public void cambiarTurno() {
-    	
-    }
     
-   /*
-    public boolean comprobarGanador() {
+    public int getTurnoActual() {
+		return turnoActual;
+	}
+
+	public void setTurnoActual(int turnoActual) {
+		this.turnoActual = turnoActual;
+	}
+	
+	
+/*
+	public void cambiarTurno() {
+    	
+    	// Incrementamos el turno y volvemos a 0 si llegamos al final de la lista
+                turnoActual = (turnoActual + 1) % jugadores.size();
+
+        Jugador j = jugadores.get(turnoActual);
+        System.out.println("Es el turno de: " + j.getNombre());
+
+        // Si el jugador está bloqueado (por la foca o eventos), salta el turno
+        if (j.estaBloqueado()) {
+            System.out.println(j.getNombre() + " está bloqueado. Restando turno de bloqueo...");
+            j.setTurnosBloqueados(j.getTurnosBloqueados() - 1);
+            cambiarTurno();
+        }	
     	
     }
     */
+	
+	public boolean cambiarTurno() {
+	    boolean finRonda = false;
+
+	    // Si el turno actual es el del último jugador de la lista, la ronda va a acabar
+	    if (turnoActual == jugadores.size() - 1) {
+	        finRonda = true;
+	    }
+
+	    // Tu lógica original con el módulo % (mantiene el turno entre 0 y el máximo)
+	    turnoActual = (turnoActual + 1) % jugadores.size();
+
+	    Jugador j = jugadores.get(turnoActual);
+	    
+	    // Si el jugador está bloqueado, restamos turno y saltamos al siguiente recursivamente
+	    if (j.estaBloqueado()) {
+	        System.out.println(j.getNombre() + " está bloqueado. Turnos restantes: " + (j.getTurnosBloqueados() - 1));
+	        j.setTurnosBloqueados(j.getTurnosBloqueados() - 1);
+	        return cambiarTurno(); // Recursividad: pasamos al siguiente
+	    }
+
+	    System.out.println("Es el turno de: " + j.getNombre());
+	    return finRonda; 
+	}
+	
+   
+    public boolean comprobarGanador() {
+    	for (Jugador j : jugadores) {
+            if (j.getPosicion() >= 50) { // Casilla meta según el dossier
+                System.out.println("¡Victoria! El ganador es: " + j.getNombre());
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    public void comprobarGuerra(Jugador jugadorActual) {
+        for (Jugador oponente : jugadores) {
+            // No puede luchar contra sí mismo
+            // Y deben estar en la misma casilla (que no sea la salida 0)
+            if (!oponente.equals(jugadorActual) && 
+                oponente.getPosicion() == jugadorActual.getPosicion() && 
+                jugadorActual.getPosicion() != 0) {
+                
+                System.out.println("\n¡ALERTA DE COMBATE! Casilla " + jugadorActual.getPosicion());
+                
+                // Instanciamos la clase Guerra que creamos antes
+                Guerra combate = new Guerra();
+                combate.iniciarGuerra(jugadorActual, oponente);
+                
+                // Una vez hay guerra, salimos del bucle para evitar múltiples guerras 
+                // si hubiera más de 2 personas (aunque el dossier dice 1vs1)
+                break; 
+            }
+        }
+    }
     
     
 }

@@ -9,6 +9,17 @@ public class Jugador extends Juego{
     private int turnosBloqueados;
     
     
+    
+	public Jugador(String id, String nombre) {
+
+		this.id = id;
+		this.nombre = nombre;
+		this.posicion = 0;
+		this.inventario = new Inventario();
+		this.turnosBloqueados =0;
+	}
+
+
 	public int getPosicion() {
 		return posicion;
 	}
@@ -20,11 +31,18 @@ public class Jugador extends Juego{
 	
 	
     
-    /*
+    
     public int tirarDado() {
-
+    	
+    		int numero = (int)(Math.random() * 6) + 1;
+    		
+    		this.moverFicha(numero);
+    		
+            return numero;
+            
+    	
     }
-	*/
+	
 
     public int getTurnosBloqueados() {
 		return turnosBloqueados;
@@ -52,11 +70,6 @@ public class Jugador extends Juego{
     		this.posicion = 50;
     	}
     }
-	
-	
-    public void atacarConBolasNieve(Jugador jugador) {
-    	
-    }
 
 
 	public String getNombre() {
@@ -71,15 +84,27 @@ public class Jugador extends Juego{
 
 
     
-    /*
+    
     public boolean sobornarOso() {
     
+    	if(this.inventario.tieneObjeto("Pez")) {
+    		this.inventario.eliminarObjeto("Pez");
+    		return true;
+    	}else {
+    		return false;
+    	}
+    	
+    	
     }
-
-    public boolean estaBloqueado() {
     
+    
+    public boolean estaBloqueado() {
+    	if(turnosBloqueados == 0) {
+    		return false;
+    	}else {return true;}
+    	
     }
-    */
+    
     
     
     
