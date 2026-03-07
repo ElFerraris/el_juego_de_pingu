@@ -61,6 +61,8 @@ public class Main {
             System.out.println("------------------------------------");
             System.out.println("TURNO DE: " + jugadorActual.getNombre());
             if(!jugadorActual.estaBloqueado()) {
+            	
+            int posAntes = jugadorActual.getPosicion(); // Guardamos donde estaba
             
             System.out.println("Posición actual: " + jugadorActual.getPosicion());
             
@@ -70,6 +72,18 @@ public class Main {
                 
                 // La foca usa su propia lógica (decidir si usa dados o no)
                 ((CPU) jugadorActual).decidirAccion();
+                
+                int posDespues = jugadorActual.getPosicion(); // Miramos donde ha llegado
+
+                // COMPROBAR QUIÉN HA SIDO ADELANTADO (Regla de la mitad del inventario)
+                for (Jugador p : partida.jugadores) {
+                    if (!(p instanceof CPU)) {
+                        // Si el jugador humano estaba entre la casilla de origen y la de destino
+                        if (p.getPosicion() > posAntes && p.getPosicion() < posDespues) {
+                            ((CPU) jugadorActual).atacarJugador(p);
+                        }
+                    }
+                }
                 
             } else {
             
