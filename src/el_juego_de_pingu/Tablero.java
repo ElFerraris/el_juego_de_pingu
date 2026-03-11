@@ -145,15 +145,33 @@ public class Tablero{
 		
 	
 	
-	
-	
-	
-	
-	
-	/*public Casilla getCasilla(int posicion) {
-		
+	/**
+	 * Aplica el efecto de la casilla donde se encuentra actualmente el jugador.
+	 * @param jugador El jugador que acaba de caer en la casilla.
+	 */
+	public void aplicarEfectoCasilla(Jugador jugador) {
+	    int pos = jugador.getPosicion();
+	    
+	    // Verificamos que la posición sea válida dentro del tablero
+	    if (pos >= 0 && pos < casillas.size()) {
+	        Casilla casillaActual = casillas.get(pos);
+	        
+	        System.out.println("--- EFECTO: " + jugador.getNombre() + " ha caído en " + casillaActual.tipo + " ---");
+	        
+	        // Polimorfismo en acción: llama al activarEfecto específico de cada subclase
+	        casillaActual.activarEfecto(jugador);
+	    }
 	}
-	*/
+	
+	
+	
+	
+	public Casilla getCasilla(int posicion) {
+	    if (posicion >= 0 && posicion < casillas.size()) {
+	        return casillas.get(posicion);
+	    }
+	    return null;
+	}
 	
 
 	

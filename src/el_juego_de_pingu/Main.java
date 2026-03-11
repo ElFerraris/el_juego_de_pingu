@@ -56,11 +56,11 @@ public class Main {
             partida.jugadores.add(nuevoJugador);
             
             // Regalo de bienvenida (opcional, como tenías antes para pruebas)
-            /*if (i == 1) {
-                nuevoJugador.getInventario().agregarObjeto("DadoRapido");
-                nuevoJugador.getInventario().agregarObjeto("DadoLento");
-                nuevoJugador.getInventario().agregarObjeto("BolaNieve");
-            }*/
+            if (i == 1) {
+                nuevoJugador.getInventario().agregarObjeto("Pez");
+                nuevoJugador.getInventario().agregarObjeto("Pez");
+                nuevoJugador.getInventario().agregarObjeto("Pez");
+            }
         }
         
         //Foca CPU
@@ -90,7 +90,7 @@ public class Main {
             
             if (jugadorActual instanceof CPU) {
                 System.out.println("La foca está pensando su movimiento...");
-                try { Thread.sleep(2000); } catch (InterruptedException e) {} // Pausa dramática
+                try { Thread.sleep(1500); } catch (InterruptedException e) {} // Pausa dramática
                 
                 // La foca usa su propia lógica (decidir si usa dados o no)
                 ((CPU) jugadorActual).decidirAccion();
@@ -152,12 +152,15 @@ public class Main {
                 System.out.println("Has sacado un " + resultado + ". \n");
             }
             
+            
+            }
+            
             System.out.println("Nueva posición: " + jugadorActual.getPosicion());
             
             partida.comprobarGuerra(jugadorActual);
             
-            }
-            
+            partida.getTablero().aplicarEfectoCasilla(jugadorActual);
+
             }
             else {
             	System.out.println("Esta BLOQUEADO no se puede mover ");
