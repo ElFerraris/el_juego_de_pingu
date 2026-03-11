@@ -2,7 +2,7 @@ package el_juego_de_pingu;
 
 import java.util.ArrayList;
 
-public class Tablero extends Juego{
+public class Tablero{
 	
 	private int midaTablero = 50;
     private ArrayList<Casilla> casillas = new ArrayList<Casilla>();

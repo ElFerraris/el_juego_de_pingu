@@ -10,6 +10,28 @@ public class Main {
         
         System.out.println("=== BIENVENIDO A EL JUEGO DE PINGU ===");
         
+        int tipo_de_tablero = 0;
+        while (tipo_de_tablero != 1 && tipo_de_tablero != 2) {
+            System.out.println("1 Para generar seed aleatoria");
+            System.out.println("2 Para introducir una seed valida");
+            try {
+                tipo_de_tablero = Integer.parseInt(sc.nextLine());
+                
+                if (tipo_de_tablero == 1) {
+                    partida.getTablero().generarSeedAleatorioa();
+                } else if (tipo_de_tablero == 2) {
+                    System.out.print("Introduce la seed: ");
+                    String seed = sc.nextLine();
+                    partida.getTablero().introducirSeed(seed);
+                } else {
+                    System.out.println("Error: Por favor, elige 1 o 2.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Debes introducir un número (1 o 2).");
+            }
+        }
+
+        
         // 1. Elegir cantidad de jugadores
         int numJugadores = 0;
         while (numJugadores < 2 || numJugadores > 4) {
@@ -34,11 +56,11 @@ public class Main {
             partida.jugadores.add(nuevoJugador);
             
             // Regalo de bienvenida (opcional, como tenías antes para pruebas)
-            if (i == 1) {
+            /*if (i == 1) {
                 nuevoJugador.getInventario().agregarObjeto("DadoRapido");
                 nuevoJugador.getInventario().agregarObjeto("DadoLento");
                 nuevoJugador.getInventario().agregarObjeto("BolaNieve");
-            }
+            }*/
         }
         
         //Foca CPU
@@ -61,6 +83,8 @@ public class Main {
             System.out.println("------------------------------------");
             System.out.println("TURNO DE: " + jugadorActual.getNombre());
             if(!jugadorActual.estaBloqueado()) {
+            	
+            int posAntes = jugadorActual.getPosicion(); // Guardamos donde estaba
             
             System.out.println("Posición actual: " + jugadorActual.getPosicion());
             
@@ -70,6 +94,18 @@ public class Main {
                 
                 // La foca usa su propia lógica (decidir si usa dados o no)
                 ((CPU) jugadorActual).decidirAccion();
+                
+                int posDespues = jugadorActual.getPosicion(); // Miramos donde ha llegado
+
+                // COMPROBAR QUIÉN HA SIDO ADELANTADO (Regla de la mitad del inventario)
+                for (Jugador p : partida.jugadores) {
+                    if (!(p instanceof CPU)) {
+                        // Si el jugador humano estaba entre la casilla de origen y la de destino
+                        if (p.getPosicion() > posAntes && p.getPosicion() < posDespues) {
+                            ((CPU) jugadorActual).atacarJugador(p);
+                        }
+                    }
+                }
                 
             } else {
             

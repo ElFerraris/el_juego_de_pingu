@@ -128,4 +128,18 @@ public class Inventario{
 	    return false;
 	}
 	
+	public void serAtracado() {
+	    // Reducimos a la mitad (división entera: si tiene 3, se queda con 1 o 2 según prefieras)
+	    this.peces /= 2;
+	    this.bolasNieve /= 2;
+	    
+	    // Para los dados en el ArrayList, borramos la mitad
+	    int dadosARemover = dados.size() / 2;
+	    for (int i = 0; i < dadosARemover; i++) {
+	        if (!dados.isEmpty()) {
+	            dados.remove(0);
+	        }
+	    }
+	}
+	
 }

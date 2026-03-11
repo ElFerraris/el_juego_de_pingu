@@ -9,6 +9,11 @@ public class Juego extends BBDD{
     private int turnoActual;
     private CPU cpu;
     
+    public Juego() {
+        this.tablero = new Tablero(); 
+        this.jugadores = new ArrayList<>();
+    }
+    
     public void iniciarPartida() {
     	
     	System.out.println("--- Iniciando El Juego de Pingu ---");
@@ -35,6 +40,7 @@ public class Juego extends BBDD{
 	}
 	
 	
+	
 /*
 	public void cambiarTurno() {
     	
@@ -54,6 +60,14 @@ public class Juego extends BBDD{
     }
     */
 	
+	public Tablero getTablero() {
+		return tablero;
+	}
+
+	public void setTablero(Tablero tablero) {
+		this.tablero = tablero;
+	}
+
 	public boolean cambiarTurno() {
 	    boolean finRonda = false;
 
