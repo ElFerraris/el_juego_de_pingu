@@ -7,7 +7,6 @@ public class Juego extends BBDD{
 	private Tablero tablero;
     ArrayList<Jugador> jugadores = new ArrayList<Jugador>();
     private int turnoActual;
-    private CPU cpu;
     
     public Juego() {
         this.tablero = new Tablero(); 

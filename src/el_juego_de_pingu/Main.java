@@ -64,7 +64,7 @@ public class Main {
         }
         
         //Foca CPU
-        CPU foca = new CPU("CPU01", "Foca Loca", "Normal");
+        CPU foca = new CPU("CPU01", "Foca Loca");
         partida.jugadores.add(foca);
         
         // 3. Añadir jugadores a la partida (incluyendo la CPU que ya está en Juego)

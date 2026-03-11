@@ -2,11 +2,9 @@ package el_juego_de_pingu;
 
 public class CPU extends Jugador{
 
-	private String dificultad;
 	
-	public CPU(String id, String nombre, String dificultad) {
+	public CPU(String id, String nombre) {
         super(id, nombre); // Llama al constructor de Jugador
-        this.dificultad = dificultad;
     }
 	
 	public void decidirAccion() {
