@@ -7,10 +7,13 @@ public class Juego extends BBDD{
 	private Tablero tablero;
     ArrayList<Jugador> jugadores = new ArrayList<Jugador>();
     private int turnoActual;
+    private boolean partidaFinalizada;
+    private Jugador ganador;
     
     public Juego() {
         this.tablero = new Tablero(); 
         this.jugadores = new ArrayList<>();
+        this.partidaFinalizada =false;
     }
     
     public void iniciarPartida() {
@@ -96,6 +99,8 @@ public class Juego extends BBDD{
     	for (Jugador j : jugadores) {
             if (j.getPosicion() >= 50) { // Casilla meta según el dossier
                 System.out.println("¡Victoria! El ganador es: " + j.getNombre());
+                partidaFinalizada = true;
+                ganador = j;
                 return true;
             }
         }
