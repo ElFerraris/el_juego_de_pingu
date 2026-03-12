@@ -6,6 +6,9 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Scanner sc = new Scanner(System.in);
+		boolean jugarOtraVez = true;
+		
+		while (jugarOtraVez) {
         Juego partida = new Juego();
         
         System.out.println("=== BIENVENIDO A EL JUEGO DE PINGU ===");
@@ -50,14 +53,13 @@ public class Main {
         for (int i = 1; i <= numJugadores; i++) {
             System.out.print("Introduce el nombre del Jugador " + i + ": ");
             String nombre = sc.nextLine();
-            System.out.print("Introduce el color Rojo, Azul, Verde, Amarillo, Naranja, Morado, Rosa");
+            System.out.print("Introduce el color Rojo, Azul, Verde, Amarillo, Naranja, Morado i Rosa: ");
             String color = sc.nextLine();
             Jugador nuevoJugador = new Jugador("P" + i, nombre, color);
             
             // Añadirlos a la lista de la partida
             partida.jugadores.add(nuevoJugador);
             
-            // Regalo de bienvenida (opcional, como tenías antes para pruebas)
 
         }
         
@@ -88,8 +90,8 @@ public class Main {
             
             if (jugadorActual instanceof CPU) {
                 System.out.println("La foca está pensando su movimiento...");
-                try { Thread.sleep(1500); } catch (InterruptedException e) {} // Pausa dramática
-                
+                /*try { Thread.sleep(1500); } catch (InterruptedException e) {} // Pausa dramática
+                */
                 // La foca usa su propia lógica (decidir si usa dados o no)
                 ((CPU) jugadorActual).decidirAccion();
                 
@@ -177,6 +179,23 @@ public class Main {
                     }else {System.out.println();}
             	}
         }
+        // --- MENU DE SALIDA / REINICIO ---
+        System.out.println("¿Qué deseas hacer ahora?");
+        System.out.println("1. Jugar una nueva partida");
+        System.out.println("2. Salir del juego");
+        System.out.print("Opción: ");
+        
+        String eleccion = sc.nextLine();
+        if (eleccion.equals("2")) {
+            jugarOtraVez = false;
+            System.out.println("\nGracias por jugar. ¡Hasta la próxima!");
+        	} else {
+        		System.out.println("\nReiniciando el mundo de los pingüinos...\n");
+        	}
+        }
         sc.close();
+        
+        
+        
     }
 }
