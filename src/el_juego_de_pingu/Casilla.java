@@ -13,6 +13,10 @@ public abstract class Casilla extends Tablero {
 	public void activarEfecto(Jugador jugador) {
 		
 	}
+
+	public String getTipoCasilla() {
+		return tipo;
+	}
 	
 	
 	
