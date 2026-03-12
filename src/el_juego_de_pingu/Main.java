@@ -50,7 +50,9 @@ public class Main {
         for (int i = 1; i <= numJugadores; i++) {
             System.out.print("Introduce el nombre del Jugador " + i + ": ");
             String nombre = sc.nextLine();
-            Jugador nuevoJugador = new Jugador("P" + i, nombre);
+            System.out.print("Introduce el color Rojo, Azul, Verde, Amarillo, Naranja, Morado, Rosa");
+            String color = sc.nextLine();
+            Jugador nuevoJugador = new Jugador("P" + i, nombre, color);
             
             // Añadirlos a la lista de la partida
             partida.jugadores.add(nuevoJugador);

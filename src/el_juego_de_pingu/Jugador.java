@@ -1,5 +1,8 @@
 package el_juego_de_pingu;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Jugador extends Juego{
 	
 	private String id;
@@ -7,17 +10,18 @@ public class Jugador extends Juego{
     private int posicion;
     private Inventario inventario;
     private int turnosBloqueados;
+    private String color;
     
     
-    
-	public Jugador(String id, String nombre) {
-
-		this.id = id;
-		this.nombre = nombre;
-		this.posicion = 0;
-		this.inventario = new Inventario();
-		this.turnosBloqueados =0;
-	}
+    public Jugador(String id, String nombre, String color) {
+        this.id = id;
+        this.nombre = nombre;
+        this.posicion = 0;
+        this.inventario = new Inventario();
+        this.turnosBloqueados = 0;
+        
+        this.color = validarColor(color);
+    }
 
 
 	public int getPosicion() {
@@ -103,6 +107,25 @@ public class Jugador extends Juego{
     		return false;
     	}else {return true;}
     	
+    }
+    
+    
+    private String validarColor(String colorRecibido) {
+        // Lista de colores permitidos (puedes ajustarlos a tu gusto)
+        List<String> coloresValidos = Arrays.asList(
+            "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"
+        );
+
+        // Validamos ignorando mayúsculas/minúsculas
+        for (String c : coloresValidos) {
+            if (c.equalsIgnoreCase(colorRecibido)) {
+                return c; // Retorna el color con el formato correcto
+            }
+        }
+
+        // Si el color no es válido, asignamos uno por defecto (ej. Gris)
+        System.out.println("Color no válido. Asignando Gris por defecto.");
+        return "Gris";
     }
     
     
