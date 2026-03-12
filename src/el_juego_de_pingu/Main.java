@@ -58,11 +58,7 @@ public class Main {
             partida.jugadores.add(nuevoJugador);
             
             // Regalo de bienvenida (opcional, como tenías antes para pruebas)
-            if (i == 1) {
-                nuevoJugador.getInventario().agregarObjeto("Pez");
-                nuevoJugador.getInventario().agregarObjeto("Pez");
-                nuevoJugador.getInventario().agregarObjeto("Pez");
-            }
+
         }
         
         //Foca CPU
