@@ -28,6 +28,7 @@ public class BolaNieve extends Objeto{
         // Pero para la estructura básica, podrías dejarlo preparado:
         System.out.println(jugadorQueLaUsa.getNombre() + " se prepara para lanzar una bola.");
     }
+	*/
 	
 	
 }
