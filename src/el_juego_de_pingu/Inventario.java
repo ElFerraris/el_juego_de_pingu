@@ -8,29 +8,28 @@ public class Inventario{
 	private int peces;        // max = 2
 	private int bolasNieve;   // max = 6
 	
-	
-	
-	
 	public Inventario() {
 
 	}
 
 	public boolean agregarObjeto(String tipo) {
-	    switch (tipo) {
+	    // Es recomendable usar .trim() por si acaso
+	    switch (tipo.trim()) { 
 	        case "Pez":
-	            if (peces < 2) { // Límite máximo de 2
+	            if (peces < 2) {
 	                peces++;
 	                return true;
 	            }
 	            break;
 	        case "BolaNieve":
-	            if (bolasNieve < 6) { // Límite máximo de 6 
+	            if (bolasNieve < 6) {
 	                bolasNieve++;
 	                return true;
 	            }
 	            break;
 	        case "DadoRapido":
-	            if (dados.size() < 3) { // Límite máximo de 3 dados en total 
+	            if (dados.size() < 3) {
+	                // Asegúrate de que la clase DadoRapido esté bien escrita
 	                dados.add(new DadoRapido("Dado Rápido", "Dados")); 
 	                return true;
 	            }
@@ -101,5 +100,46 @@ public class Inventario{
 	    return false;
 	}
 	
+	
+	
+	//Dado especial
+	public boolean usarDadoEspecifico(String subTipo, Jugador jugador) {
+	    for (int i = 0; i < dados.size(); i++) {
+	        Objeto d = dados.get(i);
+	        // Comprobamos si es el tipo que busca el usuario
+	        if ((subTipo.equals("Rapido") && d instanceof DadoRapido) || 
+	            (subTipo.equals("Lento") && d instanceof DadoLento)) {
+	            
+	            dados.remove(i).usar(jugador); // Lo usa y lo borra de la lista
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	public ArrayList<Objeto> getDadosLista() {
+	    return this.dados;
+	}
+	
+	public boolean tieneObjetoEspecifico(String subTipo) {
+	    for (Objeto d : dados) {
+	        if (subTipo.equals("Rapido") && d instanceof DadoRapido) return true;
+	        if (subTipo.equals("Lento") && d instanceof DadoLento) return true;
+	    }
+	    return false;
+	}
+	
+	public void serAtracado() {
+	    // Reducimos a la mitad (división entera: si tiene 3, se queda con 1 o 2 según prefieras)
+	    this.peces /= 2;
+	    this.bolasNieve /= 2;
+	    
+	    // Para los dados en el ArrayList, borramos la mitad
+	    int dadosARemover = dados.size() / 2;
+	    for (int i = 0; i < dadosARemover; i++) {
+	        if (!dados.isEmpty()) {
+	            dados.remove(0);
+	        }
+	    }
+	}
+	
 }
-

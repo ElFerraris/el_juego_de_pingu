@@ -20,7 +20,7 @@ public class BolaNieve extends Objeto{
             oponente.retroceder(this.potencia); 
         }
     }
-    
+    */
 
     @Override
     public void usar(Jugador jugadorQueLaUsa) {
@@ -29,5 +29,6 @@ public class BolaNieve extends Objeto{
         System.out.println(jugadorQueLaUsa.getNombre() + " se prepara para lanzar una bola.");
     }
 	*/
+	
 	
 }

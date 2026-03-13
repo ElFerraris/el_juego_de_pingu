@@ -5,32 +5,26 @@ public class Guerra{
 	private Jugador jugador1;
 	private Jugador jugador2;
 
-	public void iniciarGuerra(Jugador jugador1, Jugador jugador2) {
+	public void iniciarGuerra(Jugador j1, Jugador j2) {
+	    int bolasJ1 = j1.getInventario().getCuantidad("BolaNieve");
+	    int bolasJ2 = j2.getInventario().getCuantidad("BolaNieve");
 
-		int bolasJ1 = jugador1.getInventario().getCuantidad("BolaNieve");
-	    int bolasJ2 = jugador2.getInventario().getCuantidad("BolaNieve");
-	    int diferencia =0;
-	    
-	    if(bolasJ1 > bolasJ2) {
-	    	diferencia = bolasJ1 - bolasJ2;
-	    	System.out.println("El jugador " + jugador1.getNombre() + " ha ganado la Guerra contra " + jugador2.getNombre()+ ". \n El Jugador " + jugador1.getNombre() +" avanza " + diferencia+" casillas.");
-	    	jugador1.moverFicha(diferencia);
+	    if (bolasJ1 > bolasJ2) {
+	        int diferencia = bolasJ1 - bolasJ2;
+	        System.out.println(j1.getNombre() + " gana. " + j2.getNombre() + " retrocede " + diferencia);
+	        j2.retroceder(diferencia); // El perdedor retrocede
+	    } else if (bolasJ2 > bolasJ1) {
+	        int diferencia = bolasJ2 - bolasJ1;
+	        System.out.println(j2.getNombre() + " gana. " + j1.getNombre() + " retrocede " + diferencia);
+	        j1.retroceder(diferencia); // El perdedor retrocede
+	    } else {
+	        System.out.println("Empate técnico: Nadie retrocede.");
 	    }
-	    
-	    else if(bolasJ2 > bolasJ1) {
-	    	diferencia = bolasJ2 - bolasJ1;
 
-	    	System.out.println("El jugador " + jugador2.getNombre() + " ha ganado la Guerra contra " + jugador1.getNombre() + ". \n El Jugador " + jugador2.getNombre() +" avanza " + diferencia+" casillas.");
-	    	jugador2.moverFicha(diferencia);
-	    }
-	    else {
-	    	System.out.println("EMPATE Nadie avanza");
-	    }
-	    
-	    limpiarBolas(jugador1);
-	    limpiarBolas(jugador2);
-	    
-	}
+	    // Ambos gastan todas sus bolas (regla obligatoria)
+	    limpiarBolas(j1);
+	    limpiarBolas(j2);
+	}	
 
 	public void limpiarBolas(Jugador jugador) {
 		
@@ -39,6 +33,8 @@ public class Guerra{
 	  }	
 		
 	}
+	
+	
 	
 	
 }
