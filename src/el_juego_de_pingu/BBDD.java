@@ -73,32 +73,58 @@ public class BBDD {
 	
 	/* FUNCIONES POR IMPLEMENTAR CON EL RESTO DEL JUEGO */
 	
-	
+	///
+	/// - REGISTRAR JUGADOR
+	/// - 
+	///
 	
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
-
+		
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		}
 	}
 
 	public Juego cargarPartida(Connection conConnection con) {
 
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		}
 	}
 
 	public String encriptarDatos(Connection con, String datos) {
+
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		}
 
 	}
 
 	public String desencriptarDatos(Connection con, String datos) {
 	
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		}
+	
 	}
 
 	public boolean existePartidaGuardada(Connection con) {
+
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		}
 
 	}
 	*/	
 	
 	// EJEMPLO DE METODO PARA GUARDAR COSITAS
-	/*
+	
 	public static void guardarPuntuacion(Connection con, String nombre, int puntos) {
 		String sql = "INSERT INTO RANKING VALUES (?, ?)";
 		
@@ -112,10 +138,9 @@ public class BBDD {
 			System.out.println("Error al guardar: " + e.getMessage());
 		}
 	}
-	*/
-	
+		
 	// EJEMPLO DE METODO PARA VER COSITAS
-	/*
+	
 	public static void mostrarRanking(Connection con) {
 		String sql = "SELECT nombre, puntos FROM ranking ORDER BY puntos DESC";
 		
@@ -142,7 +167,5 @@ public class BBDD {
 			System.out.println("► Error al leer el ranking: " + e.getMessage());
 		}
 	}
-	*/
-	
-	
+		
 }
