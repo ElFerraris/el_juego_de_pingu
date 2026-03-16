@@ -6,7 +6,7 @@ public class Tablero{
 	
 	private int midaTablero = 50;
     private ArrayList<Casilla> casillas = new ArrayList<Casilla>();
-    
+    private String seed =""; 
 	
     //GENERAR SEED ALEATORIA
     public void generarSeedAleatorioa() {
@@ -60,7 +60,7 @@ public class Tablero{
     
     //GENERACIO TABLERO
 	public void generarTablero(String seed) {
-		
+		this.seed = seed;
 		casillas.add(new CasillaNormal(0, "Casilla NORMAL"));	//Generar primera casilla
 		//Generación tablero en base a seed
 		for (int i = 1; i < midaTablero - 1; i++) {

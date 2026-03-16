@@ -73,6 +73,8 @@ public class BBDD {
 	
 	/* FUNCIONES POR IMPLEMENTAR CON EL RESTO DEL JUEGO */
 	
+	
+	
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
 
