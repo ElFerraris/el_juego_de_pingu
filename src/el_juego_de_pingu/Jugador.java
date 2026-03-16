@@ -124,8 +124,8 @@ public class Jugador extends Juego{
         }
 
         // Si el color no es válido, asignamos uno por defecto (ej. Gris)
-        System.out.println("Color no válido. Asignando Gris por defecto.");
-        return "Gris";
+        System.out.println("Color no válido. Asignando Rojo por defecto.");
+        return "Rojo";
     }
     
     
