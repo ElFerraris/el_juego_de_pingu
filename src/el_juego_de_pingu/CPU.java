@@ -4,7 +4,7 @@ public class CPU extends Jugador{
 
 	
 	public CPU(String id, String nombre) {
-        super(id, nombre, "Gris"); // Llama al constructor de Jugador
+        super(id, nombre, "Rojo"); // Llama al constructor de Jugador
     }
 	
 	public void decidirAccion() {
