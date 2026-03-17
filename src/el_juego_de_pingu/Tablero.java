@@ -25,8 +25,13 @@ public class Tablero{
     	generarTablero(genSeed);
     }
     
-    
-    //INTRODUCIR SEED PARA GENERAR
+    // OBTENER SEED DE PARTIDA
+    public String getSeed() {
+		return seed;
+	}
+
+
+	//INTRODUCIR SEED PARA GENERAR
     public void introducirSeed(String seed) {
     	if (validarSeed(seed)) {
     		generarTablero(seed);
