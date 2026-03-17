@@ -78,12 +78,31 @@ public class BBDD {
 	/// - 
 	///
 	
+	
+	
+	public boolean guardarNuevaPartida(Connection con, Juego juego) {
+		
+		String sql = "DECLARE insertar_partida(?, ?); END;";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+			pstmt.setString(1, juego.getTablero().getSeed());
+			pstmt.setInt(2, juego.getTurnoActual());
+			
+			return true;
+			
+		} catch (SQLException e) {
+			System.out.println("Error al guardarNuevaPartida: " + e.getMessage());
+		}
+		return false;
+	}
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
 		
 		String sql = "";
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
 		}
 	}
 
@@ -92,6 +111,8 @@ public class BBDD {
 		String sql = "";
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
 		}
 	}
 
@@ -100,6 +121,8 @@ public class BBDD {
 		String sql = "";
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
 		}
 
 	}
@@ -109,6 +132,8 @@ public class BBDD {
 		String sql = "";
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
 		}
 	
 	}
@@ -118,6 +143,8 @@ public class BBDD {
 		String sql = "";
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
 		}
 
 	}
