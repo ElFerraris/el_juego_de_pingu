@@ -90,6 +90,12 @@ public class Juego {
     public void iniciarPartida() {
         System.out.println("--- Iniciando El Juego de Pingu ---");
         this.turnoActual = 0;
+        
+        // 1. Primero registramos/comprobamos a los jugadores uno por uno
+        for (Jugador j : jugadores) {
+            this.baseDatos.registrarJugadorSiNoExiste(j);
+        }
+        
         // Simplemente llamamos al método de nuestro objeto baseDatos.
         // Él se encarga de conectar, insertar y desconectar.
         boolean exito = this.baseDatos.guardarNuevaPartida(this);
@@ -99,6 +105,7 @@ public class Juego {
         } else {
             System.out.println("⚠️ No se pudo registrar la partida en la base de datos.");
         }
+        
     }
 
     // ==================== TURNOS ====================
@@ -285,6 +292,9 @@ public class Juego {
             }
         }
     }
+    
+    
+    
 
     // ==================== GETTERS Y SETTERS ====================
 

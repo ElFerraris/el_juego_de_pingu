@@ -1,8 +1,11 @@
 package datos;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 import controlador.Juego;
+import modelo.CPU;
+import modelo.Jugador;
 
 /**
  * Clase para gestionar la conexión y operaciones con la Base de Datos.
@@ -76,6 +79,102 @@ public class BBDD {
             return false;
         }
     }
+    
+    /**
+     * Llama al procedimiento almacenado para insertar un único jugador.
+     */
+    public boolean insertarUnJugador(Connection con, Jugador j) {
+        String sql = "{call insertar_jugador(?, ?, ?)}";
+        
+        try (CallableStatement cstmt = con.prepareCall(sql)) {
+            // 1. Nickname
+            cstmt.setString(1, j.getNombre());
+            
+            // 2. Contraseña (usamos una por defecto si el modelo no tiene)
+            cstmt.setString(2, "pingu123"); 
+            
+            // 3. Es_CPU (Comprobamos si es instancia de la clase CPU)
+            int esCpu = (j instanceof CPU) ? 1 : 0;
+            cstmt.setInt(3, esCpu);
+            
+            cstmt.execute();
+            return true;
+            
+        } catch (SQLException e) {
+            // Si el error es porque el nickname ya existe (Unique Constraint), 
+            // aquí es donde capturaríamos el error de Oracle.
+            System.out.println("► Error al insertar a " + j.getNombre() + ": " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean existeJugador(Connection con, String nickname) {
+        // Buscamos si hay algún registro con ese nombre
+        String sql = "SELECT COUNT(*) FROM jugador WHERE nickname = ?";
+        
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, nickname);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Si el conteo es mayor a 0, el jugador ya existe
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("► Error al comprobar existencia: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    /**
+     * Comprueba si el jugador existe y, si no, lo inserta en la base de datos.
+     * @param j El objeto Jugador (o CPU) a registrar.
+     * @return true si se insertó o ya existía, false si hubo un error crítico.
+     */
+    public boolean registrarJugadorSiNoExiste(Jugador j) {
+        // Usamos try-with-resources para manejar la conexión automáticamente
+        try (Connection con = conectarBD()) {
+            if (con == null) return false;
+
+            // 1. PASO: Comprobar si existe
+            String sqlCheck = "SELECT COUNT(*) FROM jugador WHERE nickname = ?";
+            boolean existe = false;
+            
+            try (PreparedStatement pstmt = con.prepareStatement(sqlCheck)) {
+                pstmt.setString(1, j.getNombre());
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        existe = true;
+                    }
+                }
+            }
+
+            // 2. PASO: Si no existe, llamar al procedimiento de inserción
+            if (!existe) {
+                String sqlInsert = "{call insertar_jugador(?, ?, ?)}";
+                try (CallableStatement cstmt = con.prepareCall(sqlInsert)) {
+                    cstmt.setString(1, j.getNombre());
+                    cstmt.setString(2, "pingu123"); // Contraseña por defecto
+                    
+                    int esCpu = (j instanceof CPU) ? 1 : 0;
+                    cstmt.setInt(3, esCpu);
+                    
+                    cstmt.execute();
+                    System.out.println("► Nuevo jugador registrado: " + j.getNombre());
+                }
+            } else {
+                System.out.println("► El jugador " + j.getNombre() + " ya está en la BD.");
+            }
+            
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("► ERROR en registro de jugador: " + e.getMessage());
+            return false;
+        }
+    }
+    
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
 		
