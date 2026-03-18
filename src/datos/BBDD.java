@@ -52,21 +52,30 @@ public class BBDD {
 	
 	
 	
-	public boolean guardarNuevaPartida(Connection con, Juego juego) {
-		
-		String sql = "DECLARE insertar_partida(?, ?); END;";
-		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-		
-			pstmt.setString(1, juego.getTablero().getSeed());
-			pstmt.setInt(2, juego.getTurnoActual());
-			
-			return true;
-			
-		} catch (SQLException e) {
-			System.out.println("Error al guardarNuevaPartida: " + e.getMessage());
-		}
-		return false;
-	}
+    public boolean guardarNuevaPartida(Juego juego) {
+    	// 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
+        // se cerrará solo al llegar a la llave final }.
+        try (Connection con = conectarBD()) { 
+            
+            if (con == null) return false;
+
+            // 2. Preparamos la llamada al procedimiento de Oracle
+            String sql = "{call insertar_partida(?)}";
+            
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+                // Pasamos la seed del objeto juego que recibimos
+                cstmt.setString(1, juego.getTablero().getSeed());
+                
+                // 3. Ejecutamos
+                cstmt.execute();
+                return true;
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("► ERROR en BBDD: " + e.getMessage());
+            return false;
+        }
+    }
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
 		
