@@ -60,7 +60,7 @@ public class BBDD {
         // se cerrará solo al llegar a la llave final }.
         try (Connection con = conectarBD()) { 
             
-            if (con == null) return false;
+            if (con == null) return 0;
 
             // 2. Preparamos la llamada al procedimiento de Oracle
             String sql = "{? = call insertar_partida(?)}"; 
@@ -176,6 +176,44 @@ public class BBDD {
 
         } catch (SQLException e) {
             System.out.println("► ERROR en registro de jugador: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    
+    public boolean ActualizarPartida(Juego juego) {
+    	// 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
+        // se cerrará solo al llegar a la llave final }.
+        try (Connection con = conectarBD()) { 
+            
+            if (con == null) return false;
+
+            // 2. Preparamos la llamada al procedimiento de Oracle
+            String sql = "{call actualizar_partida(?, ?, ?)}"; 
+
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+            	// 1. p_num_partida: El ID de la partida que estamos jugando
+            	cstmt.setInt(1, juego.getTablero().getIdPartida());	  
+            	
+            	// 2. p_torn_actual: El ID del jugador que tiene el turno
+            	cstmt.setInt(2, juego.getTurnoActual());
+                
+                // 3. p_ganador: El ID del ganador (si no hay, pasamos un valor nulo o 0)
+                if (juego.getGanador() != null) {
+                    cstmt.setInt(3, 1); // Aquí iría el ID real del ganador
+                } else {
+                    cstmt.setNull(3, java.sql.Types.INTEGER);
+                }
+                
+                cstmt.execute();
+                
+                // Recuperamos el ID que nos dio la función
+                System.out.println("► Partida " + juego.getTablero().getIdPartida() + " actualizada en Oracle.");
+                return true;
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("► ERROR al actualizar partida: " + e.getMessage());
             return false;
         }
     }

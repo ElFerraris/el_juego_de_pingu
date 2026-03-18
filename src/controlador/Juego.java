@@ -346,6 +346,7 @@ public class Juego {
 
     public void guardarPartida() {
         // TODO: Implementar guardado de partida con BBDD
+    	baseDatos.ActualizarPartida(this);
     }
 
     public void cargarPartida() {
