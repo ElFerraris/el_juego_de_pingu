@@ -43,74 +43,87 @@ public class BBDD {
         return null;
     }
 
-    /**
-     * Cierra la conexión con la Base de Datos.
-     * @param con Conexión a cerrar.
-     */
-    public static void desconectarBD(Connection con) {
-        try {
-            if (con != null && !con.isClosed()) {
-                con.close();
-                System.out.println("►Conexión cerrada correctamente.");
-            }
-        } catch (SQLException e) {
-            System.out.println("►Error al cerrar la conexión: " + e.getMessage());
-        }
-    }
+/* FUNCIONES POR IMPLEMENTAR CON EL RESTO DEL JUEGO */
+	
+	///
+	/// - REGISTRAR JUGADOR
+	/// - 
+	///
+	
+	
+	
+	public boolean guardarNuevaPartida(Connection con, Juego juego) {
+		
+		String sql = "DECLARE insertar_partida(?, ?); END;";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+			pstmt.setString(1, juego.getTablero().getSeed());
+			pstmt.setInt(2, juego.getTurnoActual());
+			
+			return true;
+			
+		} catch (SQLException e) {
+			System.out.println("Error al guardarNuevaPartida: " + e.getMessage());
+		}
+		return false;
+	}
+	/*
+	public boolean guardarPartida(Connection con, Juego juego) {
+		
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
+		}
+	}
 
-    /**
-     * Guarda una nueva partida en la base de datos.
-     * @return true si se guardó correctamente, false en caso contrario.
-     */
-    public boolean guardarNuevaPartida(Connection con, Juego juego) {
-        String sql = "DECLARE insertar_partida(?, ?); END;";
-        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-            pstmt.setString(1, juego.getTablero().getSeed());
-            pstmt.setInt(2, juego.getTurnoActual());
-            pstmt.execute(); // FIX: faltaba ejecutar la sentencia
-            return true;
-        } catch (SQLException e) {
-            System.out.println("Error al guardar nueva partida: " + e.getMessage());
-        }
-        return false;
-    }
+	public Juego cargarPartida(Connection conConnection con) {
 
-    /**
-     * Guarda la puntuación de un jugador en el ranking.
-     */
-    public static void guardarPuntuacion(Connection con, String nombre, int puntos) {
-        String sql = "INSERT INTO RANKING VALUES (?, ?)";
-        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-            pstmt.setString(1, nombre);
-            pstmt.setInt(2, puntos);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("Error al guardar puntuación: " + e.getMessage());
-        }
-    }
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
+		}
+	}
 
-    /**
-     * Muestra el ranking de jugadores ordenado por puntos.
-     */
-    public static void mostrarRanking(Connection con) {
-        String sql = "SELECT nombre, puntos FROM ranking ORDER BY puntos DESC";
+	public String encriptarDatos(Connection con, String datos) {
 
-        try (PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
+		}
 
-            System.out.println("\n--- RANKING DE PINGÜINOS ---");
-            System.out.println("NOMBRE\t\tPUNTOS");
-            System.out.println("---------------------------");
+	}
 
-            while (rs.next()) {
-                String nombre = rs.getString("nombre");
-                int puntos = rs.getInt("puntos");
-                System.out.println(nombre + "\t\t" + puntos);
-            }
-            System.out.println("---------------------------\n");
+	public String desencriptarDatos(Connection con, String datos) {
+	
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
+		}
+	
+	}
 
-        } catch (SQLException e) {
-            System.out.println("► Error al leer el ranking: " + e.getMessage());
-        }
-    }
+	public boolean existePartidaGuardada(Connection con) {
+
+		String sql = "";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+		} catch (SQLException e) {
+			System.out.println("Error al guardar: " + e.getMessage());
+		}
+
+	}
+	*/
+    
+    
+
+        
+    
 }
