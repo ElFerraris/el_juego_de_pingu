@@ -11,8 +11,11 @@ public class Tablero {
 
     private ArrayList<Casilla> casillas = new ArrayList<>();
     private String seed = "";
+    private int idPartida = 0;
+ 
 
-    /**
+
+	/**
      * Genera una seed aleatoria válida y construye el tablero.
      */
     public void generarSeedAleatoria() {
@@ -164,4 +167,12 @@ public class Tablero {
         }
         return null;
     }
+    
+    public int getIdPartida() {
+		return idPartida;
+	}
+
+	public void setIdPartida(int idPartida) {
+		this.idPartida = idPartida;
+	}
 }

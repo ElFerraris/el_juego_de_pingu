@@ -55,7 +55,7 @@ public class BBDD {
 	
 	
 	
-    public boolean guardarNuevaPartida(Juego juego) {
+    public int guardarNuevaPartida(Juego juego) {
     	// 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
         // se cerrará solo al llegar a la llave final }.
         try (Connection con = conectarBD()) { 
@@ -63,20 +63,25 @@ public class BBDD {
             if (con == null) return false;
 
             // 2. Preparamos la llamada al procedimiento de Oracle
-            String sql = "{call insertar_partida(?)}";
-            
+            String sql = "{? = call insertar_partida(?)}"; 
+
             try (CallableStatement cstmt = con.prepareCall(sql)) {
-                // Pasamos la seed del objeto juego que recibimos
-                cstmt.setString(1, juego.getTablero().getSeed());
+                // Registramos el tipo del primer "?" (el retorno)
+                cstmt.registerOutParameter(1, java.sql.Types.INTEGER);
                 
-                // 3. Ejecutamos
+                // Pasamos el valor del segundo "?" (la seed)
+                cstmt.setString(2, juego.getTablero().getSeed());
+                
                 cstmt.execute();
-                return true;
+                
+                // Recuperamos el ID que nos dio la función
+                int idPartida = cstmt.getInt(1); 
+                return idPartida;
             }
             
         } catch (SQLException e) {
             System.out.println("► ERROR en BBDD: " + e.getMessage());
-            return false;
+            return 0;
         }
     }
     

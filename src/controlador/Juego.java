@@ -98,7 +98,9 @@ public class Juego {
         
         // Simplemente llamamos al método de nuestro objeto baseDatos.
         // Él se encarga de conectar, insertar y desconectar.
-        boolean exito = this.baseDatos.guardarNuevaPartida(this);
+        boolean exito = false;
+        		if(this.baseDatos.guardarNuevaPartida(this) == 0) {exito = false;}
+        		else {exito = true; this.getTablero().setIdPartida(this.baseDatos.guardarNuevaPartida(this));}
 
         if (exito) {
             System.out.println("► Registro en Oracle completado con éxito.");
