@@ -358,6 +358,7 @@ public class Juego {
     
     public void guardarPartida() {
         // TODO: Implementar guardado de partida con BBDD
+    	int turnoParaBD = this.turnoActual + 1;
     	baseDatos.actualizarEstadoPartida(this.getTablero().getIdPartida(),this);
         for (Jugador j : jugadores) {
             this.baseDatos.actualizarParticipacion(this.getTablero().getIdPartida(),j);
@@ -377,8 +378,6 @@ public class Juego {
                 System.out.println("Seed del tablero: " + this.tablero.getSeed());
                 System.out.println("Jugadores detectados: " + this.jugadores.size());
                 
-                // Opcional: Podrías buscar en la BD quién tenía el turno y setearlo
-                this.turnoActual = 0; 
             } else {
                 System.out.println("⚠️ No se encontró la partida o hubo un error en la base de datos.");
             }

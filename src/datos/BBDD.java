@@ -322,8 +322,7 @@ public class BBDD {
 
                 // 2. p_torn_actual: ID del jugador que tiene el turno ahora
                 // Obtenemos el jugador actual de la lista y sacamos su ID de BD
-                int idJugadorTurno = juego.getJugadores().get(juego.getTurnoActual()).getId();
-                cstmt.setInt(2, idJugadorTurno);
+                cstmt.setInt(2, juego.getTurnoActual());
 
                 // 3. p_ganador: ID del ganador (si existe)
                 if (juego.getGanador() != null) {
@@ -348,7 +347,8 @@ public class BBDD {
                               "p.num_peces, p.num_bolas_nieve, p.num_dados_lentos, p.num_dados_rapidos, p.turnos_bloqueado " +
                               "FROM participacion_jugadores p " +
                               "JOIN jugador j ON p.id_jugador = j.id_jugador " +
-                              "WHERE p.id_partida = ?";
+                              "WHERE p.id_partida = ?"+
+                              "ORDER BY j.id_jugador ASC";
 
         try (Connection con = conectarBD()) {
             if (con == null) return false;
