@@ -108,7 +108,7 @@ public class Juego {
         		if(this.baseDatos.guardarNuevaPartida(this) == 0) {exito = false;}
         		else {exito = true; this.getTablero().setIdPartida(this.baseDatos.guardarNuevaPartida(this));}
                 for (Jugador j : jugadores) {
-                    this.baseDatos.insertarParticipacion(this.getTablero().getIdPartida(),j.getId());
+                    this.baseDatos.insertarParticipacion(this.getTablero().getIdPartida(),j.getId(),j.getColor());
                 }	
         		
 
@@ -356,7 +356,11 @@ public class Juego {
 
     public void guardarPartida() {
         // TODO: Implementar guardado de partida con BBDD
-    	baseDatos.ActualizarPartida(this);
+    	baseDatos.actualizarEstadoPartida(this.getTablero().getIdPartida(),this);
+        for (Jugador j : jugadores) {
+            this.baseDatos.actualizarParticipacion(this.getTablero().getIdPartida(),j);
+        }
+    	
     }
 
     public void cargarPartida() {

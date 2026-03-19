@@ -83,12 +83,31 @@ public class Inventario {
      */
     public int getCantidad(String tipo) {
         switch (tipo) {
-            case "Pez": return peces;
-            case "BolaNieve": return bolasNieve;
-            case "Dados": return dados.size();
-            case "Total": return peces + bolasNieve + dados.size();
-            default: return 0;
+            case "Pez": 
+                return peces;
+            case "BolaNieve": 
+                return bolasNieve;
+            case "Dados": 
+                return dados.size();
+            case "DadoRapido":
+                return contarDadosPorClase(DadoRapido.class);
+            case "DadoLento":
+                return contarDadosPorClase(DadoLento.class);
+            case "Total": 
+                return peces + bolasNieve + dados.size();
+            default: 
+                return 0;
         }
+    }
+    
+    private int contarDadosPorClase(Class<?> clase) {
+        int contador = 0;
+        for (Objeto d : dados) {
+            if (clase.isInstance(d)) {
+                contador++;
+            }
+        }
+        return contador;
     }
 
     /**

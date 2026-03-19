@@ -185,7 +185,7 @@ public class BBDD {
         }
     }
     
-    
+    /*
     public boolean ActualizarPartida(Juego juego) {
     	// 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
         // se cerrará solo al llegar a la llave final }.
@@ -221,7 +221,7 @@ public class BBDD {
             System.out.println("► ERROR al actualizar partida: " + e.getMessage());
             return false;
         }
-    }
+    }*/
     
     
     
@@ -230,9 +230,9 @@ public class BBDD {
     /**
      * Registra que un jugador específico está participando en una partida concreta.
      */
-    public boolean insertarParticipacion(int idPartida, int idJugador) {
+    public boolean insertarParticipacion(int idPartida, int idJugador, String color) {
         // Llamada al procedimiento con los 2 parámetros de entrada (IN)
-        String sql = "{call insertar_participacion(?, ?)}";
+        String sql = "{call insertar_participacion(?, ?, ?)}";
         
         try (Connection con = conectarBD()) { 
             
@@ -245,6 +245,9 @@ public class BBDD {
             
             // 2. p_id_jugador
             cstmt.setInt(2, idJugador);
+            
+            cstmt.setString(3, color);
+
             
             cstmt.execute();
             return true;
@@ -272,6 +275,72 @@ public class BBDD {
         return -1;
     }
     
+    
+    public boolean actualizarParticipacion(int idPartida, Jugador j) {
+        String sql = "{call actualizar_participacion(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+
+        try (Connection con = conectarBD()) {
+            if (con == null) return false;
+
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+                // 1. IDs para el WHERE
+                cstmt.setInt(1, idPartida);
+                cstmt.setInt(2, j.getId()); // El ID que recuperamos antes
+
+                // 2. Datos de posición y estética
+                cstmt.setInt(3, j.getPosicion());
+                cstmt.setString(4, j.getColor());
+
+                // 3. Inventario (Accediendo a los contadores de tu clase Jugador/Inventario)
+                // Ajusta estos getters según los nombres reales en tu código
+                cstmt.setInt(5, j.getInventario().getCantidad("Pez"));
+                cstmt.setInt(6, j.getInventario().getCantidad("BolaNieve"));
+                cstmt.setInt(7, j.getInventario().getCantidad("DadoLento"));
+                cstmt.setInt(8, j.getInventario().getCantidad("DadoRapido"));
+
+                // 4. Estado de bloqueo
+                cstmt.setInt(9, j.getTurnosBloqueados());
+
+                cstmt.execute();
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println("► ERROR al actualizar participación de " + j.getNombre() + ": " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean actualizarEstadoPartida(int idPartida, Juego juego) {
+        String sql = "{call actualizar_partida(?, ?, ?)}";
+
+        try (Connection con = conectarBD()) {
+            if (con == null) return false;
+
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+                // 1. p_num_partida: El ID de la fila que queremos actualizar
+                cstmt.setInt(1, idPartida);
+
+                // 2. p_torn_actual: ID del jugador que tiene el turno ahora
+                // Obtenemos el jugador actual de la lista y sacamos su ID de BD
+                int idJugadorTurno = juego.getJugadores().get(juego.getTurnoActual()).getId();
+                cstmt.setInt(2, idJugadorTurno);
+
+                // 3. p_ganador: ID del ganador (si existe)
+                if (juego.getGanador() != null) {
+                    cstmt.setInt(3, juego.getGanador().getId());
+                } else {
+                    // Si la partida sigue en curso, enviamos NULL a Oracle
+                    cstmt.setNull(3, java.sql.Types.INTEGER);
+                }
+
+                cstmt.execute();
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println("► ERROR al actualizar estado de partida: " + e.getMessage());
+            return false;
+        }
+    }
     
     
 	/*
