@@ -8,14 +8,14 @@ import java.util.List;
  */
 public class Jugador {
 
-    private String id;
+    private int id;
     private String nombre;
     private int posicion;
     private Inventario inventario;
     private int turnosBloqueados;
     private String color;
 
-    public Jugador(String id, String nombre, String color) {
+    public Jugador(int id, String nombre, String color) {
         this.id = id;
         this.nombre = nombre;
         this.posicion = 0;
@@ -24,7 +24,11 @@ public class Jugador {
         this.color = validarColor(color);
     }
 
-    public String getId() {
+    public void setId(int id) {
+		this.id = id;
+	}
+
+	public int getId() {
         return id;
     }
 

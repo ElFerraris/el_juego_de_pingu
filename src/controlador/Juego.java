@@ -76,11 +76,11 @@ public class Juego {
             String nombre = sc.nextLine();
             System.out.print("Introduce el color (Rojo, Azul, Verde, Amarillo, Naranja, Morado, Rosa): ");
             String color = sc.nextLine();
-            agregarJugador(new Jugador("P" + i, nombre, color));
+            agregarJugador(new Jugador(1 + i, nombre, color));
         }
 
         // Añadir la Foca CPU
-        CPU foca = new CPU("CPU01", "Foca Loca");
+        CPU foca = new CPU(0, "Foca Loca");
         agregarJugador(foca);
     }
 
@@ -93,7 +93,13 @@ public class Juego {
         
         // 1. Primero registramos/comprobamos a los jugadores uno por uno
         for (Jugador j : jugadores) {
-            this.baseDatos.registrarJugadorSiNoExiste(j);
+            // Obtenemos el ID de Oracle
+            int idAsignado = this.baseDatos.registrarJugadorSiNoExiste(j);
+            
+            if (idAsignado != -1) {
+                // Suponiendo que añades el atributo idBD a tu clase Jugador
+                j.setId(idAsignado); 
+            }
         }
         
         // Simplemente llamamos al método de nuestro objeto baseDatos.
@@ -101,6 +107,10 @@ public class Juego {
         boolean exito = false;
         		if(this.baseDatos.guardarNuevaPartida(this) == 0) {exito = false;}
         		else {exito = true; this.getTablero().setIdPartida(this.baseDatos.guardarNuevaPartida(this));}
+                for (Jugador j : jugadores) {
+                    this.baseDatos.insertarParticipacion(this.getTablero().getIdPartida(),j.getId());
+                }	
+        		
 
         if (exito) {
             System.out.println("► Registro en Oracle completado con éxito.");

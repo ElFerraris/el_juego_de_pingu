@@ -137,46 +137,51 @@ public class BBDD {
      * @param j El objeto Jugador (o CPU) a registrar.
      * @return true si se insertó o ya existía, false si hubo un error crítico.
      */
-    public boolean registrarJugadorSiNoExiste(Jugador j) {
-        // Usamos try-with-resources para manejar la conexión automáticamente
-        try (Connection con = conectarBD()) {
-            if (con == null) return false;
+    public int registrarJugadorSiNoExiste(Jugador j) {
+        int idJugador = -1; // Valor por defecto si falla
 
-            // 1. PASO: Comprobar si existe
-            String sqlCheck = "SELECT COUNT(*) FROM jugador WHERE nickname = ?";
-            boolean existe = false;
+        try (Connection con = conectarBD()) {
+            if (con == null) return -1;
+
+            // 1. PASO: Comprobar si existe y pillar su ID
+            String sqlCheck = "SELECT id_jugador FROM jugador WHERE nickname = ?";
             
             try (PreparedStatement pstmt = con.prepareStatement(sqlCheck)) {
                 pstmt.setString(1, j.getNombre());
                 try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        existe = true;
+                    if (rs.next()) {
+                        idJugador = rs.getInt("id_jugador");
                     }
                 }
             }
 
-            // 2. PASO: Si no existe, llamar al procedimiento de inserción
-            if (!existe) {
+            // 2. PASO: Si no existe (idJugador sigue siendo -1), insertar
+            if (idJugador == -1) {
                 String sqlInsert = "{call insertar_jugador(?, ?, ?)}";
                 try (CallableStatement cstmt = con.prepareCall(sqlInsert)) {
                     cstmt.setString(1, j.getNombre());
-                    cstmt.setString(2, "pingu123"); // Contraseña por defecto
-                    
-                    int esCpu = (j instanceof CPU) ? 1 : 0;
-                    cstmt.setInt(3, esCpu);
-                    
+                    cstmt.setString(2, "pingu123");
+                    cstmt.setInt(3, (j instanceof CPU) ? 1 : 0);
                     cstmt.execute();
-                    System.out.println("► Nuevo jugador registrado: " + j.getNombre());
+                    
+                    // 3. PASO: Una vez insertado, volvemos a consultar para obtener el ID generado
+                    try (PreparedStatement pstmt2 = con.prepareStatement(sqlCheck)) {
+                        pstmt2.setString(1, j.getNombre());
+                        try (ResultSet rs2 = pstmt2.executeQuery()) {
+                            if (rs2.next()) idJugador = rs2.getInt("id_jugador");
+                        }
+                    }
+                    System.out.println("► Nuevo jugador registrado: " + j.getNombre() + " (ID: " + idJugador + ")");
                 }
             } else {
-                System.out.println("► El jugador " + j.getNombre() + " ya está en la BD.");
+                System.out.println("► El jugador " + j.getNombre() + " ya está en la BD con ID: " + idJugador);
             }
             
-            return true;
+            return idJugador; // Devolvemos el ID real de la base de datos
 
         } catch (SQLException e) {
             System.out.println("► ERROR en registro de jugador: " + e.getMessage());
-            return false;
+            return -1;
         }
     }
     
@@ -217,6 +222,57 @@ public class BBDD {
             return false;
         }
     }
+    
+    
+    
+    
+    
+    /**
+     * Registra que un jugador específico está participando en una partida concreta.
+     */
+    public boolean insertarParticipacion(int idPartida, int idJugador) {
+        // Llamada al procedimiento con los 2 parámetros de entrada (IN)
+        String sql = "{call insertar_participacion(?, ?)}";
+        
+        try (Connection con = conectarBD()) { 
+            
+            if (con == null) return false;
+            
+        try (CallableStatement cstmt = con.prepareCall(sql)) {
+            
+            // 1. p_id_partida
+            cstmt.setInt(1, idPartida);
+            
+            // 2. p_id_jugador
+            cstmt.setInt(2, idJugador);
+            
+            cstmt.execute();
+            return true;
+           
+        }
+        } catch (SQLException e) {
+            System.out.println("► ERROR en insertarParticipacion: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    
+    public int obtenerIdJugador(Connection con, String nickname) {
+        String sql = "SELECT id_jugador FROM jugador WHERE nickname = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, nickname);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id_jugador");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener ID: " + e.getMessage());
+        }
+        return -1;
+    }
+    
+    
     
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
