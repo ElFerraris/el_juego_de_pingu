@@ -15,11 +15,20 @@ public class Main {
 
         while (jugarOtraVez) {
             Juego partida = new Juego();
-
+            
+            System.out.println("=== BIENVENIDO A EL JUEGO DE PINGU ===");
+            System.out.println("1. Nueva Partida");
+            System.out.println("2. Cargar Partida Guardada");
+            
+            String modo = sc.nextLine();
+            if (modo.equals("2")) {
+                // USAR EL MÉTODO QUE CREAMOS ANTES
+                partida.cargarPartida(sc); 
+            } else {
             // 1. Configurar la partida (seed + jugadores)
             partida.configurarPartida(sc);
             partida.iniciarPartida();
-
+            }
             // 2. Bucle principal del juego
             boolean hayGanador = false;
 

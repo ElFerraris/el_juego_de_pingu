@@ -177,4 +177,22 @@ public class Inventario {
             }
         }
     }
+    
+    public int agregarObjetos(String tipo, int cantidad) {
+        int agregados = 0;
+        
+        while (agregados < cantidad) {
+            // Reutilizamos la lógica de agregarObjeto(String) para no repetir código
+            if (agregarObjeto(tipo)) {
+                agregados++;
+            } else {
+                // Si agregarObjeto devuelve false, es que el inventario se llenó
+                break; 
+            }
+        }
+        
+        return agregados;
+    }
+    
+    
 }

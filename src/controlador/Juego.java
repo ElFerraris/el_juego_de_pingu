@@ -176,8 +176,9 @@ public class Juego {
      */
     private void ejecutarTurnoHumano(Jugador jugador, Scanner sc) {
         System.out.println("Presiona ENTER para tirar el dado...");
-        sc.nextLine();
-
+        String variable ="";
+        variable = sc.nextLine();
+        if(variable.equals("Guardar")) {guardarPartida();}
         if (jugador.getInventario().tieneObjeto("Dados")) {
             int nRapidos = 0;
             int nLentos = 0;
@@ -354,6 +355,7 @@ public class Juego {
         return baseDatos;
     }
 
+    
     public void guardarPartida() {
         // TODO: Implementar guardado de partida con BBDD
     	baseDatos.actualizarEstadoPartida(this.getTablero().getIdPartida(),this);
@@ -363,7 +365,27 @@ public class Juego {
     	
     }
 
-    public void cargarPartida() {
-        // TODO: Implementar carga de partida con BBDD
+    public void cargarPartida(Scanner sc) {
+        System.out.print("Introduce el ID de la partida que deseas retomar: ");
+        try {
+            int idCargar = Integer.parseInt(sc.nextLine());
+            
+            boolean ok = this.baseDatos.cargarDatosPartida(idCargar, this);
+            
+            if (ok) {
+                System.out.println("► Partida " + idCargar + " cargada con éxito.");
+                System.out.println("Seed del tablero: " + this.tablero.getSeed());
+                System.out.println("Jugadores detectados: " + this.jugadores.size());
+                
+                // Opcional: Podrías buscar en la BD quién tenía el turno y setearlo
+                this.turnoActual = 0; 
+            } else {
+                System.out.println("⚠️ No se encontró la partida o hubo un error en la base de datos.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: El ID debe ser un número.");
+        }
     }
+    
+    
 }

@@ -342,6 +342,70 @@ public class BBDD {
         }
     }
     
+    public boolean cargarDatosPartida(int idPartida, Juego juego) {
+        String sqlPartida = "SELECT seed, torn_actual FROM partida WHERE num_partida = ?";
+        String sqlJugadores = "SELECT j.id_jugador, j.nickname, j.es_cpu, p.posicion_actual, p.color, " +
+                              "p.num_peces, p.num_bolas_nieve, p.num_dados_lentos, p.num_dados_rapidos, p.turnos_bloqueado " +
+                              "FROM participacion_jugadores p " +
+                              "JOIN jugador j ON p.id_jugador = j.id_jugador " +
+                              "WHERE p.id_partida = ?";
+
+        try (Connection con = conectarBD()) {
+            if (con == null) return false;
+
+            // 1. Cargar datos generales de la partida
+            try (PreparedStatement pstmt = con.prepareStatement(sqlPartida)) {
+                pstmt.setInt(1, idPartida);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        juego.getTablero().introducirSeed(rs.getString("seed"));
+                        juego.setTurnoActual(rs.getInt(("torn_actual")));
+                        juego.getTablero().setIdPartida(idPartida);
+                        // El turno lo setearemos después de cargar los jugadores para evitar errores de índice
+                    } else {
+                        return false; // No existe la partida
+                    }
+                }
+            }
+
+            // 2. Cargar jugadores y sus estados
+            juego.getJugadores().clear(); // Limpiamos la lista actual
+            try (PreparedStatement pstmt = con.prepareStatement(sqlJugadores)) {
+                pstmt.setInt(1, idPartida);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        Jugador nuevo;
+                        int id = rs.getInt("id_jugador");
+                        String nombre = rs.getString("nickname");
+                        String color = rs.getString("color");
+                        
+                        if (rs.getInt("es_cpu") == 1) {
+                            nuevo = new CPU(id, nombre);
+                        } else {
+                            nuevo = new Jugador(id, nombre, color);
+                        }
+
+                        // Restaurar estado físico e inventario
+                        nuevo.setPosicion(rs.getInt("posicion_actual"));
+                        nuevo.setTurnosBloqueados(rs.getInt("turnos_bloqueado"));
+                        
+                        // IMPORTANTE: Aquí debes rellenar el inventario de tu objeto Jugador
+                        // Ejemplo:
+                        nuevo.getInventario().agregarObjetos("Pez",rs.getInt("num_peces"));
+                        nuevo.getInventario().agregarObjetos("BolaNieve",rs.getInt("num_bolas_nieve"));
+                        nuevo.getInventario().agregarObjetos("DadoLento",rs.getInt("num_dados_lentos"));
+                        nuevo.getInventario().agregarObjetos("DadoRapido",rs.getInt("num_dados_rapidos"));                        
+                        juego.agregarJugador(nuevo);
+                    }
+                }
+            }
+            return true;
+        } catch (SQLException e) {
+            System.out.println("► ERROR al cargar: " + e.getMessage());
+            return false;
+        }
+    }
+    
     
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
