@@ -21,7 +21,7 @@ public class Jugador {
         this.posicion = 0;
         this.inventario = new Inventario();
         this.turnosBloqueados = 0;
-        this.color = validarColor(color);
+        this.color = color;
     }
 
     public void setId(int id) {
@@ -114,7 +114,7 @@ public class Jugador {
     /**
      * Valida el color elegido. Si no es válido, asigna Rojo por defecto.
      */
-    private String validarColor(String colorRecibido) {
+    /*private String validarColor(String colorRecibido) {
         List<String> coloresValidos = Arrays.asList(
             "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"
         );
@@ -127,5 +127,8 @@ public class Jugador {
 
         System.out.println("Color no válido. Asignando Rojo por defecto.");
         return "Rojo";
-    }
+    }*/
+    
+    
+    
 }

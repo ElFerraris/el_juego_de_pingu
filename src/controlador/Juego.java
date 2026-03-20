@@ -1,6 +1,7 @@
 package controlador;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import modelo.*;
@@ -55,7 +56,79 @@ public class Juego {
                 System.out.println("Error: Debes introducir un número (1 o 2).");
             }
         }
+        
+        
+        
+        ArrayList<String> coloresDisponibles = new ArrayList<>(Arrays.asList(
+                "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"
+            ));
+            
+            // NUEVO: Lista para rastrear nombres ya elegidos
+            ArrayList<String> nombresUsados = new ArrayList<>();
 
+            // Elegir cantidad de jugadores
+            int numJugadores = 0;
+            while (numJugadores < 2 || numJugadores > 4) {
+                System.out.print("¿Cuántos pingüinos van a jugar? (2-4): ");
+                try {
+                    numJugadores = Integer.parseInt(sc.nextLine());
+                } catch (NumberFormatException e) {
+                    System.out.println("Por favor, introduce un número válido.");
+                }
+            }
+
+            // Crear jugadores
+            for (int i = 1; i <= numJugadores; i++) {
+                String nombre = "";
+                boolean nombreValido = false;
+
+                // --- BUCLE PARA EL NOMBRE ---
+                while (!nombreValido) {
+                    System.out.print("Introduce el nombre del Jugador " + i + ": ");
+                    nombre = sc.nextLine().trim();
+
+                    if (nombre.isEmpty()) {
+                        System.out.println("❌ El nombre no puede estar vacío.");
+                    } else if (nombresUsados.contains(nombre)) {
+                        System.out.println("❌ Error: El nombre '" + nombre + "' ya está en uso. Elige otro.");
+                    } else {
+                        nombresUsados.add(nombre); // Lo registramos
+                        nombreValido = true;
+                    }
+                }
+
+                // --- BUCLE PARA EL COLOR ---
+                String colorElegido = "";
+                boolean colorValido = false;
+                while (!colorValido) {
+                    System.out.println("Colores disponibles: " + coloresDisponibles);
+                    System.out.print("Introduce el color para " + nombre + ": ");
+                    colorElegido = sc.nextLine();
+
+                    String colorEncontrado = null;
+                    for (String c : coloresDisponibles) {
+                        if (c.equalsIgnoreCase(colorElegido)) {
+                            colorEncontrado = c;
+                            break;
+                        }
+                    }
+
+                    if (colorEncontrado != null) {
+                        colorElegido = colorEncontrado;
+                        coloresDisponibles.remove(colorEncontrado);
+                        colorValido = true;
+                    } else {
+                        System.out.println("❌ Color no válido o ya elegido.");
+                    }
+                }
+
+                agregarJugador(new Jugador(1 + i, nombre, colorElegido));
+            }
+        
+        
+        
+        
+        /*
         // Elegir cantidad de jugadores
         int numJugadores = 0;
         while (numJugadores < 2 || numJugadores > 4) {
@@ -70,14 +143,52 @@ public class Juego {
             }
         }
 
+         // 1. Definimos la lista de colores disponibles
+        ArrayList<String> coloresDisponibles = new ArrayList<>(Arrays.asList(
+            "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"
+        ));
+        
+        
+        
+        
         // Crear jugadores
         for (int i = 1; i <= numJugadores; i++) {
             System.out.print("Introduce el nombre del Jugador " + i + ": ");
             String nombre = sc.nextLine();
-            System.out.print("Introduce el color (Rojo, Azul, Verde, Amarillo, Naranja, Morado, Rosa): ");
-            String color = sc.nextLine();
-            agregarJugador(new Jugador(1 + i, nombre, color));
+
+            String colorElegido = "";
+            boolean colorValido = false;
+
+            // 2. Bucle de validación de color
+            while (!colorValido) {
+                System.out.println("Colores disponibles: " + coloresDisponibles);
+                System.out.print("Introduce el color para " + nombre + ": ");
+                colorElegido = sc.nextLine();
+
+                // Buscamos si el color existe en la lista (ignorando mayúsculas)
+                String colorEncontrado = null;
+                for (String c : coloresDisponibles) {
+                    if (c.equalsIgnoreCase(colorElegido)) {
+                        colorEncontrado = c;
+                        break;
+                    }
+                }
+
+                if (colorEncontrado != null) {
+                    // Si existe, lo asignamos y lo BORRAMOS de la lista para el siguiente
+                    colorElegido = colorEncontrado; 
+                    coloresDisponibles.remove(colorEncontrado);
+                    colorValido = true;
+                } else {
+                    System.out.println("❌ Error: El color '" + colorElegido + "' no está disponible o ya fue elegido.");
+                }
+            }
+
+            // Agregamos al jugador con su color único asegurado
+            agregarJugador(new Jugador(1 + i, nombre, colorElegido));
         }
+        */
+        
 
         // Añadir la Foca CPU
         CPU foca = new CPU(0, "Foca Loca");
