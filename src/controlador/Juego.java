@@ -499,12 +499,57 @@ public class Juego {
         }
     }
     
+    public Jugador gestionarAccesoJugador(Scanner sc) {
+        while (true) {
+            System.out.println("\n=== ACCESO AL IGLÚ ===");
+            System.out.println("1. Iniciar Sesión");
+            System.out.println("2. Registrar Nuevo Pingüino");
+            System.out.println("3. Salir");
+            System.out.print("Selecciona una opción: ");
+            
+            String opcion = sc.nextLine();
+
+            if (opcion.equals("1")) {
+                // Lógica de Login
+                System.out.print("Nickname: ");
+                String user = sc.nextLine();
+                System.out.print("Password: ");
+                String pass = sc.nextLine();
+
+                if (this.baseDatos.loginJugador(user, pass)) {
+                    int id = this.baseDatos.registrarJugadorSiNoExiste(new Jugador(0, user, "")); // Pillamos el ID
+                    return new Jugador(id, user, ""); // Éxito
+                }
+
+            } else if (opcion.equals("2")) {
+                // Lógica de Registro
+                System.out.print("Elige tu Nickname: ");
+                String user = sc.nextLine();
+                System.out.print("Crea tu Password: ");
+                String pass = sc.nextLine();
+                
+                int nuevoId = this.baseDatos.registrarNuevoJugador(user, pass, false);
+                
+                if (nuevoId != -1) {
+                    System.out.println("¡Registro completado! Ya puedes jugar.");
+                    return new Jugador(nuevoId, user, ""); 
+                } else {
+                    System.out.println("Ese nombre ya existe. Prueba con otro.");
+                }
+
+            } else if (opcion.equals("3")) {
+                return null; // El usuario canceló
+            }
+        }
+    }
+    
     
     /**
      * Solicita credenciales al usuario en un bucle hasta que el login es correcto.
      * @param sc El escáner para leer la entrada.
      * @return El nombre del jugador si se autentica con éxito, null si falla tras los intentos.
      */
+    /*
     public String autenticarJugadorConBucle(Scanner sc) {
         int intentos = 0;
         int maxIntentos = 5;
@@ -534,7 +579,7 @@ public class Juego {
             }
         }
         return user; 
-    }
+    }*/
     
     
 }

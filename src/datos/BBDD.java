@@ -522,6 +522,32 @@ public class BBDD {
     }
     
     
+    /**
+     * Inserta un nuevo jugador en la tabla con su contraseña.
+     * @return El ID generado por Oracle, o -1 si hubo un error (ej: el nombre ya existe).
+     */
+    public int registrarNuevoJugador(String nickname, String password, boolean esCpu) {
+        String sql = "{call insertar_jugador(?, ?, ?)}";
+        
+        try (Connection con = conectarBD()) {
+            if (con == null) return -1;
+
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+                cstmt.setString(1, nickname);
+                cstmt.setString(2, password);
+                cstmt.setInt(3, esCpu ? 1 : 0);
+                
+                cstmt.execute();
+                
+                // Una vez insertado, recuperamos el ID que le ha tocado
+                return obtenerIdJugador(con, nickname); 
+            }
+        } catch (SQLException e) {
+            System.out.println("► ERROR: El nombre '" + nickname + "' ya está ocupado.");
+            return -1;
+        }
+    }
+    
     
     
     
