@@ -483,6 +483,48 @@ public class BBDD {
     }
     
     
+    
+    /**
+     * Comprueba si el nickname y la contraseña coinciden en la base de datos.
+     * @param nickname El nombre del jugador.
+     * @param password La contraseña introducida.
+     * @return true si las credenciales son correctas, false en caso contrario.
+     */
+    public boolean loginJugador(String nickname, String password) {
+        // Consulta para contar si hay un usuario con ese nombre Y esa contraseña
+        String sql = "SELECT COUNT(*) FROM jugador WHERE nickname = ? AND CONTRASENA = ?";
+
+        try (Connection con = conectarBD();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            
+            if (con == null) return false;
+
+            // Seteamos los parámetros
+            pstmt.setString(1, nickname);
+            pstmt.setString(2, password);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Si el conteo es mayor que 0, es que existe y coincide
+                    int coincidencias = rs.getInt(1);
+                    if (coincidencias > 0) {
+                        System.out.println("► Login correcto para: " + nickname);
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("► ERROR en el login: " + e.getMessage());
+        }
+
+        System.out.println("► Nickname o contraseña incorrectos.");
+        return false;
+    }
+    
+    
+    
+    
+    
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
 		

@@ -16,6 +16,7 @@ public class Main {
         while (jugarOtraVez) {			
             Juego partida = new Juego();
             System.out.println("=== BIENVENIDO A EL JUEGO DE PINGU ===");
+            partida.autenticarJugadorConBucle(sc);
             System.out.println("1. Nueva Partida");
             System.out.println("2. Cargar Partida Guardada");
             

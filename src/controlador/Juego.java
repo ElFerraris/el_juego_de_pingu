@@ -500,4 +500,41 @@ public class Juego {
     }
     
     
+    /**
+     * Solicita credenciales al usuario en un bucle hasta que el login es correcto.
+     * @param sc El escáner para leer la entrada.
+     * @return El nombre del jugador si se autentica con éxito, null si falla tras los intentos.
+     */
+    public String autenticarJugadorConBucle(Scanner sc) {
+        int intentos = 0;
+        int maxIntentos = 5;
+        boolean autenticado = false;
+        String user = "";
+
+        while (!autenticado && intentos < maxIntentos) {
+            System.out.println("\n--- INICIO DE SESIÓN (Intento " + (intentos + 1) + "/" + maxIntentos + ") ---");
+            System.out.print("Nickname: ");
+            user = sc.nextLine();
+            
+            System.out.print("Password: ");
+            String pass = sc.nextLine();
+
+            // Llamamos al método boolean que ya tenemos en BBDD
+            if (this.baseDatos.loginJugador(user, pass)) {
+                autenticado = true;
+                System.out.println("¡Acceso concedido! Bienvenido, " + user);
+            } else {
+                intentos++;
+                if (intentos < maxIntentos) {
+                    System.out.println("Error: Credenciales incorrectas. Prueba de nuevo.");
+                } else {
+                    System.out.println("Has agotado los " + maxIntentos + " intentos.");
+                    return null; // Devolvemos null para indicar que no se pudo entrar
+                }
+            }
+        }
+        return user; 
+    }
+    
+    
 }
