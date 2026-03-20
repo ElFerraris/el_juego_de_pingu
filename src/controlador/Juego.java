@@ -374,6 +374,7 @@ public class Juego {
                 System.out.println("¡Victoria! El ganador es: " + j.getNombre());
                 partidaFinalizada = true;
                 ganador = j;
+                guardarPartida();
                 return j;
             }
         }
@@ -478,6 +479,7 @@ public class Juego {
     }
 
     public void cargarPartida(Scanner sc) {
+    	getBaseDatos().mostrarPartidasPendientes();
         System.out.print("Introduce el ID de la partida que deseas retomar: ");
         try {
             int idCargar = Integer.parseInt(sc.nextLine());

@@ -12,10 +12,9 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         boolean jugarOtraVez = true;
-
-        while (jugarOtraVez) {
+        
+        while (jugarOtraVez) {			
             Juego partida = new Juego();
-            
             System.out.println("=== BIENVENIDO A EL JUEGO DE PINGU ===");
             System.out.println("1. Nueva Partida");
             System.out.println("2. Cargar Partida Guardada");
@@ -62,7 +61,7 @@ public class Main {
                 System.out.println("\nReiniciando el mundo de los pingüinos...\n");
             }
         }
-
+        											// partida.getBaseDatos().mostrarRankingMasPartidas(); Recuerdalo Dani
         sc.close();
     }
 }

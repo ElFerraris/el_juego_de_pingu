@@ -406,6 +406,82 @@ public class BBDD {
         }
     }
     
+    public void mostrarPartidasPendientes() {
+        // Consulta: Solo donde ganador no tiene valor
+        String sql = "SELECT num_partida, seed, hora_partida FROM partida WHERE ganador IS NULL ORDER BY hora_partida DESC";
+
+        try (Connection con = conectarBD();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            System.out.println("\n=== PARTIDAS PENDIENTES DE FINALIZAR ===");
+            System.out.printf("%-12s | %-40s | %-20s %n", "ID", "SEED", "ULTIMA CONEXION");
+            System.out.println("------------------------------------------------------------");
+
+            boolean hayPartidas = false;
+            while (rs.next()) {
+                hayPartidas = true;
+                int id = rs.getInt("num_partida");
+                String seed = rs.getString("seed");
+                String fecha = rs.getString("hora_partida");
+
+                System.out.printf("%-10d | %-20s | %-20s %n", id, seed, fecha);
+            }
+
+            if (!hayPartidas) {
+                System.out.println("No hay partidas pendientes en la base de datos.");
+            }
+            System.out.println("------------------------------------------------------------\n");
+
+        } catch (SQLException e) {
+            System.out.println("► ERROR al listar partidas: " + e.getMessage());
+        }
+    }
+    
+    public void mostrarRankingMasPartidas() {
+        // Consulta: Unimos jugador con participación y contamos cuántas veces aparece cada uno
+        String sql = "SELECT j.nickname, COUNT(p.id_partida) AS total_partidas " +
+                     "FROM jugador j " +
+                     "JOIN participacion_jugadores p ON j.id_jugador = p.id_jugador " +
+                     "WHERE j.nickname != 'Foca Loca'"+ //Quitamos la Foca
+                     "GROUP BY j.nickname " +
+                     "ORDER BY total_partidas DESC";
+
+        try (Connection con = conectarBD();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            System.out.println("\n" + "=".repeat(45));
+            System.out.println("       RANKING: PINGÜINOS MÁS ACTIVOS        ");
+            System.out.println("=".repeat(45));
+            
+            System.out.printf("| %-25s | %-12s |%n", "NOMBRE JUGADOR", "PARTIDAS");
+            System.out.println("-".repeat(45));
+
+            boolean hayDatos = false;
+            int puesto = 1;
+            
+            while (rs.next()) {
+                hayDatos = true;
+                String nombre = rs.getString("nickname");
+                int total = rs.getInt("total_partidas");
+
+                // Resaltamos el primer puesto con un emoji o marca
+                String medalla = (puesto == 1) ? "🏆 " : (puesto + ". ");
+                System.out.printf("| %-25s | %-12d |%n", medalla + nombre, total);
+                puesto++;
+            }
+
+            if (!hayDatos) {
+                System.out.println("| " + String.format("%-41s", "Aún no hay registros de participación.") + " |");
+            }
+            System.out.println("=".repeat(45) + "\n");
+
+        } catch (SQLException e) {
+            System.out.println("► ERROR al generar ranking: " + e.getMessage());
+        }
+    }
+    
     
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
