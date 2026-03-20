@@ -89,7 +89,7 @@ public class Tablero {
                     casillas.add(new CasillaTrineo(i, "Casilla TRINEO", 0));
                     break;
                 case '4':
-                    casillas.add(new CasillaInterrogante(i, "Casilla INTERROGANTE"));
+                    casillas.add(new CasillaInterrogante(i, "Casilla INTERROGANTE",this));
                     break;
                 case '5':
                     casillas.add(new CasillaRompedizas(i, "Casilla ROMPEDIZAS"));

@@ -21,7 +21,7 @@ public class CasillaTrineo extends Casilla {
         avanzarSiguienteTrineo(jugador);
     }
 
-    private void avanzarSiguienteTrineo(Jugador jugador) {
+    public void avanzarSiguienteTrineo(Jugador jugador) {
         System.out.println(jugador.getNombre() + " toma el trineo y avanza a la casilla " + posicionSiguienteTrineo + "!");
         jugador.setPosicion(posicionSiguienteTrineo);
     }

@@ -1,5 +1,6 @@
 package modelo;
 
+import modelo.CasillaTrineo;
 import java.util.Random;
 
 /**
@@ -17,7 +18,7 @@ public class Evento {
     /**
      * Aplica el efecto del evento sobre el jugador.
      */
-    public void aplicarEfecto(Jugador jugador) {
+    public void aplicarEfecto(Jugador jugador, Tablero tablero) {
         System.out.println("Evento aleatorio: " + tipoEvento);
 
         switch (tipoEvento) {
@@ -27,7 +28,7 @@ public class Evento {
             case "BolaNieve":
                 Random r = new Random();
                 int cantidad = r.nextInt(3) + 1;
-                for (int i = 0; i < cantidad; i++) { // FIX: era i <= cantidad (off-by-one)
+                for (int i = 0; i < cantidad; i++) { 
                     jugador.getInventario().agregarObjeto("BolaNieve");
                 }
                 break;
@@ -36,6 +37,23 @@ public class Evento {
                 break;
             case "DadoLento":
                 jugador.getInventario().agregarObjeto("DadoLento");
+                break;
+            case "MotoNeu":
+            	// Lógica para ir al siguiente trineo
+                boolean encontrado = false;
+                // Empezamos a buscar desde la posición siguiente a la del jugador
+                for (int i = jugador.getPosicion() + 1; i < Tablero.TAMANYO_TABLERO; i++) {
+                    Casilla c = tablero.getCasilla(i);
+                    if (c instanceof CasillaTrineo) {
+                        System.out.println("¡La Moto de Nieve te lleva al trineo en la posición " + i + "!");
+                        jugador.setPosicion(i);
+                        encontrado = true;
+                        break; 
+                    }
+                }
+                if (!encontrado) {
+                    System.out.println("No hay más trineos adelante, la moto se queda donde está.");
+                }
                 break;
         }
     }
