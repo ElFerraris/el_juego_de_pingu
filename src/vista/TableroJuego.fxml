@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane maxHeight="900.0" maxWidth="1800.0" minHeight="900.0" minWidth="1800.0" prefHeight="900.0" prefWidth="1800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="vista.TableroJuego">
+	<!-- TODO Add Nodes -->
+</AnchorPane>
