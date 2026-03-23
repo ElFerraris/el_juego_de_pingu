@@ -16,10 +16,14 @@ public class CasillaInterrogante extends Casilla {
     }
 
     @Override
-    public void activarEfecto(Jugador jugador) {
+    public void activarEfecto(Jugador jugador, controlador.Juego juego) {
         Evento evento = generarEventoAleatorio();
         evento.aplicarEfecto(jugador);
         eventosOcurridos.add(evento);
+        String item = evento.getTipoEvento();
+        String msg = "¡INTERROGANTE! " + jugador.getNombre() + " consigue un(a) " + item + "!";
+        if (juego != null) juego.setLogMessage(msg);
+        System.out.println(msg);
     }
 
     private Evento generarEventoAleatorio() {

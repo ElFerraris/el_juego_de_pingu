@@ -1,0 +1,140 @@
+/* Ice / Winter Theme for "El Juego de Pingu" */
+
+.root {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-base: #e0f2f1;
+    -fx-background-color: linear-gradient(to bottom right, #e0f7fa, #80deea, #4dd0e1);
+}
+
+.label {
+    -fx-text-fill: #006064;
+}
+
+.title-text {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 2);
+}
+
+.button {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #e0f7fa);
+    -fx-background-radius: 15;
+    -fx-border-color: #4dd0e1;
+    -fx-border-radius: 15;
+    -fx-border-width: 1px;
+    -fx-text-fill: #00838f;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+}
+
+.button:hover {
+    -fx-background-color: #80deea;
+    -fx-text-fill: white;
+}
+
+.text-field, .password-field {
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+    -fx-background-radius: 5;
+    -fx-border-color: #b2ebf2;
+    -fx-border-radius: 5;
+    -fx-padding: 8;
+}
+
+.menu-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+}
+
+.grid-pane {
+    -fx-padding: 10;
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 10;
+    -fx-border-color: rgba(255, 255, 255, 0.5);
+    -fx-border-radius: 10;
+}
+
+.cell-type {
+    -fx-font-size: 10px;
+    -fx-fill: #004d40;
+    -fx-font-weight: bold;
+}
+
+.game-over-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-alignment: center;
+}
+
+.game-over-text {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-fill: #ffeb3b;
+    -fx-effect: dropshadow(gaussian, black, 10, 0, 0, 0);
+}
+
+.welcome-text {
+    -fx-font-size: 18px;
+    -fx-fill: #006064;
+    -fx-font-weight: bold;
+}
+
+.help-text {
+    -fx-font-size: 14px;
+    -fx-fill: #546e7a;
+}
+
+.error-text {
+    -fx-font-size: 14px;
+    -fx-fill: #d32f2f;
+    -fx-font-weight: bold;
+}
+
+.combo-box {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-border-color: #80deea;
+    -fx-border-radius: 5;
+}
+
+.button-large {
+    -fx-font-size: 20px;
+    -fx-padding: 15 40;
+}
+
+.button-secondary {
+    -fx-background-color: #cfd8dc;
+    -fx-border-color: #90a4ae;
+    -fx-text-fill: #37474f;
+}
+
+.button-primary {
+    -fx-background-color: #26c6da;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.premium-panel {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 20, 0, 0, 10);
+}
+
+.sidebar {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 5, 0);
+}
+
+.btn-inv {
+    -fx-min-width: 50;
+    -fx-font-size: 10px;
+    -fx-padding: 4 8;
+}
+
+.splash-container {
+    -fx-background-image: url('https://img.freepik.com/free-vector/winter-landscape-with-mountains-pine-trees_23-2148780182.jpg');
+    -fx-background-size: cover;
+}
+
+.fullscreen-hint {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-padding: 3 8;
+    -fx-background-radius: 0 0 5 5;
+}

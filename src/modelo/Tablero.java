@@ -148,13 +148,13 @@ public class Tablero {
     /**
      * Aplica el efecto de la casilla donde se encuentra el jugador.
      */
-    public void aplicarEfectoCasilla(Jugador jugador) {
+    public void aplicarEfectoCasilla(Jugador jugador, controlador.Juego juego) {
         int pos = jugador.getPosicion();
 
         if (pos >= 0 && pos < casillas.size()) {
             Casilla casillaActual = casillas.get(pos);
             System.out.println("--- EFECTO: " + jugador.getNombre() + " ha caído en " + casillaActual.getTipo() + " ---");
-            casillaActual.activarEfecto(jugador);
+            casillaActual.activarEfecto(jugador, juego);
         }
     }
 

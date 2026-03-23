@@ -17,6 +17,7 @@ public class Juego {
     private int turnoActual;
     private boolean partidaFinalizada;
     private Jugador ganador;
+    private String logMessage = "¡El juego ha comenzado!";
     private BBDD baseDatos; // Composición en vez de herencia
 
     public Juego() {
@@ -104,13 +105,15 @@ public class Juego {
         
         // Simplemente llamamos al método de nuestro objeto baseDatos.
         // Él se encarga de conectar, insertar y desconectar.
-        boolean exito = false;
-        		if(this.baseDatos.guardarNuevaPartida(this) == 0) {exito = false;}
-        		else {exito = true; this.getTablero().setIdPartida(this.baseDatos.guardarNuevaPartida(this));}
-                for (Jugador j : jugadores) {
-                    this.baseDatos.insertarParticipacion(this.getTablero().getIdPartida(),j.getId(),j.getColor());
-                }	
-        		
+        int idPartida = this.baseDatos.guardarNuevaPartida(this);
+        boolean exito = (idPartida != 0);
+        
+        if (exito) {
+            this.getTablero().setIdPartida(idPartida);
+            for (Jugador j : jugadores) {
+                this.baseDatos.insertarParticipacion(idPartida, j.getId(), j.getColor());
+            }
+        }
 
         if (exito) {
             System.out.println("► Registro en Oracle completado con éxito.");
@@ -143,7 +146,7 @@ public class Juego {
 
             System.out.println("Nueva posición: " + jugadorActual.getPosicion());
             comprobarGuerra(jugadorActual);
-            tablero.aplicarEfectoCasilla(jugadorActual);
+            tablero.aplicarEfectoCasilla(jugadorActual, this);
 
         } else {
             System.out.println("Está BLOQUEADO, no se puede mover.");
@@ -299,7 +302,7 @@ public class Juego {
                 } else {
                     System.out.println("¡Guerra de bolas de nieve entre " + jugadorActual.getNombre() + " y " + oponente.getNombre() + "!");
                     Guerra combate = new Guerra();
-                    combate.iniciarGuerra(jugadorActual, oponente);
+                    combate.iniciarGuerra(jugadorActual, oponente, this);
                 }
                 return;
             }
@@ -345,6 +348,14 @@ public class Juego {
 
     public boolean isPartidaFinalizada() {
         return partidaFinalizada;
+    }
+
+    public String getLogMessage() {
+        return logMessage;
+    }
+
+    public void setLogMessage(String message) {
+        this.logMessage = message;
     }
 
     public Jugador getGanador() {

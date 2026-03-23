@@ -10,7 +10,7 @@ public class CasillaNormal extends Casilla {
     }
 
     @Override
-    public void activarEfecto(Jugador jugador) {
+    public void activarEfecto(Jugador jugador, controlador.Juego juego) {
         // Sin efecto
     }
 }

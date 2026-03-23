@@ -17,12 +17,14 @@ public class CasillaTrineo extends Casilla {
     }
 
     @Override
-    public void activarEfecto(Jugador jugador) {
-        avanzarSiguienteTrineo(jugador);
+    public void activarEfecto(Jugador jugador, controlador.Juego juego) {
+        avanzarSiguienteTrineo(jugador, juego);
     }
 
-    private void avanzarSiguienteTrineo(Jugador jugador) {
-        System.out.println(jugador.getNombre() + " toma el trineo y avanza a la casilla " + posicionSiguienteTrineo + "!");
+    private void avanzarSiguienteTrineo(Jugador jugador, controlador.Juego juego) {
+        String msg = "¡TRINEO! " + jugador.getNombre() + " monta el trineo y avanza a la casilla " + posicionSiguienteTrineo + "!";
+        if (juego != null) juego.setLogMessage(msg);
+        System.out.println(msg);
         jugador.setPosicion(posicionSiguienteTrineo);
     }
 }

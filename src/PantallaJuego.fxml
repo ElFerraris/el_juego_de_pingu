@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.geometry.Insets?>
+
+<StackPane stylesheets="@style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.PantallaJuego">
+    <BorderPane styleClass="root">
+        <top>
+            <MenuBar BorderPane.alignment="CENTER">
+                <Menu text="Archivo">
+                    <MenuItem fx:id="newGame" text="Nuevo" onAction="#handleNewGame"/>
+                    <MenuItem fx:id="saveGame" text="Guardar" onAction="#handleSaveGame"/>
+                    <MenuItem fx:id="loadGame" text="Cargar" onAction="#handleLoadGame"/>
+                    <MenuItem fx:id="quitGame" text="Salir" onAction="#handleQuitGame"/>
+                </Menu>
+            </MenuBar>
+        </top>
+        <center>
+            <VBox alignment="CENTER" spacing="10">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                <Text text="Tablero de Hielo" styleClass="title-text" style="-fx-font-size: 24px;"/>
+                <GridPane fx:id="tablero" alignment="CENTER" gridLinesVisible="true" styleClass="grid-pane">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="70.0" prefWidth="70.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="70.0" prefWidth="70.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="70.0" prefWidth="70.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="70.0" prefWidth="70.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="70.0" prefWidth="70.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="70.0" prefHeight="70.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <Circle fx:id="P1" fill="#2196f3" radius="18.0" stroke="WHITE" strokeWidth="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <effect>
+                                <DropShadow color="rgba(0,0,0,0.5)" radius="5" />
+                            </effect>
+                        </Circle>
+                        <Circle fx:id="P4" fill="#ffeb3b" radius="18.0" stroke="WHITE" strokeWidth="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0" visible="false">
+                            <effect>
+                                <DropShadow blurType="GAUSSIAN" color="#00000080" radius="5.0" />
+                            </effect>
+                        </Circle>
+                        <Circle fx:id="P5" fill="#9e9e9e" radius="18.0" stroke="WHITE" strokeWidth="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0" visible="false">
+                            <effect>
+                                <DropShadow blurType="GAUSSIAN" color="#00000080" radius="5.0" />
+                            </effect>
+                        </Circle>
+                        <Circle fx:id="P2" fill="#f44336" radius="18.0" stroke="WHITE" strokeWidth="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0" visible="false"/>
+                        <Circle fx:id="P3" fill="#4caf50" radius="18.0" stroke="WHITE" strokeWidth="2.0" GridPane.columnIndex="0" GridPane.rowIndex="0" visible="false"/>
+
+                    </children>
+                </GridPane>
+            </VBox>
+        </center>
+        <right>
+            <VBox alignment="TOP_CENTER" prefWidth="200.0" spacing="15.0" styleClass="sidebar" style="-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 15; -fx-padding: 20;">
+                <Label text="CONTROL" style="-fx-font-weight: bold; -fx-text-fill: #00838f; -fx-font-size: 18px;"/>
+                <Separator />
+                
+                <Button fx:id="dado" mnemonicParsing="false" onAction="#handleDado" text="TIRAR DADO" minWidth="160" styleClass="button-primary"/>
+                <Text fx:id="dadoResultText" style="-fx-font-weight: bold;" text="Resultado: -" />
+                
+                <Separator />
+                <Label text="LEYENDA" style="-fx-font-weight: bold;"/>
+                <VBox fx:id="legendContainer" spacing="5" style="-fx-border-color: #ddd; -fx-border-radius: 5; -fx-padding: 5;">
+                    <!-- Filled dynamically in Java -->
+                </VBox>
+
+                <Separator />
+                <Label text="MENSAJES" style="-fx-font-weight: bold;"/>
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" prefHeight="100">
+                    <Text fx:id="eventos" strokeType="OUTSIDE" strokeWidth="0.0" text="¡Bienvenido!" wrappingWidth="160.0" />
+                </ScrollPane>
+                
+                <Separator />
+                <Label text="INVENTARIO" style="-fx-font-weight: bold;" />
+                <GridPane vgap="8" hgap="10">
+                    <Button fx:id="rapido" onAction="#handleRapido" text="D.R." styleClass="btn-inv"/>
+                    <Text fx:id="rapido_t" text="0" GridPane.columnIndex="1"/>
+                    
+                    <Button fx:id="lento" onAction="#handleLento" text="D.L." styleClass="btn-inv" GridPane.rowIndex="1"/>
+                    <Text fx:id="lento_t" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    
+                    <Button fx:id="peces" onAction="#handlePeces" text="Pez" styleClass="btn-inv" GridPane.rowIndex="2"/>
+                    <Text fx:id="peces_t" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    
+                    <Button fx:id="nieve" onAction="#handleNieve" text="Nieve" styleClass="btn-inv" GridPane.rowIndex="3"/>
+                    <Text fx:id="nieve_t" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                </GridPane>
+                
+                <Region VBox.vgrow="ALWAYS" />
+                <Button text="OPCIONES" onAction="#showOptionsMenu" style="-fx-background-color: #ffe082; -fx-font-weight: bold;" prefWidth="160"/>
+            </VBox>
+        </right>
+    </BorderPane>
+
+    <!-- IN-GAME OPTIONS OVERLAY -->
+    <VBox fx:id="optionsOverlay" visible="false" alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.7);">
+        <VBox alignment="CENTER" spacing="20" styleClass="premium-panel" maxWidth="400" style="-fx-background-color: white; -fx-padding: 40; -fx-background-radius: 20;">
+            <Text text="MENÚ DE OPCIONES" styleClass="title-text" style="-fx-font-size: 24px;"/>
+            <Button text="GUARDAR PARTIDA" onAction="#handleSaveGame" prefWidth="250" styleClass="button-large"/>
+            <Button text="SALIR AL MENÚ PRINCIPAL" onAction="#handleConfirmQuitToMenu" prefWidth="250" styleClass="button-secondary"/>
+            <Button text="CONTINUAR JUGANDO" onAction="#hideOptionsMenu" prefWidth="250" style="-fx-background-color: #81c784;"/>
+        </VBox>
+    </VBox>
+
+    <!-- CONFIRMATION OVERLAY -->
+    <VBox fx:id="confirmOverlay" visible="false" alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.8);">
+        <VBox alignment="CENTER" spacing="20" styleClass="premium-panel" maxWidth="450" style="-fx-background-color: white; -fx-padding: 40; -fx-background-radius: 20; -fx-border-color: #f44336; -fx-border-width: 3;">
+            <Text text="¿SALIR SIN GUARDAR?" styleClass="title-text" style="-fx-font-size: 22px; -fx-fill: #d32f2f;"/>
+            <Text text="Los progresos no guardados se perderán." style="-fx-text-fill: #666;"/>
+            <HBox spacing="20" alignment="CENTER">
+                <Button text="SÍ, SALIR" onAction="#handleDoQuitToMenu" style="-fx-background-color: #ef5350; -fx-text-fill: white;" prefWidth="120"/>
+                <Button text="VOLVER" onAction="#hideConfirmOverlay" style="-fx-background-color: #90a4ae; -fx-text-fill: white;" prefWidth="120"/>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <!-- GAME OVER OVERLAY -->
+    <VBox fx:id="gameOverOverlay" visible="false" alignment="CENTER" spacing="30" style="-fx-background-color: rgba(0,0,0,0.85);">
+        <VBox alignment="CENTER" spacing="25" styleClass="premium-panel" maxWidth="500" style="-fx-background-color: white; -fx-padding: 50; -fx-background-radius: 30; -fx-border-color: #ffd54f; -fx-border-width: 5;">
+            <Text text="¡FIN DEL JUEGO!" styleClass="title-text" style="-fx-font-size: 36px; -fx-fill: #fbc02d;" />
+            <Text fx:id="winnerLabel" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Ganador: -" />
+            <VBox spacing="10" alignment="CENTER">
+                <Button text="VOLVER AL MENÚ PRINCIPAL" onAction="#handleDoQuitToMenu" styleClass="button-large" prefWidth="300"/>
+                <Button text="SALIR DEL JUEGO" onAction="#handleQuitGame" styleClass="button-secondary" prefWidth="300"/>
+            </VBox>
+        </VBox>
+    </VBox>
+
+    <!-- Custom small fullscreen hint -->
+    <Label fx:id="fullScreenHint" text="Pulse Esc para salir de pantalla completa" 
+           styleClass="fullscreen-hint" StackPane.alignment="TOP_CENTER" visible="false" />
+</StackPane>

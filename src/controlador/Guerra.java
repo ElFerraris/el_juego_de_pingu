@@ -12,21 +12,25 @@ public class Guerra {
      * y el perdedor retrocede la diferencia de casillas.
      * Ambos jugadores gastan todas sus bolas al final.
      */
-    public void iniciarGuerra(Jugador j1, Jugador j2) {
+    public void iniciarGuerra(Jugador j1, Jugador j2, Juego juego) {
         int bolasJ1 = j1.getInventario().getCantidad("BolaNieve");
         int bolasJ2 = j2.getInventario().getCantidad("BolaNieve");
+        String msg = "";
 
         if (bolasJ1 > bolasJ2) {
             int diferencia = bolasJ1 - bolasJ2;
-            System.out.println(j1.getNombre() + " gana. " + j2.getNombre() + " retrocede " + diferencia + " casillas.");
+            msg = "¡GUERRA! " + j1.getNombre() + " gana. " + j2.getNombre() + " retrocede " + diferencia + " casillas.";
             j2.retroceder(diferencia);
         } else if (bolasJ2 > bolasJ1) {
             int diferencia = bolasJ2 - bolasJ1;
-            System.out.println(j2.getNombre() + " gana. " + j1.getNombre() + " retrocede " + diferencia + " casillas.");
+            msg = "¡GUERRA! " + j2.getNombre() + " gana. " + j1.getNombre() + " retrocede " + diferencia + " casillas.";
             j1.retroceder(diferencia);
         } else {
-            System.out.println("Empate técnico: Nadie retrocede.");
+            msg = "¡GUERRA! Empate técnico: Nadie retrocede.";
         }
+
+        if (juego != null) juego.setLogMessage(msg);
+        System.out.println(msg);
 
         // Ambos gastan todas sus bolas
         limpiarBolas(j1);
