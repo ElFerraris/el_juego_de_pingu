@@ -548,9 +548,6 @@ public class BBDD {
         }
     }
     
-    
-    
-    
 	/*
 	public boolean guardarPartida(Connection con, Juego juego) {
 		
