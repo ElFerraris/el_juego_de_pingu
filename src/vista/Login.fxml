@@ -5,10 +5,10 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="700.0" maxWidth="1200.0" minHeight="700.0" minWidth="1200.0" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.Login">
+<AnchorPane maxHeight="700.0" maxWidth="1200.0" minHeight="700.0" minWidth="1200.0" prefHeight="700.0" prefWidth="1200.0" stylesheets="@login.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.Login">
    <children>
       <Button fx:id="btn_login" layoutX="102.0" layoutY="479.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="188.0" text="LOGIN" />
-      <PasswordField fx:id="text_pswd" layoutX="133.0" layoutY="368.0" />
+      <PasswordField fx:id="text_pswd" layoutX="109.0" layoutY="368.0" prefHeight="25.0" prefWidth="173.0" />
       <TextField fx:id="text_user" layoutX="122.0" layoutY="273.0" />
    </children>
 </AnchorPane>
