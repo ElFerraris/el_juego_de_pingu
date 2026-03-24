@@ -1,6 +1,71 @@
+/* Contenedor principal */
 .root {
     -fx-background-image: url("../assets/login/fondo_login.png");
     -fx-background-size: cover;
     -fx-background-repeat: no-repeat;
     -fx-background-position: center;
+}
+
+/* Etiquetas (Labels) en la zona blanca */
+.label {
+    -fx-text-fill: #2c3e50;
+    /* Gris carbón profundo para contraste sobre blanco */
+    -fx-font-family: "Segoe UI", system-ui, sans-serif;
+    -fx-font-size: 14px;
+}
+
+.error-label {
+    -fx-text-fill: #d63031;
+    /* Rojo más intenso para ser legible sobre blanco */
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-alignment: center;
+}
+
+/* Campos de texto (TextField / PasswordField) */
+.text-field,
+.password-field {
+    -fx-background-color: rgba(0, 0, 0, 0.05);
+    /* Muy ligero para que se vea el fondo */
+    -fx-background-radius: 5;
+    -fx-border-color: rgba(44, 62, 80, 0.3);
+    /* Borde oscuro sutil */
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 8 12;
+    -fx-prompt-text-fill: rgba(44, 62, 80, 0.5);
+}
+
+.text-field:focused,
+.password-field:focused {
+    -fx-background-color: rgba(0, 0, 0, 0.08);
+    -fx-border-color: #000000;
+    /* Azul corporativo más relajado que el cian */
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.2), 5, 0, 0, 0);
+}
+
+/* Botón (Login) - Estilo más relajado */
+.button {
+    -fx-background-color: #141414;
+    -fx-background-radius: 5;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 10 30;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #272727;
+    /* Azul ligeramente más oscuro */
+    -fx-translate-y: -1;
+    /* Elevación muy sutil */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+}
+
+.button:pressed {
+    -fx-translate-y: 0;
+    -fx-background-color: #353535;
 }
