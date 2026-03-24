@@ -1,3 +1,4 @@
+package aplicacion;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -11,7 +12,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-
 
 public class Main extends Application {
 	@Override
