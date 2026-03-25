@@ -3,6 +3,7 @@ module el_juego_de_pingu {
     requires javafx.fxml;
     requires javafx.graphics;
     requires javafx.base;
+    requires javafx.media;
     requires transitive java.sql; 
     requires com.oracle.database.jdbc; // <--- DESCOMENTA ESTA LÍNEA (ya no debería dar error)
 

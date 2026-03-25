@@ -49,6 +49,7 @@
 /* Botón (Login) - Estilo más relajado */
 .button {
     -fx-background-color: #141414;
+    background-color: #141414;
     -fx-background-radius: 5;
     -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
@@ -59,6 +60,7 @@
 
 .button:hover {
     -fx-background-color: #272727;
+    background-color: #272727;
     /* Azul ligeramente más oscuro */
     -fx-translate-y: -1;
     /* Elevación muy sutil */
@@ -67,5 +69,14 @@
 
 .button:pressed {
     -fx-translate-y: 0;
-    -fx-background-color: #353535;
+    -fx-background-color: #5c5c5c;
+    background-color: #5c5c5c;
+}
+
+/* Clase para resaltar errores en los campos */
+.field-error {
+    -fx-border-color: #d63031 !important;
+    border-color: #d63031 !important;
+    -fx-border-width: 2 !important;
+    border-width: 2 !important;
 }
