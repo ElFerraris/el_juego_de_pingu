@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class CPU extends Jugador {
 
     public CPU(int id, String nombre) {
-        super(id, nombre, "Rojo");
+        super(id, nombre, "Gris");
     }
 
     /**

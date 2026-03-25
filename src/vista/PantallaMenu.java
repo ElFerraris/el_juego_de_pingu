@@ -8,16 +8,27 @@ import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
+import javafx.scene.shape.Circle;
+import javafx.scene.paint.Color;
+import javafx.scene.Cursor;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
+import javafx.geometry.Side;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.stage.PopupWindow;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
+import java.util.ArrayList;
+import java.util.Map;
+
 import datos.BBDD;
 import controlador.Juego;
 import modelo.Jugador;
 import modelo.CPU;
 import modelo.Tablero;
-import java.util.ArrayList;
 
 public class PantallaMenu {
 
@@ -34,14 +45,6 @@ public class PantallaMenu {
     @FXML private TextField newUserNameField;
     @FXML private PasswordField newUserPassField;
     @FXML private Text welcomeText;
-    @FXML private Label p1NameLabel;
-    @FXML private ComboBox<String> p2Combo;
-    @FXML private ComboBox<String> p3Combo;
-    @FXML private ComboBox<String> p4Combo;
-    @FXML private ComboBox<String> p1ColorCombo;
-    @FXML private ComboBox<String> p2ColorCombo;
-    @FXML private ComboBox<String> p3ColorCombo;
-    @FXML private ComboBox<String> p4ColorCombo;
     @FXML private Label playerConfigErrorLabel;
     @FXML private ListView<String> savedGamesListView;
     @FXML private TextField seedField;
@@ -49,31 +52,71 @@ public class PantallaMenu {
     @FXML private Label loginErrorLabel;
     @FXML private Label fullScreenHint;
     @FXML private CheckBox focaCheckbox;
+    @FXML private HBox playerSlotsContainer;
 
     private BBDD db = new BBDD();
     private String currentUserName;
     private int currentUserId = -1;
     private ArrayList<Jugador> configuredPlayers = new ArrayList<>();
+    
+    // Internal state for slots
+    private static class Slot {
+        String name;
+        int id;
+        String color;
+        boolean active;
+    }
+    private Slot[] slots = new Slot[4];
 
-    // The 7 valid color names defined in Jugador.validarColor()
+    // Humans cannot pick Gris (reserved for CPU)
     private static final String[] COLORES_VALIDOS = {"Azul", "Rojo", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"};
+    
+    private static final java.util.Map<String, String> COLOR_MAP = java.util.Map.of(
+        "Azul", "#2196f3",
+        "Rojo", "#f44336",
+        "Verde", "#4caf50",
+        "Amarillo", "#ffeb3b",
+        "Naranja", "#ff9800",
+        "Morado", "#9c27b0",
+        "Rosa", "#e91e63",
+        "Gris", "#9e9e9e"
+    );
 
     @FXML
-    private void initialize() {
-        System.out.println("PantallaMenu initialized");
+    public void initialize() {
+        System.out.println("PantallaMenu: Inicializando...");
         hideAllContainers();
         splashContainer.setVisible(true);
+        
+        // Cargar fondo del splash programáticamente para mayor fiabilidad
+        try {
+            String imagePath = "imagenes/TITULO%20CON%20FONDO.png";
+            // Intentar cargar como recurso del sistema (funciona si está en el classpath o relativo al WD)
+            java.io.File file = new java.io.File("imagenes/TITULO CON FONDO.png");
+            if (file.exists()) {
+                String url = file.toURI().toString();
+                javafx.scene.image.Image img = new javafx.scene.image.Image(url);
+                javafx.scene.layout.BackgroundImage bImg = new javafx.scene.layout.BackgroundImage(
+                    img,
+                    javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
+                    javafx.scene.layout.BackgroundRepeat.NO_REPEAT,
+                    javafx.scene.layout.BackgroundPosition.CENTER,
+                    new javafx.scene.layout.BackgroundSize(1.0, 1.0, true, true, false, true)
+                );
+                splashContainer.setBackground(new javafx.scene.layout.Background(bImg));
+            }
+        } catch (Exception e) {
+            System.err.println("Error cargando imagen de fondo: " + e.getMessage());
+        }
 
-        // Configure player combos
-        setupPlayerCombo(p2Combo, false);
-        setupPlayerCombo(p3Combo, true);
-        setupPlayerCombo(p4Combo, true);
+        // Nota: La fuente se carga globalmente en Main.java
 
-        // Configure color combos
-        setupColorCombo(p1ColorCombo, "Azul");
-        setupColorCombo(p2ColorCombo, "Rojo");
-        setupColorCombo(p3ColorCombo, "Verde");
-        setupColorCombo(p4ColorCombo, "Amarillo");
+        // Initialize slots
+        for(int i=0; i<4; i++) {
+            slots[i] = new Slot();
+            slots[i].active = (i < 2); // First 2 are active by default
+            slots[i].color = COLORES_VALIDOS[i % COLORES_VALIDOS.length];
+        }
 
         // Seed field: only numbers, max 48 chars
         if (seedField != null) {
@@ -94,37 +137,152 @@ public class PantallaMenu {
         fullScreenHint.setVisible(true);
         fullScreenHint.setOpacity(1.0);
         
-        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(javafx.util.Duration.seconds(2), fullScreenHint);
+        FadeTransition fade = new FadeTransition(Duration.seconds(2), fullScreenHint);
         fade.setFromValue(1.0);
         fade.setToValue(0.0);
-        fade.setDelay(javafx.util.Duration.seconds(1));
+        fade.setDelay(Duration.seconds(1));
         fade.setOnFinished(e -> fullScreenHint.setVisible(false));
         fade.play();
     }
 
-    private void setupColorCombo(ComboBox<String> combo, String defaultColor) {
-        if (combo == null) return;
-        combo.getItems().clear();
-        combo.getItems().addAll(COLORES_VALIDOS);
-        combo.setValue(defaultColor);
-    }
+    private void renderPlayerSlots() {
+        if (playerSlotsContainer == null) return;
+        playerSlotsContainer.getChildren().clear();
 
-    private void setupPlayerCombo(ComboBox<String> combo, boolean allowEmpty) {
-        if (combo == null) return;
-        ObservableList<String> options = FXCollections.observableArrayList();
-        if (allowEmpty) {
-            options.add("Vacío");
-        }
-        
-        ArrayList<String> allPlayers = db.obtenerTodosLosJugadores();
-        for (String p : allPlayers) {
-            if (!p.equals(currentUserName)) { // Don't allow selecting self
-                options.add("Jugador: " + p);
+        for (int i = 0; i < 4; i++) {
+            if (slots[i].active) {
+                playerSlotsContainer.getChildren().add(createPlayerCard(i));
+            } else {
+                // Only show "+" button for the first inactive slot
+                playerSlotsContainer.getChildren().add(createAddButton(i));
+                break; 
             }
         }
-        combo.setItems(options);
-        if (allowEmpty) combo.setValue("Vacío");
-        else if (!options.isEmpty()) combo.getSelectionModel().select(0);
+    }
+
+    private Node createPlayerCard(int index) {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("player-card");
+        
+        Label title = new Label("JUGADOR " + (index + 1));
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #90a4ae; -fx-font-size: 12px;");
+
+        // Player Name Slot
+        Node nameNode;
+        if (index == 0) {
+            // P1 is the logged in user
+            slots[0].name = currentUserName;
+            slots[0].id = currentUserId;
+            nameNode = new Label(currentUserName);
+            ((Label)nameNode).setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        } else {
+            // P2, P3, P4 can be selection from DB
+            ComboBox<String> nameCombo = new ComboBox<>();
+            nameCombo.setPromptText("Seleccionar...");
+            ObservableList<String> options = FXCollections.observableArrayList();
+            ArrayList<String> all = db.obtenerTodosLosJugadores();
+            for (String p : all) {
+                boolean alreadyTaken = false;
+                for(int j=0; j<index; j++) if(slots[j].active && p.equals(slots[j].name)) alreadyTaken = true;
+                if (!alreadyTaken && !p.equals(currentUserName)) options.add(p);
+            }
+            nameCombo.setItems(options);
+            if (slots[index].name != null) nameCombo.setValue(slots[index].name);
+            
+            nameCombo.setOnAction(e -> {
+                slots[index].name = nameCombo.getValue();
+                slots[index].id = db.obtenerIdJugador(null, slots[index].name);
+            });
+            nameNode = nameCombo;
+        }
+
+        // Color Selection (Circle + Arrow)
+        HBox colorBox = new HBox(8);
+        colorBox.setAlignment(Pos.CENTER);
+        colorBox.setCursor(Cursor.HAND);
+
+        Circle colorCircle = new Circle(22);
+        colorCircle.setStroke(Color.WHITE);
+        colorCircle.setStrokeWidth(3);
+        updateCircleColor(colorCircle, slots[index].color);
+
+        Label arrow = new Label("▼");
+        arrow.setStyle("-fx-font-size: 10px; -fx-text-fill: #90a4ae;");
+
+        colorBox.getChildren().addAll(colorCircle, arrow);
+        colorBox.setOnMouseClicked(e -> showColorPicker(colorCircle, index));
+
+        card.getChildren().addAll(title, nameNode, colorBox);
+
+        // Remove button for P3 and P4
+        if (index >= 2) {
+            Button removeBtn = new Button("✕");
+            removeBtn.setStyle("-fx-background-color: #ffcdd2; -fx-text-fill: #b71c1c; -fx-background-radius: 50; -fx-font-size: 10px;");
+            removeBtn.setOnAction(e -> {
+                // Deactivate this slot and all subsequent ones to ensure contiguity
+                for (int k = index; k < 4; k++) {
+                    slots[k].active = false;
+                    slots[k].name = null;
+                }
+                renderPlayerSlots();
+            });
+            card.getChildren().add(removeBtn);
+        }
+
+        return card;
+    }
+
+    private Node createAddButton(int index) {
+        Button addBtn = new Button("+");
+        addBtn.getStyleClass().add("add-player-button");
+        addBtn.setPrefSize(180, 200);
+        addBtn.setOnAction(e -> {
+            slots[index].active = true;
+            renderPlayerSlots();
+        });
+        
+        VBox container = new VBox(10, addBtn, new Label("Añadir Jugador"));
+        container.setAlignment(Pos.CENTER);
+        return container;
+    }
+
+    private void updateCircleColor(Circle circle, String colorName) {
+        String hex = COLOR_MAP.getOrDefault(colorName, "#000000");
+        circle.setFill(Color.web(hex));
+    }
+
+    private void showColorPicker(Circle targetCircle, int slotIndex) {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10));
+        grid.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);");
+
+        int col = 0;
+        int row = 0;
+        for (String colorName : COLORES_VALIDOS) {
+            Circle c = new Circle(15);
+            c.setFill(Color.web(COLOR_MAP.get(colorName)));
+            c.setCursor(Cursor.HAND);
+            c.setOnMouseClicked(ev -> {
+                slots[slotIndex].color = colorName;
+                updateCircleColor(targetCircle, colorName);
+                ((PopupWindow)grid.getScene().getWindow()).hide();
+            });
+
+            grid.add(c, col, row);
+            col++;
+            if (col == 3) {
+                col = 0;
+                row++;
+            }
+        }
+
+        ContextMenu contextMenu = new ContextMenu();
+        CustomMenuItem item = new CustomMenuItem(grid);
+        item.setHideOnClick(false);
+        contextMenu.getItems().add(item);
+        contextMenu.show(targetCircle, Side.BOTTOM, 0, 0);
     }
 
     private void hideAllContainers() {
@@ -177,10 +335,6 @@ public class PantallaMenu {
                 currentUserName = username;
                 loginErrorLabel.setVisible(false);
                 showMainMenu();
-                // Refresh combos now that we know the currentUserName
-                setupPlayerCombo(p2Combo, false);
-                setupPlayerCombo(p3Combo, true);
-                setupPlayerCombo(p4Combo, true);
             } else {
                 loginErrorLabel.setText("Usuario o contraseña incorrectos.");
                 loginErrorLabel.setVisible(true);
@@ -201,12 +355,7 @@ public class PantallaMenu {
     @FXML
     private void showPlayerConfig() {
         hideAllContainers();
-        p1NameLabel.setText(currentUserName);
-        // Reset colour combos to default values each time config is opened
-        setupColorCombo(p1ColorCombo, "Azul");
-        setupColorCombo(p2ColorCombo, "Rojo");
-        setupColorCombo(p3ColorCombo, "Verde");
-        setupColorCombo(p4ColorCombo, "Amarillo");
+        renderPlayerSlots();
         playerConfigContainer.setVisible(true);
     }
 
@@ -240,54 +389,38 @@ public class PantallaMenu {
 
     @FXML
     private void showSeedSelection() {
-        // Validate player config
-        configuredPlayers.clear();
+        ArrayList<Jugador> players = new ArrayList<>();
         playerConfigErrorLabel.setText("");
 
-        // Player 1 is ALWAYS the current user
-        String p1Color = p1ColorCombo != null ? p1ColorCombo.getValue() : "Azul";
-        if (p1Color == null) p1Color = "Azul";
-        configuredPlayers.add(new Jugador(currentUserId, currentUserName, p1Color));
+        for (int i = 0; i < 4; i++) {
+            if (slots[i].active) {
+                if (slots[i].name == null || slots[i].name.isEmpty()) {
+                    playerConfigErrorLabel.setText("Jugador " + (i+1) + " debe tener un usuario.");
+                    return;
+                }
+                players.add(new Jugador(slots[i].id, slots[i].name, slots[i].color));
+            }
+        }
 
-        // Player 2 is Mandatory Human
-        String p2Val = p2Combo.getValue();
-        if (p2Val == null || p2Val.equals("Vacío")) {
-            playerConfigErrorLabel.setText("El Jugador 2 es obligatorio.");
+        if (players.size() < 2) {
+            playerConfigErrorLabel.setText("Se requieren al menos 2 jugadores.");
             return;
         }
-        String p2Color = p2ColorCombo != null && p2ColorCombo.getValue() != null ? p2ColorCombo.getValue() : "Rojo";
-        processHumanSlot(p2Val, 2, p2Color);
-
-        // Player 3 & 4 are Optional Humans
-        String p3Color = p3ColorCombo != null && p3ColorCombo.getValue() != null ? p3ColorCombo.getValue() : "Verde";
-        String p4Color = p4ColorCombo != null && p4ColorCombo.getValue() != null ? p4ColorCombo.getValue() : "Amarillo";
-        processHumanSlot(p3Combo.getValue(), 3, p3Color);
-        processHumanSlot(p4Combo.getValue(), 4, p4Color);
 
         // Foca CPU is Optional
         if (focaCheckbox.isSelected()) {
-            // Foca color is irrelevant or special
-            configuredPlayers.add(new CPU(configuredPlayers.size() + 1, "Foca Loca"));
+            players.add(new CPU(players.size() + 1, "Foca Loca"));
         }
 
-        if (configuredPlayers.size() < 2) {
-            playerConfigErrorLabel.setText("Mínimo 2 jugadores.");
-            return;
-        }
-
+        // All good, prepare the game
+        configuredPlayers = players;
+        
         hideAllContainers();
         seedSelectionContainer.setVisible(true);
         seedErrorLabel.setText("");
         seedField.setText("");
     }
 
-    private void processHumanSlot(String val, int id, String color) {
-        if (val == null || val.equals("Vacío")) return;
-        if (val.startsWith("Jugador: ")) {
-            String name = val.replace("Jugador: ", "");
-            configuredPlayers.add(new Jugador(id, name, color));
-        }
-    }
 
     @FXML
     private void handleRandomSeed(ActionEvent event) {

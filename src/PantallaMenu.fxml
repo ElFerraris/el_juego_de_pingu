@@ -8,8 +8,9 @@
 <StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.PantallaMenu" prefHeight="600.0" prefWidth="800.0" styleClass="root">
     
     <!-- 1. SPLASH SCREEN -->
-    <VBox fx:id="splashContainer" alignment="CENTER" spacing="30" styleClass="splash-container">
-        <Text text="EL JUEGO DEL PINGU" styleClass="title-text" />
+    <VBox fx:id="splashContainer" alignment="CENTER" spacing="30" styleClass="splash-container" maxWidth="Infinity" maxHeight="Infinity">
+        <!-- The title is now part of the background image -->
+        <Region prefHeight="400" /> 
         <VBox alignment="CENTER" spacing="15">
             <Button text="EMPEZAR" onAction="#handleStartSplash" styleClass="button-large" prefWidth="250" />
             <Button text="SALIR" onAction="#handleQuitGame" styleClass="button-secondary" prefWidth="250" />
@@ -52,37 +53,26 @@
         </VBox>
     </VBox>
 
-    <!-- 5. PLAYER CONFIGURATION -->
-    <VBox fx:id="playerConfigContainer" alignment="CENTER" spacing="20" visible="false" maxWidth="650">
-        <Text text="CONFIGURACIÓN DE PARTIDA" styleClass="title-text" />
-        <GridPane hgap="20" vgap="15" alignment="CENTER">
-            <!-- Headers -->
-            <Label text="JUGADOR" style="-fx-font-weight:bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-            <Label text="USUARIO" style="-fx-font-weight:bold;" GridPane.rowIndex="0" GridPane.columnIndex="1" />
-            <Label text="COLOR" style="-fx-font-weight:bold;" GridPane.rowIndex="0" GridPane.columnIndex="2" />
-
-            <Label text="Jugador 1:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-            <Label fx:id="p1NameLabel" text="[Usuario]" GridPane.rowIndex="1" GridPane.columnIndex="1" />
-            <ComboBox fx:id="p1ColorCombo" prefWidth="120" GridPane.rowIndex="1" GridPane.columnIndex="2" />
-
-            <Label text="Jugador 2 (obligatorio):" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-            <ComboBox fx:id="p2Combo" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="1" />
-            <ComboBox fx:id="p2ColorCombo" prefWidth="120" GridPane.rowIndex="2" GridPane.columnIndex="2" />
-
-            <Label text="Jugador 3:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-            <ComboBox fx:id="p3Combo" prefWidth="200" GridPane.rowIndex="3" GridPane.columnIndex="1" />
-            <ComboBox fx:id="p3ColorCombo" prefWidth="120" GridPane.rowIndex="3" GridPane.columnIndex="2" />
-
-            <Label text="Jugador 4:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
-            <ComboBox fx:id="p4Combo" prefWidth="200" GridPane.rowIndex="4" GridPane.columnIndex="1" />
-            <ComboBox fx:id="p4ColorCombo" prefWidth="120" GridPane.rowIndex="4" GridPane.columnIndex="2" />
-        </GridPane>
-        <CheckBox fx:id="focaCheckbox" text="¿Añadir Foca Loca (CPU)?" />
-        <Label fx:id="playerConfigErrorLabel" text="" styleClass="error-text" />
-        <HBox spacing="10" alignment="CENTER">
-            <Button text="CONTINUAR" onAction="#showSeedSelection" />
-            <Button text="VOLVER" onAction="#showMainMenu" />
+    <!-- 5. PLAYER CONFIGURATION (REDESIGNED) -->
+    <VBox fx:id="playerConfigContainer" alignment="CENTER" spacing="40" visible="false" maxWidth="950">
+        <padding><Insets top="40" right="40" bottom="40" left="40"/></padding>
+        
+        <Text text="CONFIGURACIÓN DE PERSONAJES" styleClass="title-text" />
+        
+        <HBox fx:id="playerSlotsContainer" spacing="25" alignment="CENTER" minHeight="250">
+            <!-- Cards (P1, P2, P3, P4) and "+" buttons will be injected here -->
         </HBox>
+
+        <VBox spacing="25" alignment="CENTER">
+            <CheckBox fx:id="focaCheckbox" text="AÑADIR FOCA LOCA (CPU)" style="-fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            
+            <Label fx:id="playerConfigErrorLabel" text="" styleClass="error-text" />
+            
+            <HBox spacing="20" alignment="CENTER">
+                <Button text="EMPEZAR PARTIDA" onAction="#showSeedSelection" styleClass="button-large" prefWidth="300" />
+                <Button text="VOLVER AL MENÚ" onAction="#showMainMenu" styleClass="button-secondary" prefWidth="200" />
+            </HBox>
+        </VBox>
     </VBox>
 
     <!-- 6. LOAD GAME SCREEN -->

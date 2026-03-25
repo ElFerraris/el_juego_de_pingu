@@ -116,7 +116,7 @@ public class Jugador {
      */
     private String validarColor(String colorRecibido) {
         List<String> coloresValidos = Arrays.asList(
-            "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"
+            "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa", "Gris"
         );
 
         for (String c : coloresValidos) {

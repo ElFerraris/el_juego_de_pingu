@@ -16,8 +16,9 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-# Copiar recursos (FXML, CSS) a la carpeta bin
+# Copiar recursos (FXML, CSS, Imágenes, Fuentes) a la carpeta bin
 Copy-Item "src/*.fxml", "src/*.css" "bin/" -ErrorAction SilentlyContinue
+Copy-Item -Path "imagenes", "fuentes" -Destination "bin/" -Recurse -ErrorAction SilentlyContinue
 
 Write-Host "Ejecutando el juego..." -ForegroundColor Green
 

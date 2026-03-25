@@ -103,23 +103,9 @@ public class Juego {
             }
         }
         
-        // Simplemente llamamos al método de nuestro objeto baseDatos.
-        // Él se encarga de conectar, insertar y desconectar.
-        int idPartida = this.baseDatos.guardarNuevaPartida(this);
-        boolean exito = (idPartida != 0);
-        
-        if (exito) {
-            this.getTablero().setIdPartida(idPartida);
-            for (Jugador j : jugadores) {
-                this.baseDatos.insertarParticipacion(idPartida, j.getId(), j.getColor());
-            }
-        }
-
-        if (exito) {
-            System.out.println("► Registro en Oracle completado con éxito.");
-        } else {
-            System.out.println("⚠️ No se pudo registrar la partida en la base de datos.");
-        }
+        // Note: Automatic DB registration in Oracle is removed.
+        // Saving will only happen when explicitly requested via guardarPartida().
+        System.out.println("► Partida preparada (sin guardar en base de datos aún).");
         
     }
 
@@ -368,13 +354,39 @@ public class Juego {
 
     
     public void guardarPartida() {
-        // TODO: Implementar guardado de partida con BBDD
-    	int turnoParaBD = this.turnoActual + 1;
-    	baseDatos.actualizarEstadoPartida(this.getTablero().getIdPartida(),this);
-        for (Jugador j : jugadores) {
-            this.baseDatos.actualizarParticipacion(this.getTablero().getIdPartida(),j);
+        int idPartida = this.getTablero().getIdPartida();
+
+        // 1. Si la partida no tiene ID, es la primera vez que se guarda
+        if (idPartida == 0) {
+            System.out.println("► Registrando nueva partida en la Base de Datos...");
+            idPartida = baseDatos.guardarNuevaPartida(this);
+            if (idPartida != 0) {
+                this.getTablero().setIdPartida(idPartida);
+                // Insertar participaciones iniciales
+                for (Jugador j : jugadores) {
+                    this.baseDatos.insertarParticipacion(idPartida, j.getId(), j.getColor());
+                }
+            } else {
+                System.err.println("⚠️ Error al registrar nueva partida.");
+                return;
+            }
         }
-    	
+
+        // 2. Actualizar estado (posiciones, inventario, turno, etc.)
+        boolean okPartida = baseDatos.actualizarEstadoPartida(idPartida, this);
+        boolean okJugadores = true;
+        for (Jugador j : jugadores) {
+            if (!this.baseDatos.actualizarParticipacion(idPartida, j)) {
+                okJugadores = false;
+            }
+        }
+
+        if (okPartida && okJugadores) {
+            System.out.println("► Partida #" + idPartida + " guardada correctamente.");
+            this.logMessage = "Partida guardada correctamente.";
+        } else {
+            System.err.println("⚠️ Error parcial al guardar la partida.");
+        }
     }
 
     public void cargarPartida(Scanner sc) {

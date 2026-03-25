@@ -67,7 +67,7 @@
             </VBox>
         </center>
         <right>
-            <VBox alignment="TOP_CENTER" prefWidth="200.0" spacing="15.0" styleClass="sidebar" style="-fx-background-color: rgba(255,255,255,0.7); -fx-background-radius: 15; -fx-padding: 20;">
+            <VBox alignment="TOP_CENTER" prefWidth="200.0" spacing="15.0" styleClass="sidebar">
                 <Label text="CONTROL" style="-fx-font-weight: bold; -fx-text-fill: #00838f; -fx-font-size: 18px;"/>
                 <Separator />
                 
@@ -110,7 +110,7 @@
 
     <!-- IN-GAME OPTIONS OVERLAY -->
     <VBox fx:id="optionsOverlay" visible="false" alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.7);">
-        <VBox alignment="CENTER" spacing="20" styleClass="premium-panel" maxWidth="400" style="-fx-background-color: white; -fx-padding: 40; -fx-background-radius: 20;">
+        <VBox alignment="CENTER" spacing="20" styleClass="premium-panel" maxWidth="400">
             <Text text="MENÚ DE OPCIONES" styleClass="title-text" style="-fx-font-size: 24px;"/>
             <Button text="GUARDAR PARTIDA" onAction="#handleSaveGame" prefWidth="250" styleClass="button-large"/>
             <Button text="SALIR AL MENÚ PRINCIPAL" onAction="#handleConfirmQuitToMenu" prefWidth="250" styleClass="button-secondary"/>
@@ -120,7 +120,7 @@
 
     <!-- CONFIRMATION OVERLAY -->
     <VBox fx:id="confirmOverlay" visible="false" alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.8);">
-        <VBox alignment="CENTER" spacing="20" styleClass="premium-panel" maxWidth="450" style="-fx-background-color: white; -fx-padding: 40; -fx-background-radius: 20; -fx-border-color: #f44336; -fx-border-width: 3;">
+        <VBox alignment="CENTER" spacing="20" styleClass="premium-panel" maxWidth="450" style="-fx-border-color: #f44336; -fx-border-width: 3;">
             <Text text="¿SALIR SIN GUARDAR?" styleClass="title-text" style="-fx-font-size: 22px; -fx-fill: #d32f2f;"/>
             <Text text="Los progresos no guardados se perderán." style="-fx-text-fill: #666;"/>
             <HBox spacing="20" alignment="CENTER">
@@ -132,7 +132,7 @@
 
     <!-- GAME OVER OVERLAY -->
     <VBox fx:id="gameOverOverlay" visible="false" alignment="CENTER" spacing="30" style="-fx-background-color: rgba(0,0,0,0.85);">
-        <VBox alignment="CENTER" spacing="25" styleClass="premium-panel" maxWidth="500" style="-fx-background-color: white; -fx-padding: 50; -fx-background-radius: 30; -fx-border-color: #ffd54f; -fx-border-width: 5;">
+        <VBox alignment="CENTER" spacing="25" styleClass="premium-panel" maxWidth="500" style="-fx-border-color: #ffd54f; -fx-border-width: 5;">
             <Text text="¡FIN DEL JUEGO!" styleClass="title-text" style="-fx-font-size: 36px; -fx-fill: #fbc02d;" />
             <Text fx:id="winnerLabel" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Ganador: -" />
             <VBox spacing="10" alignment="CENTER">

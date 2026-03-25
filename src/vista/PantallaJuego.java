@@ -233,6 +233,7 @@ public class PantallaJuego {
                 eventos.setText(logMsg);
             }
             
+            juego.comprobarGanador();
             if (comprobarFinDePartida()) return;
 
             // Change turn
@@ -260,6 +261,7 @@ public class PantallaJuego {
                     if (logMsg != null && !logMsg.isEmpty()) {
                         eventos.setText(logMsg);
                     }
+                    juego.comprobarGanador();
                     if (comprobarFinDePartida()) return;
                     juego.cambiarTurno();
                     actualizarEstadoUI();
@@ -431,6 +433,7 @@ public class PantallaJuego {
             case "naranja":  return Color.ORANGE;
             case "morado":   return Color.PURPLE;
             case "rosa":     return Color.PINK;
+            case "gris":     return Color.GRAY;
             default:         return Color.GRAY;
         }
     }
