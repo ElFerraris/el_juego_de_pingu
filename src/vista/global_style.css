@@ -1,0 +1,83 @@
+/* 
+   GLOBAL PIXEL-ICE STYLE 
+   Inspired by The Binding of Isaac and Pixel Art aesthetics.
+*/
+
+.root {
+    /* Palette */
+    -ice-bright: #D6F9FF;
+    -ice-mid: #87CEEB;
+    -ice-dark: #4682B4;
+    -isaac-red: #A61D24;
+    -pixel-black: #1A1A1A;
+    
+    -fx-font-family: "Consolas", "Monospace";
+    -fx-background-color: -ice-dark;
+}
+
+/* PIXEL BUTTON STYLE */
+.button.pixel-button {
+    -fx-background-color: -ice-mid;
+    -fx-background-radius: 0;
+    -fx-border-color: -pixel-black;
+    -fx-border-width: 4px;
+    -fx-text-fill: -pixel-black;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    
+    /* Pixel "3D" effect with shadows */
+    -fx-background-insets: 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 0, 0, 4, 4);
+}
+
+.button.pixel-button:hover {
+    -fx-background-color: -ice-bright;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 0, 0, 6, 6);
+}
+
+.button.pixel-button:pressed {
+    -fx-translate-y: 2px;
+    -fx-translate-x: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 0, 0, 2, 2);
+}
+
+/* Exit/Special buttons */
+.button.button-red {
+    -fx-background-color: -isaac-red;
+    -fx-text-fill: white;
+}
+
+/* PIXEL LABEL STYLE */
+.pixel-label {
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(one-pass-box, -pixel-black, 4, 0.5, 2, 2);
+}
+
+/* GAME BOARD ASSETS */
+.ice-tile {
+    -fx-background-color: -ice-bright;
+    -fx-border-color: -pixel-black;
+    -fx-border-width: 3px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.ice-tile:hover {
+    -fx-background-color: white;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.sidebar {
+    -fx-background-color: rgba(26, 43, 60, 0.8);
+    -fx-border-color: -pixel-black;
+    -fx-border-width: 0 0 0 4px;
+    -fx-padding: 20px;
+}
+
+.status-label {
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+    -fx-padding: 10px;
+}
