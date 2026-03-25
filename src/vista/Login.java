@@ -32,6 +32,11 @@ public class Login {
 	private boolean modoRegistro = false;
 
 	@FXML
+	public void initialize() {
+		limpiarErrores();
+	}
+
+	@FXML
 	void handleLogin(ActionEvent event) {
 		limpiarErrores();
 
@@ -68,15 +73,10 @@ public class Login {
 	private void registrarUsuario(String user, String pswd, ActionEvent event) {
 		int resultado = BBDD.registrarNuevoJugador(user, pswd, false);
 		if (resultado != -1) {
-			// Volver al modo login antes de poner el mensaje de éxito
-			// así alternarModo no lo borra.
 			alternarModo(null);
-			
-			// Ahora sí ponemos el mensaje de éxito
 			text_error.setText("¡Registro completado! Ya puedes entrar.");
 			text_error.getStyleClass().add("success-label");
 		} else {
-			// Registro fallido (ej: usuario ya existe)
 			mostrarError("El nombre '" + user + "' ya está ocupado.", true, false);
 		}
 	}
@@ -120,6 +120,8 @@ public class Login {
 			Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 			stage.setScene(scene);
 			stage.centerOnScreen();
+			stage.setFullScreen(true); // Activar pantalla completa para el vídeo
+			stage.setFullScreenExitHint(""); // Quitar el mensaje de "Presione ESC para salir"
 			stage.show();
 		} catch (IOException e) {
 			e.printStackTrace();
