@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1000.0"
+    stylesheets="@global_style.css"
+    xmlns="http://javafx.com/javafx/25"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="vista.Victoria">
+
+    <!-- Fondo animado suave -->
+    <AnchorPane prefHeight="700.0" prefWidth="1000.0"
+        style="-fx-background-color: linear-gradient(to bottom, #0D1B2A, #1A2B3C, #4682B4);" />
+
+    <VBox layoutX="100.0" layoutY="80.0" prefWidth="800.0" spacing="30" alignment="CENTER">
+
+        <!-- Trofeo -->
+        <Label text="🏆" style="-fx-font-size: 80px;" />
+
+        <Label text="¡GANADOR!" style="-fx-text-fill: #FFD700; -fx-font-size: 50px; -fx-font-weight: bold;
+            -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 8, 0, 4, 4);" />
+
+        <Label fx:id="lbl_ganador" text="---"
+            style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" />
+
+        <Label fx:id="lbl_subtitulo" text="¡Ha llegado al iglú final!"
+            style="-fx-text-fill: #87CEEB; -fx-font-size: 20px;" />
+
+        <Separator style="-fx-background-color: #4682B4;" />
+
+        <HBox spacing="30" alignment="CENTER">
+            <Button text="🔄 NUEVA PARTIDA" onAction="#handleNuevaPartida"
+                prefWidth="220" prefHeight="60" styleClass="pixel-button"
+                style="-fx-background-color: #2ECC71; -fx-text-fill: white; -fx-font-size:16px;" />
+            <Button text="🏠 MENÚ PRINCIPAL" onAction="#handleMenu"
+                prefWidth="220" prefHeight="60" styleClass="pixel-button"
+                style="-fx-font-size:16px;" />
+            <Button text="❌ SALIR" onAction="#handleSalir"
+                prefWidth="180" prefHeight="60" styleClass="pixel-button, button-red"
+                style="-fx-font-size:16px;" />
+        </HBox>
+
+    </VBox>
+
+</AnchorPane>

@@ -27,6 +27,26 @@ public class Juego {
         this.baseDatos = new BBDD();
     }
 
+    /**
+     * Configura la partida desde la UI JavaFX (sin Scanner).
+     * @param seed  Seed del tablero (ya validada)
+     * @param nombresYColores  Array de {nombre, color} por jugador
+     */
+    public void configurarPartidaUI(String seed, String[][] nombresYColores) {
+        tablero.introducirSeed(seed);
+
+        // Crear jugadores humanos
+        for (int i = 0; i < nombresYColores.length; i++) {
+            String nombre = nombresYColores[i][0];
+            String color  = nombresYColores[i][1];
+            agregarJugador(new Jugador(i + 2, nombre, color));
+        }
+
+        // Añadir la Foca CPU siempre
+        CPU foca = new CPU(0, "Foca Loca");
+        agregarJugador(foca);
+    }
+
     // ==================== CONFIGURACIÓN ====================
 
     /**

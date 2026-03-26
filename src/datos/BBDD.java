@@ -437,6 +437,55 @@ public class BBDD {
             System.out.println("► ERROR al listar partidas: " + e.getMessage());
         }
     }
+
+    /**
+     * Devuelve una lista con los nombres de todos los jugadores humanos en la BD.
+     */
+    public ArrayList<String> getJugadoresHumanos() {
+        ArrayList<String> lista = new ArrayList<>();
+        String sql = "SELECT nickname FROM jugador WHERE es_cpu = 0 ORDER BY nickname ASC";
+
+        try (Connection con = conectarBD()) {
+            if (con == null) return lista;
+            try (PreparedStatement pstmt = con.prepareStatement(sql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(rs.getString("nickname"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("► ERROR al obtener jugadores: " + e.getMessage());
+        }
+        return lista;
+    }
+
+
+    /**
+     * Devuelve las partidas pendientes como lista de arrays {id, seed, turno, fecha}
+     * para usarlas en la UI JavaFX (TableView).
+     */
+    public ArrayList<String[]> getPartidasPendientes() {
+        ArrayList<String[]> lista = new ArrayList<>();
+        String sql = "SELECT num_partida, seed, torn_actual, hora_partida FROM partida WHERE ganador IS NULL ORDER BY hora_partida DESC";
+
+        try (Connection con = conectarBD()) {
+            if (con == null) return lista;
+            try (PreparedStatement pstmt = con.prepareStatement(sql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String id    = String.valueOf(rs.getInt("num_partida"));
+                    String seed  = rs.getString("seed");
+                    String turno = String.valueOf(rs.getInt("torn_actual"));
+                    String fecha = rs.getString("hora_partida");
+                    lista.add(new String[]{id, seed, turno, fecha});
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("► ERROR al obtener partidas: " + e.getMessage());
+        }
+        return lista;
+    }
+
     
     public void mostrarRankingMasPartidas() {
         // Consulta: Unimos jugador con participación y contamos cuántas veces aparece cada uno

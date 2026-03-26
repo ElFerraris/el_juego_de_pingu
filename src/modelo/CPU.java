@@ -13,6 +13,14 @@ public class CPU extends Jugador {
     }
     
     
+    /**
+     * Versión sin parámetros (compatibilidad con código legado y llamadas simples).
+     * Simplemente tira el dado normal.
+     */
+    public void decidirAccion() {
+        this.tirarDado();
+    }
+
     public void decidirAccion(Tablero tablero, ArrayList<Jugador> jugadores) {
         int posActual = this.getPosicion();
         

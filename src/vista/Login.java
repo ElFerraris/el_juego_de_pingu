@@ -64,6 +64,7 @@ public class Login {
 
 	private void iniciarSesion(String user, String pswd, ActionEvent event) {
 		if (BBDD.loginJugador(user, pswd)) {
+			GameState.getInstance().setUsuarioLogueado(user);
 			abrirIntro(event);
 		} else {
 			mostrarError("Usuario o contraseña incorrectos", true, true);

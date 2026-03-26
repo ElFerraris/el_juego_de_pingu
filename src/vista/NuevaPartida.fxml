@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="900.0" prefWidth="1200.0"
+    stylesheets="@global_style.css"
+    xmlns="http://javafx.com/javafx/25"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="vista.NuevaPartida">
+
+    <!-- Fondo degradado -->
+    <AnchorPane prefHeight="900.0" prefWidth="1200.0"
+        style="-fx-background-color: linear-gradient(to bottom, #1A2B3C, #4682B4);" />
+
+    <!-- Título -->
+    <Label layoutX="200.0" layoutY="40.0" prefWidth="800.0" prefHeight="70.0"
+        styleClass="title-label" text="NUEVA PARTIDA" textAlignment="CENTER" />
+
+    <!-- Panel central -->
+    <VBox layoutX="200.0" layoutY="130.0" prefWidth="800.0" spacing="16.0"
+        style="-fx-padding: 30; -fx-background-color: rgba(26,43,60,0.85); -fx-background-radius: 8;">
+
+        <!-- Seed -->
+        <Label text="SEED DEL TABLERO" style="-fx-text-fill: #D6F9FF; -fx-font-size: 16px; -fx-font-weight: bold;" />
+
+        <HBox spacing="16.0" alignment="CENTER_LEFT">
+            <RadioButton fx:id="rb_aleatorio" text="Seed aleatoria" selected="true"
+                style="-fx-text-fill: white;" onAction="#handleSeedMode" />
+            <RadioButton fx:id="rb_manual" text="Seed manual"
+                style="-fx-text-fill: white;" onAction="#handleSeedMode" />
+        </HBox>
+
+        <TextField fx:id="txt_seed" promptText="Introduce la seed (48 dígitos: 0-5)"
+            disable="true" prefHeight="36.0"
+            style="-fx-background-color: #1A2B3C; -fx-text-fill: white; -fx-prompt-text-fill: gray; -fx-border-color: #4682B4; -fx-border-width: 2;" />
+
+        <Label fx:id="lbl_seed_error" text=" " style="-fx-text-fill: #FF6E6E; -fx-font-size: 12px;" />
+
+        <Separator style="-fx-background-color: #4682B4;" />
+
+        <!-- Número de jugadores -->
+        <Label text="NÚMERO DE JUGADORES" style="-fx-text-fill: #D6F9FF; -fx-font-size: 16px; -fx-font-weight: bold;" />
+
+        <HBox spacing="12.0" alignment="CENTER_LEFT">
+            <Label text="Jugadores:" style="-fx-text-fill: white;" />
+            <Spinner fx:id="spinner_jugadores" min="2" max="4" initialValue="2"
+                prefWidth="80.0" onValueChange="#handleNumJugadores"
+                style="-fx-background-color: #1A2B3C;" />
+        </HBox>
+
+        <Separator style="-fx-background-color: #4682B4;" />
+
+        <!-- Formulario de jugadores (filas dinámicas) -->
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <Label text="DATOS DE LOS JUGADORES" style="-fx-text-fill: #D6F9FF; -fx-font-size: 16px; -fx-font-weight: bold;" />
+            <CheckBox fx:id="chk_cpu" text="Añadir a la Foca (IA)" selected="true" style="-fx-text-fill: white; -fx-font-size: 14px;" />
+        </HBox>
+
+        <!-- Jugador 1 -->
+        <HBox fx:id="row1" spacing="12.0" alignment="CENTER_LEFT">
+            <Label text="🐧 J1" prefWidth="50" style="-fx-text-fill: #87CEEB; -fx-font-weight: bold;" />
+            <ComboBox fx:id="combo_nombre1" promptText="Selecciona jugador" prefWidth="250.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white; -fx-border-color: #4682B4; -fx-border-width: 2;" onAction="#handlePlayerSelectionChanged" />
+            <ComboBox fx:id="combo_color1" prefWidth="160.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white;" onAction="#handleColorSelectionChanged" />
+        </HBox>
+
+        <!-- Jugador 2 -->
+        <HBox fx:id="row2" spacing="12.0" alignment="CENTER_LEFT">
+            <Label text="🐧 J2" prefWidth="50" style="-fx-text-fill: #87CEEB; -fx-font-weight: bold;" />
+            <ComboBox fx:id="combo_nombre2" promptText="Selecciona jugador" prefWidth="250.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white; -fx-border-color: #4682B4; -fx-border-width: 2;" onAction="#handlePlayerSelectionChanged" />
+            <ComboBox fx:id="combo_color2" prefWidth="160.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white;" onAction="#handleColorSelectionChanged" />
+        </HBox>
+
+        <!-- Jugador 3 (oculto inicialmente) -->
+        <HBox fx:id="row3" spacing="12.0" alignment="CENTER_LEFT" visible="false" managed="false">
+            <Label text="🐧 J3" prefWidth="50" style="-fx-text-fill: #87CEEB; -fx-font-weight: bold;" />
+            <ComboBox fx:id="combo_nombre3" promptText="Selecciona jugador" prefWidth="250.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white; -fx-border-color: #4682B4; -fx-border-width: 2;" onAction="#handlePlayerSelectionChanged" />
+            <ComboBox fx:id="combo_color3" prefWidth="160.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white;" onAction="#handleColorSelectionChanged" />
+        </HBox>
+
+        <!-- Jugador 4 (oculto inicialmente) -->
+        <HBox fx:id="row4" spacing="12.0" alignment="CENTER_LEFT" visible="false" managed="false">
+            <Label text="🐧 J4" prefWidth="50" style="-fx-text-fill: #87CEEB; -fx-font-weight: bold;" />
+            <ComboBox fx:id="combo_nombre4" promptText="Selecciona jugador" prefWidth="250.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white; -fx-border-color: #4682B4; -fx-border-width: 2;" onAction="#handlePlayerSelectionChanged" />
+            <ComboBox fx:id="combo_color4" prefWidth="160.0"
+                style="-fx-background-color: #1A2B3C; -fx-text-fill: white;" onAction="#handleColorSelectionChanged" />
+        </HBox>
+
+        <Label fx:id="lbl_form_error" text=" " style="-fx-text-fill: #FF6E6E; -fx-font-size: 12px;" />
+
+        <Separator style="-fx-background-color: #4682B4;" />
+
+        <!-- Botones -->
+        <HBox spacing="20.0" alignment="CENTER">
+            <Button text="VOLVER" onAction="#handleVolver"
+                prefWidth="180.0" prefHeight="50.0" styleClass="pixel-button" />
+            <Button text="¡JUGAR!" onAction="#handleJugar"
+                prefWidth="220.0" prefHeight="50.0"
+                styleClass="pixel-button"
+                style="-fx-background-color: #2ECC71; -fx-text-fill: white;" />
+        </HBox>
+
+    </VBox>
+
+</AnchorPane>
