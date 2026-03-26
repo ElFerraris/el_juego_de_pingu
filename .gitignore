@@ -1,18 +1,17 @@
 # --- Java ---
-*.class
 *.log
+
 *.jar
-*.war
+!lib/*.jar
+!lib/*.dll
 
-!ojdbc8.jar
-
-# --- Directorios de compilación ---
+# --- Directorios de compilación (SIEMPRE IGNORADOS) ---
 bin/
 build/
 target/
 out/
 
-# --- Eclipse ---
+# --- Eclipse (Ajustado) ---
 .metadata/
 .recommenders/
 remote-systems-tempfiles/
@@ -25,9 +24,9 @@ local.properties
 .settings/
 .loadpath
 
-# --- Archivos de proyecto de Eclipse ---
-.project
-.classpath
+# --- NO ignores estos si quieres que otros vean tu configuración de Eclipse ---
+# .project
+# .classpath
 
 # --- OS específicos ---
 .DS_Store

@@ -260,7 +260,7 @@ public class BBDD {
     }
     
     
-    public int obtenerIdJugador(Connection con, String nickname) {
+    public static int obtenerIdJugador(Connection con, String nickname) {
         String sql = "SELECT id_jugador FROM jugador WHERE nickname = ?";
         try (PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setString(1, nickname);
@@ -490,7 +490,7 @@ public class BBDD {
      * @param password La contraseña introducida.
      * @return true si las credenciales son correctas, false en caso contrario.
      */
-    public boolean loginJugador(String nickname, String password) {
+    public static boolean loginJugador(String nickname, String password) {
         // Consulta para contar si hay un usuario con ese nombre Y esa contraseña
         String sql = "SELECT COUNT(*) FROM jugador WHERE nickname = ? AND CONTRASENA = ?";
 
@@ -526,7 +526,7 @@ public class BBDD {
      * Inserta un nuevo jugador en la tabla con su contraseña.
      * @return El ID generado por Oracle, o -1 si hubo un error (ej: el nombre ya existe).
      */
-    public int registrarNuevoJugador(String nickname, String password, boolean esCpu) {
+    public static int registrarNuevoJugador(String nickname, String password, boolean esCpu) {
         String sql = "{call insertar_jugador(?, ?, ?)}";
         
         try (Connection con = conectarBD()) {
