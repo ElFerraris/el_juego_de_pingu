@@ -7,18 +7,8 @@
 <?import javafx.scene.effect.*?>
 <?import javafx.geometry.Insets?>
 
-<StackPane stylesheets="@style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.PantallaJuego">
+<StackPane stylesheets="@style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.JuegoController">
     <BorderPane styleClass="root">
-        <top>
-            <MenuBar BorderPane.alignment="CENTER">
-                <Menu text="Archivo">
-                    <MenuItem fx:id="newGame" text="Nuevo" onAction="#handleNewGame"/>
-                    <MenuItem fx:id="saveGame" text="Guardar" onAction="#handleSaveGame"/>
-                    <MenuItem fx:id="loadGame" text="Cargar" onAction="#handleLoadGame"/>
-                    <MenuItem fx:id="quitGame" text="Salir" onAction="#handleQuitGame"/>
-                </Menu>
-            </MenuBar>
-        </top>
         <center>
             <VBox alignment="CENTER" spacing="10">
                 <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
@@ -103,7 +93,7 @@
                 </GridPane>
                 
                 <Region VBox.vgrow="ALWAYS" />
-                <Button text="OPCIONES" onAction="#showOptionsMenu" style="-fx-background-color: #ffe082; -fx-font-weight: bold;" prefWidth="160"/>
+                <Button text="OPCIONES" onAction="#showOptionsMenu" styleClass="btn-warning" prefWidth="160"/>
             </VBox>
         </right>
     </BorderPane>
@@ -112,9 +102,11 @@
     <VBox fx:id="optionsOverlay" visible="false" alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.7);">
         <VBox alignment="CENTER" spacing="20" styleClass="premium-panel" maxWidth="400">
             <Text text="MENÚ DE OPCIONES" styleClass="title-text" style="-fx-font-size: 24px;"/>
-            <Button text="GUARDAR PARTIDA" onAction="#handleSaveGame" prefWidth="250" styleClass="button-large"/>
-            <Button text="SALIR AL MENÚ PRINCIPAL" onAction="#handleConfirmQuitToMenu" prefWidth="250" styleClass="button-secondary"/>
-            <Button text="CONTINUAR JUGANDO" onAction="#hideOptionsMenu" prefWidth="250" style="-fx-background-color: #81c784;"/>
+            <Button fx:id="btnNewGame" text="NUEVA PARTIDA" onAction="#handleNewGame" prefWidth="250" styleClass="button-primary"/>
+            <Button fx:id="btnLoadGame" text="CARGAR PARTIDA" onAction="#handleLoadGame" prefWidth="250" styleClass="button-primary"/>
+            <Button fx:id="btnSaveGame" text="GUARDAR PARTIDA" onAction="#handleSaveGame" prefWidth="250" styleClass="button-large"/>
+            <Button fx:id="btnQuitToMenu" text="SALIR AL MENÚ PRINCIPAL" onAction="#handleConfirmQuitToMenu" prefWidth="250" styleClass="button-secondary"/>
+            <Button fx:id="btnContinue" text="CONTINUAR JUGANDO" onAction="#hideOptionsMenu" prefWidth="250" styleClass="btn-success"/>
         </VBox>
     </VBox>
 
@@ -124,8 +116,8 @@
             <Text text="¿SALIR SIN GUARDAR?" styleClass="title-text" style="-fx-font-size: 22px; -fx-fill: #d32f2f;"/>
             <Text text="Los progresos no guardados se perderán." style="-fx-text-fill: #666;"/>
             <HBox spacing="20" alignment="CENTER">
-                <Button text="SÍ, SALIR" onAction="#handleDoQuitToMenu" style="-fx-background-color: #ef5350; -fx-text-fill: white;" prefWidth="120"/>
-                <Button text="VOLVER" onAction="#hideConfirmOverlay" style="-fx-background-color: #90a4ae; -fx-text-fill: white;" prefWidth="120"/>
+                <Button text="SÍ, SALIR" onAction="#handleDoQuitToMenu" styleClass="btn-danger" prefWidth="120"/>
+                <Button text="VOLVER" onAction="#hideConfirmOverlay" styleClass="btn-neutral" prefWidth="120"/>
             </HBox>
         </VBox>
     </VBox>

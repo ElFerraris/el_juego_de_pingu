@@ -1,4 +1,4 @@
-package vista;
+package controlador;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,20 +21,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
-import controlador.Juego;
 import modelo.*;
 
-public class PantallaJuego {
+public class JuegoController {
 
-	// Menu items
-	@FXML
-	private MenuItem newGame;
-	@FXML
-	private MenuItem saveGame;
-	@FXML
-	private MenuItem loadGame;
-	@FXML
-	private MenuItem quitGame;
+	// Overlay Buttons (Replaced MenuItems)
+	@FXML private Button btnNewGame;
+	@FXML private Button btnSaveGame;
+	@FXML private Button btnLoadGame;
+	@FXML private Button btnQuitToMenu;
+    @FXML private Button btnContinue;
 
 	// Buttons
 	@FXML
@@ -99,6 +95,8 @@ public class PantallaJuego {
 	private void initialize() {
 		eventos.setText("¡El juego ha comenzado!");
         showFullScreenHint();
+        
+        // Note: Button animations are handled globally by NavigationController
 	}
 
     private void showFullScreenHint() {
@@ -343,18 +341,7 @@ public class PantallaJuego {
     }
 
     private void irAlMenu(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/PantallaMenu.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setFullScreen(true);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        NavigationController.navigateTo(event, "MainMenuView.fxml");
     }
 
     @FXML

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.effect.GaussianBlur?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.LoginController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+    <Region style="-fx-background-color: rgba(5,20,60,0.2);"/>
+    <VBox spacing="40" alignment="CENTER" maxWidth="500" maxHeight="600" styleClass="glass-panel">
+        <Label text="EL JUEGO DEL PINGU" styleClass="title-text" />
+        
+        <VBox spacing="20" maxWidth="350" alignment="CENTER">
+            <TextField fx:id="userField" promptText="Nombre de usuario" />
+            <PasswordField fx:id="passField" promptText="Contraseña" />
+        </VBox>
+
+        <VBox spacing="15" alignment="CENTER">
+            <Button text="INICIAR SESIÓN" onAction="#handleLogin" prefWidth="300" styleClass="button-primary" />
+            <Button text="CREAR CUENTA" onAction="#showCreatePlayer" prefWidth="300" />
+            <Label fx:id="loginErrorLabel" styleClass="error-text" visible="false" wrapText="true" textAlignment="CENTER" />
+        </VBox>
+        
+        <Button text="SALIR DEL JUEGO" onAction="#handleQuitGame" styleClass="button-secondary" prefWidth="200" />
+    </VBox>
+</StackPane>

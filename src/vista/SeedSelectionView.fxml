@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.effect.GaussianBlur?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.SeedSelectionController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+    <Region style="-fx-background-color: rgba(5,20,60,0.2);"/>
+    <VBox spacing="40" alignment="CENTER" maxWidth="700" maxHeight="600" styleClass="glass-panel">
+        <Label text="SELECCIÓN DE NIVEL" styleClass="title-text" />
+        
+        <VBox spacing="20" alignment="CENTER">
+            <Label text="Introduce 48 números indicando el tipo de casilla" styleClass="help-text" style="-fx-font-size: 18px; -fx-text-fill: #455a64;" />
+            <TextField fx:id="seedField" promptText="Solo números (48 caracteres)" maxWidth="450" alignment="CENTER" />
+            <Label fx:id="seedErrorLabel" styleClass="error-text" wrapText="true" textAlignment="CENTER" />
+        </VBox>
+
+        <VBox spacing="20" alignment="CENTER">
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="GENERAR ALEATORIA" onAction="#handleRandomSeed" prefWidth="250" styleClass="button-primary" />
+                <Button text="USAR MANUAL" onAction="#handleManualSeed" prefWidth="250" styleClass="button-primary" />
+            </HBox>
+            <Button text="ATRÁS" onAction="#showPlayerConfig" prefWidth="200" />
+        </VBox>
+    </VBox>
+</StackPane>

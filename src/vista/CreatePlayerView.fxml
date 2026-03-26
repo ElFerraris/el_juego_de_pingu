@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.effect.GaussianBlur?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.CreatePlayerController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+    <Region style="-fx-background-color: rgba(5,20,60,0.2);"/>
+    <VBox spacing="40" alignment="CENTER" maxWidth="500" maxHeight="600" styleClass="glass-panel">
+        <Label text="NUEVO JUGADOR" styleClass="title-text" />
+        
+        <VBox spacing="20" maxWidth="350" alignment="CENTER">
+            <TextField fx:id="newUserNameField" promptText="Nombre de usuario" />
+            <PasswordField fx:id="newUserPassField" promptText="Contraseña" />
+        </VBox>
+
+        <VBox spacing="15" alignment="CENTER">
+            <Button text="CREAR CUENTA" onAction="#handleCreatePlayer" prefWidth="300" styleClass="button-primary" />
+            <Button text="VOLVER" onAction="#showLogin" prefWidth="300" />
+            <Label fx:id="errorLabel" styleClass="error-text" visible="false" wrapText="true" textAlignment="CENTER" />
+        </VBox>
+    </VBox>
+</StackPane>

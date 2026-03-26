@@ -15,41 +15,34 @@ public class Main {
         public void start(Stage primaryStage) {
             // Pre-cargar la fuente para que esté disponible globalmente
             try {
-                javafx.scene.text.Font loadedFont = javafx.scene.text.Font.loadFont(getClass().getResourceAsStream("/fuentes/upheavtt.ttf"), 12);
+            // Registro de fuentes para uso global
+            try {
+                javafx.scene.text.Font.loadFont(getClass().getResourceAsStream("/fuentes/upheavtt.ttf"), 12);
+                javafx.scene.text.Font grapeSoda = javafx.scene.text.Font.loadFont(getClass().getResourceAsStream("/fuentes/GrapeSoda.ttf"), 12);
                 
-                if (loadedFont == null) {
-                    System.err.println("Intentando carga alternativa de fuente...");
-                    java.io.File fontFile = new java.io.File("fuentes/upheavtt.ttf");
-                    if (fontFile.exists()) {
-                        loadedFont = javafx.scene.text.Font.loadFont(fontFile.toURI().toString(), 12);
+                // Fallback si no están en el classpath
+                if (grapeSoda == null) {
+                    java.io.File grapeFile = new java.io.File("fuentes/GrapeSoda.ttf");
+                    if (grapeFile.exists()) {
+                        javafx.scene.text.Font.loadFont(grapeFile.toURI().toString(), 12);
                     }
                 }
-
-                if (loadedFont != null) {
-                    System.out.println("FUENTE CARGADA CORRECTAMENTE: " + loadedFont.getName() + " (Familia: " + loadedFont.getFamily() + ")");
-                } else {
-                    System.err.println("ERROR CRÍTICO: No se pudo cargar 'fuentes/upheavtt.ttf' por ningún método.");
-                }
-                
-                // Listado de diagnóstico
-                System.out.println("DEBUG - Fuentes con 'Upheaval':");
-                javafx.scene.text.Font.getFamilies().stream()
-                    .filter(f -> f.toLowerCase().contains("upheaval"))
-                    .forEach(f -> System.out.println(" - " + f));
-
             } catch (Exception e) {
-                System.err.println("Excepción en bloque de carga de fuentes: " + e.getMessage());
+                System.err.println("Error cargando fuentes: " + e.getMessage());
+            }
+            } catch (Exception e) {
+                System.err.println("Error en bloque de fuentes: " + e.getMessage());
             }
 
             try {
-                // Se asume que PantallaMenu.fxml está en el classpath (ej. en la raíz del bin/src)
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/PantallaMenu.fxml"));
+                // Se asume que SplashView.fxml está en el classpath (ej. en /vista/)
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/vista/SplashView.fxml"));
                 Parent root = loader.load();
                 
                 Scene scene = new Scene(root);
                 
                 // Verificar carga de CSS
-                java.net.URL cssURL = getClass().getResource("/style.css");
+                java.net.URL cssURL = getClass().getResource("/vista/style.css");
                 if (cssURL != null) {
                     scene.getStylesheets().add(cssURL.toExternalForm());
                     System.out.println("CSS cargado correctamente: " + cssURL.toExternalForm());

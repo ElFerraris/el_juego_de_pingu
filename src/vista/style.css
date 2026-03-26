@@ -1,0 +1,337 @@
+@font-face {
+    font-family: 'GrapeSoda';
+    src: url('../fuentes/GrapeSoda.ttf');
+}
+
+.root, .label, .button, .text, .text-field, .combo-box, .list-cell, .table-view, .text-area {
+    -fx-font-family: 'GrapeSoda', sans-serif !important;
+}
+
+.root {
+    -fx-background-color: #bbdefb;
+}
+
+/* SCREEN BACKGROUNDS */
+.root-main-bg {
+    -fx-background-image: url('../../imagenes/TITULO%20CON%20FONDO.png');
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
+.root-plain-bg {
+    -fx-background-image: url('../../imagenes/FONDO%20SOLO%20BORROSO.png');
+    -fx-background-size: cover;
+    -fx-background-position: center;
+}
+
+.label {
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 24px;
+}
+
+.title-text {
+    -fx-font-size: 70px;
+    -fx-fill: #0d47a1;
+    -fx-text-fill: #0d47a1;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 0, 0, 4, 4);
+}
+
+/* 
+   =================================================
+   TRUE CIRCULAR PIXEL ART CORNERS (14-layer, 2px steps, 2px border)
+   Outer: 0 12, 2 8, 4 6, 6 4, 8 2, 10 2, 12 0
+   Inner: 2 14, 4 10, 6 8, 8 6, 10 4, 12 4, 14 2
+   =================================================
+*/
+
+.button {
+    -fx-background-radius: 0;
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff;
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 22px;
+    -fx-padding: 12 24;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.5), 0, 0, 0, 4);
+}
+
+.button:hover {
+    -fx-background-color:
+        #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0,
+        #d6eaff, #d6eaff, #d6eaff, #d6eaff, #d6eaff, #d6eaff, #d6eaff;
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.5), 0, 0, 0, 6);
+}
+
+.button:pressed {
+    -fx-background-color:
+        #0a3478, #0a3478, #0a3478, #0a3478, #0a3478, #0a3478, #0a3478,
+        #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee;
+    -fx-translate-y: 2;
+    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.5), 0, 0, 0, 0);
+}
+
+.button-primary {
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5;
+    -fx-text-fill: white;
+}
+.button-primary:hover {
+    -fx-background-color:
+        #023a80, #023a80, #023a80, #023a80, #023a80, #023a80, #023a80,
+        #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0;
+}
+.button-primary:pressed {
+    -fx-background-color:
+        #01205a, #01205a, #01205a, #01205a, #01205a, #01205a, #01205a,
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1;
+}
+
+.button-large {
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5;
+    -fx-text-fill: white;
+    -fx-font-size: 30px;
+    -fx-padding: 16 42;
+}
+.button-large:hover {
+    -fx-background-color:
+        #023a80, #023a80, #023a80, #023a80, #023a80, #023a80, #023a80,
+        #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0;
+    -fx-translate-y: -3;
+}
+
+.button-secondary {
+    -fx-background-color:
+        #37474f, #37474f, #37474f, #37474f, #37474f, #37474f, #37474f,
+        #78909c, #78909c, #78909c, #78909c, #78909c, #78909c, #78909c;
+    -fx-text-fill: white;
+}
+.button-secondary:hover {
+    -fx-background-color:
+        #263238, #263238, #263238, #263238, #263238, #263238, #263238,
+        #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a;
+}
+
+/* GAME SPECIFIC BUTTONS */
+.btn-warning {
+    -fx-background-color:
+        #f57f17, #f57f17, #f57f17, #f57f17, #f57f17, #f57f17, #f57f17,
+        #ffe082, #ffe082, #ffe082, #ffe082, #ffe082, #ffe082, #ffe082;
+    -fx-text-fill: #0d47a1;
+}
+.btn-warning:hover {
+    -fx-background-color:
+        #e65100, #e65100, #e65100, #e65100, #e65100, #e65100, #e65100,
+        #ffd54f, #ffd54f, #ffd54f, #ffd54f, #ffd54f, #ffd54f, #ffd54f;
+}
+
+.btn-success {
+    -fx-background-color:
+        #388e3c, #388e3c, #388e3c, #388e3c, #388e3c, #388e3c, #388e3c,
+        #81c784, #81c784, #81c784, #81c784, #81c784, #81c784, #81c784;
+    -fx-text-fill: #1a1a1a;
+}
+.btn-success:hover {
+    -fx-background-color:
+        #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20,
+        #a5d6a7, #a5d6a7, #a5d6a7, #a5d6a7, #a5d6a7, #a5d6a7, #a5d6a7;
+}
+
+.btn-danger {
+    -fx-background-color:
+        #c62828, #c62828, #c62828, #c62828, #c62828, #c62828, #c62828,
+        #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350;
+    -fx-text-fill: white;
+}
+.btn-danger:hover {
+    -fx-background-color:
+        #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
+        #f44336, #f44336, #f44336, #f44336, #f44336, #f44336, #f44336;
+}
+
+.btn-neutral {
+    -fx-background-color:
+        #455a64, #455a64, #455a64, #455a64, #455a64, #455a64, #455a64,
+        #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae;
+    -fx-text-fill: white;
+}
+.btn-neutral:hover {
+    -fx-background-color:
+        #263238, #263238, #263238, #263238, #263238, #263238, #263238,
+        #b0bec5, #b0bec5, #b0bec5, #b0bec5, #b0bec5, #b0bec5, #b0bec5;
+}
+
+/* TRUE CIRCULAR GLASS PANEL */
+.glass-panel {
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-background-color:
+        rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4),
+        rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85);
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-padding: 40;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.15), 0, 0, 8, 8);
+}
+
+/* TRUE CIRCULAR FORM FIELDS */
+.text-field, .password-field {
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        white, white, white, white, white, white, white;
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-padding: 10 14;
+    -fx-text-fill: #1565c0;
+    -fx-font-size: 18px;
+    -fx-prompt-text-fill: #90b4d8;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-background-color:
+        #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5,
+        #f0f8ff, #f0f8ff, #f0f8ff, #f0f8ff, #f0f8ff, #f0f8ff, #f0f8ff;
+    -fx-effect: dropshadow(one-pass-box, rgba(30,136,229,0.3), 0, 0, 0, 4);
+}
+
+/* TRUE CIRCULAR COMBOBOX */
+.combo-box {
+    -fx-background-radius: 0;
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff, #f0f6ff;
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 18px;
+    -fx-padding: 4 8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.4), 0, 0, 0, 4);
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 6 0 0;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #0d47a1;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z";
+    -fx-scale-shape: true;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-radius: 0;
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        white, white, white, white, white, white, white;
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.4), 0, 0, 0, 6);
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #0d47a1;
+    -fx-padding: 8 14;
+    -fx-font-size: 16px;
+}
+.combo-box-popup .list-cell:hover { -fx-background-color: #dbeeff; }
+.combo-box-popup .list-cell:disabled { -fx-text-fill: #90b4d8; -fx-opacity: 0.5; }
+
+/* TRUE CIRCULAR PLAYER CARDS */
+.player-card {
+    -fx-background-radius: 0;
+    -fx-background-color:
+        rgba(13,71,161,0.8), rgba(13,71,161,0.8), rgba(13,71,161,0.8), rgba(13,71,161,0.8), rgba(13,71,161,0.8), rgba(13,71,161,0.8), rgba(13,71,161,0.8),
+        rgba(255,255,255,0.9), rgba(255,255,255,0.9), rgba(255,255,255,0.9), rgba(255,255,255,0.9), rgba(255,255,255,0.9), rgba(255,255,255,0.9), rgba(255,255,255,0.9);
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-padding: 25;
+    -fx-alignment: center;
+    -fx-min-width: 200;
+    -fx-min-height: 250;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.15), 0, 0, 6, 6);
+}
+
+.player-card:hover {
+    -fx-translate-y: -4;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.15), 0, 0, 10, 10);
+}
+
+.add-player-button {
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3);
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 60px;
+}
+
+.remove-slot-button {
+    -fx-background-color:
+        #800000, #800000, #800000, #800000, #800000, #800000, #800000,
+        #ff5252, #ff5252, #ff5252, #ff5252, #ff5252, #ff5252, #ff5252;
+    -fx-text-fill: white;
+    -fx-padding: 2 10;
+    -fx-font-size: 16px;
+}
+.remove-slot-button:hover {
+    -fx-background-color:
+        #5c0000, #5c0000, #5c0000, #5c0000, #5c0000, #5c0000, #5c0000,
+        #ff8a80, #ff8a80, #ff8a80, #ff8a80, #ff8a80, #ff8a80, #ff8a80;
+}
+
+.color-circle {
+    -fx-background-color: transparent;
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 2;
+    -fx-border-style: solid;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 0, 0, 4, 4);
+}
+
+.error-text {
+    -fx-text-fill: #d32f2f;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.welcome-text {
+    -fx-font-size: 36px;
+    -fx-text-fill: #0d47a1;
+}
+
+/* PREMIUM PIXEL CHECKBOX */
+.premium-checkbox {
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 20px;
+}
+
+.premium-checkbox .box {
+    -fx-background-color: #0d47a1, #0d47a1, white;
+    -fx-background-insets: 0 2 0 2, 2 0 2 0, 2 2 2 2;
+    -fx-background-radius: 0;
+}
+
+.premium-checkbox:selected .mark {
+    -fx-background-color: #0d47a1;
+    -fx-shape: "M 0 4 L 2 6 L 6 0 L 7 1 L 2 8 L 0 5 Z";
+}
