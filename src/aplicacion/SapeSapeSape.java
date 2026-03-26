@@ -1,3 +1,4 @@
+package aplicacion;
 import java.util.Scanner;
 
 import controlador.Juego;
@@ -7,6 +8,7 @@ import modelo.Jugador;
  * Punto de entrada del juego "El Juego de Pingu".
  * Gestiona el flujo principal: configurar, jugar y reiniciar.
  */
+/*
 public class Main {
 
     public static void main(String[] args) {
@@ -66,3 +68,4 @@ public class Main {
         sc.close();
     }
 }
+*/
