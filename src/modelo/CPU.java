@@ -11,11 +11,70 @@ public class CPU extends Jugador {
     public CPU(int id, String nombre) {
         super(id, nombre, "Gris");
     }
+    
+    
+    public void decidirAccion(Tablero tablero, ArrayList<Jugador> jugadores) {
+        int posActual = this.getPosicion();
+        
+        // Variables para decidir
+        boolean usarRapido = false;
+        boolean usarLento = false;
+        
+        // 1. EVALUAR AGRESIÓN (Prioridad Máxima)
+        // Si hay un jugador a tiro de Dado Rápido (5-10), ¡ir a por él!
+        for (Jugador j : jugadores) {
+            if (!(j instanceof CPU)) {
+                int distancia = j.getPosicion() - posActual;
+                if (distancia >= 5 && distancia <= 10 && getInventario().tieneObjetoEspecifico("Rapido")) {
+                    System.out.println("IA: Objetivo detectado. Activando motor rápido para embestir.");
+                    usarRapido = true;
+                    break;
+                }
+            }
+        }
+
+        // 2. EVALUAR PELIGRO (Si no hay agresión clara)
+        if (!usarRapido) {
+            for (int i = 1; i <= 6; i++) {
+                int casillaDestino = posActual + i;
+                if (casillaDestino < Tablero.TAMANYO_TABLERO) {
+                    String tipo = tablero.getCasilla(casillaDestino).getTipo();
+                    
+                    // Si el Dado Normal nos metería en un Oso o Forat...
+                    if (tipo.equals("Casilla OSO") || tipo.equals("Casilla AGUJERO")) {
+                        if (getInventario().tieneObjetoEspecifico("Lento")) {
+                            System.out.println("IA: Peligro detectado a corta distancia. Frenando con Dado Lento.");
+                            usarLento = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. EJECUCIÓN
+        if (usarRapido) {
+            getInventario().usarDadoEspecifico("Rapido", this);
+        } else if (usarLento) {
+            getInventario().usarDadoEspecifico("Lento", this);
+        } else {
+            // Por defecto, si tiene dado rápido y no hay peligros cerca, lo usa para ganar
+            if (getInventario().tieneObjetoEspecifico("Rapido")) {
+                getInventario().usarDadoEspecifico("Rapido", this);
+            } else {
+                this.tirarDado();
+            }
+        }
+        }
+    
+    
+    
 
     /**
      * La foca decide qué dado usar automáticamente.
      * Prioriza el dado rápido para avanzar lo máximo posible.
      */
+    /*
     public void decidirAccion() {
         System.out.println(this.getNombre() + " está decidiendo qué dado usar...");
 
@@ -26,7 +85,7 @@ public class CPU extends Jugador {
             int resultado = this.tirarDado();
             System.out.println("La foca lanza el dado normal y saca un " + resultado);
         }
-    }
+    }*/
 
     /**
      * La foca ataca a un jugador que ha adelantado, robándole la mitad del inventario.
