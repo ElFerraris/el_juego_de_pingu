@@ -14,6 +14,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.media.AudioClip;
 import javafx.stage.Stage;
 
 public class Login {
@@ -31,20 +32,43 @@ public class Login {
 
 	private boolean modoRegistro = false;
 
+	// Sonidos
+	private AudioClip soundButton;
+	private AudioClip soundCorrect;
+	private AudioClip soundError;
+
 	@FXML
 	public void initialize() {
 		limpiarErrores();
+		cargarSonidos();
+	}
+
+	private void cargarSonidos() {
+		try {
+			soundButton = new AudioClip(getClass().getResource("/assets/login/login_button.wav").toExternalForm());
+			soundCorrect = new AudioClip(getClass().getResource("/assets/login/login_correct.wav").toExternalForm());
+			soundError = new AudioClip(getClass().getResource("/assets/login/login_error.wav").toExternalForm());
+		} catch (Exception e) {
+			System.err.println("No se pudieron cargar los sonidos de login: " + e.getMessage());
+		}
+	}
+
+	private void reproducir(AudioClip clip) {
+		if (clip != null) {
+			clip.play();
+		}
 	}
 
 	@FXML
 	void handleLogin(ActionEvent event) {
+		reproducir(soundButton);
 		limpiarErrores();
 
 		String user = text_user.getText().trim();
 		String pswd = text_pswd.getText().trim();
 
-		// Validación común: campos vacíos
 		if (user.isEmpty() || pswd.isEmpty()) {
+			reproducir(soundError);
 			if (user.isEmpty() && pswd.isEmpty()) {
 				mostrarError("Faltan usuario y contraseña", true, true);
 			} else if (user.isEmpty()) {
@@ -64,8 +88,10 @@ public class Login {
 
 	private void iniciarSesion(String user, String pswd, ActionEvent event) {
 		if (BBDD.loginJugador(user, pswd)) {
+			reproducir(soundCorrect);
 			abrirIntro(event);
 		} else {
+			reproducir(soundError);
 			mostrarError("Usuario o contraseña incorrectos", true, true);
 		}
 	}
@@ -73,10 +99,12 @@ public class Login {
 	private void registrarUsuario(String user, String pswd, ActionEvent event) {
 		int resultado = BBDD.registrarNuevoJugador(user, pswd, false);
 		if (resultado != -1) {
+			reproducir(soundCorrect);
 			alternarModo(null);
 			text_error.setText("¡Registro completado! Ya puedes entrar.");
 			text_error.getStyleClass().add("success-label");
 		} else {
+			reproducir(soundError);
 			mostrarError("El nombre '" + user + "' ya está ocupado.", true, false);
 		}
 	}
@@ -120,8 +148,8 @@ public class Login {
 			Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 			stage.setScene(scene);
 			stage.centerOnScreen();
-			stage.setFullScreen(true); // Activar pantalla completa para el vídeo
-			stage.setFullScreenExitHint(""); // Quitar el mensaje de "Presione ESC para salir"
+			stage.setFullScreen(true);
+			stage.setFullScreenExitHint("");
 			stage.show();
 		} catch (IOException e) {
 			e.printStackTrace();
