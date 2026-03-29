@@ -15,21 +15,24 @@ public class Tablero {
  
 
 
-	/**
-     * Genera una seed aleatoria válida y construye el tablero.
+    /**
+     * Genera una seed aleatoria válida y la devuelve como String.
      */
-    public void generarSeedAleatoria() {
+    public static String generarSeedValida() {
         String genSeed;
-
+        Tablero temp = new Tablero();
         do {
             genSeed = "";
             for (int i = 0; i < TAMANYO_TABLERO - 2; i++) {
                 int numseed = (int) (Math.random() * 10);
                 genSeed += numseed;
             }
-            System.out.println("Seed generada: " + genSeed);
-        } while (!validarSeed(genSeed));
+        } while (!temp.validarSeed(genSeed));
+        return genSeed;
+    }
 
+    public void generarSeedAleatoria() {
+        String genSeed = generarSeedValida();
         generarTablero(genSeed);
     }
 

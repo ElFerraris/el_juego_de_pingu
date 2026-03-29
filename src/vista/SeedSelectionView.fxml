@@ -4,43 +4,42 @@
 <?import javafx.geometry.Insets?>
 <?import java.net.URL?>
 
-<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.SeedSelectionController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="controlador.SeedSelectionController" 
+           styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
     
-    <!-- Filtro oscuro para resaltar el panel -->
     <Region style="-fx-background-color: rgba(5,20,60,0.15);"/>
 
-    <VBox spacing="40" alignment="CENTER" maxWidth="900" maxHeight="600" styleClass="glass-panel">
-        <Label text="ELEGIR MUNDO" styleClass="title-text" />
+    <VBox spacing="40" alignment="CENTER" maxWidth="1000" maxHeight="650" styleClass="glass-panel">
+        <Label text="CONFIGURACIÓN DEL MUNDO" styleClass="title-text" />
         
-        <VBox spacing="20" alignment="CENTER">
-            <Label text="MUNDOS RECOMENDADOS" style="-fx-font-size: 28px; -fx-font-weight: bold;"/>
+        <VBox spacing="25" alignment="CENTER">
+            <Label text="OPCIÓN A: ELEGIR UN MUNDO RECOMENDADO" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-opacity: 0.8;"/>
             <HBox spacing="20" alignment="CENTER">
-                <Button text="ISLA PINGÜINO" onAction="#handleQuickSeed" styleClass="button" prefWidth="220" prefHeight="80">
-                    <userData>PENGU_ISLAND</userData>
-                </Button>
-                <Button text="VALLE HELADO" onAction="#handleQuickSeed" styleClass="button" prefWidth="220" prefHeight="80">
-                    <userData>FROSTY_VALLEY</userData>
-                </Button>
-                <Button text="MONTAÑA CRISTAL" onAction="#handleQuickSeed" styleClass="button" prefWidth="220" prefHeight="80">
-                    <userData>CRYSTAL_MTN</userData>
-                </Button>
+                <Button fx:id="btnIsla" text="ISLA PINGÜINO" onAction="#handleQuickSeed" styleClass="button" prefWidth="250" prefHeight="90" />
+                <Button fx:id="btnValle" text="VALLE HELADO" onAction="#handleQuickSeed" styleClass="button" prefWidth="250" prefHeight="90" />
+                <Button fx:id="btnMontana" text="MONTAÑA CRISTAL" onAction="#handleQuickSeed" styleClass="button" prefWidth="250" prefHeight="90" />
             </HBox>
         </VBox>
 
-        <Separator maxWidth="600" />
+        <Separator maxWidth="700" />
 
-        <VBox spacing="15" alignment="CENTER">
-            <Label text="O ESCRIBE TU PROPIA SEMILLA" style="-fx-font-size: 22px;"/>
-            <TextField fx:id="seedField" promptText="Ej: MI_MUNDO_123" maxWidth="400" style="-fx-font-size: 20px; -fx-alignment: center;"/>
-            <Label fx:id="errorLabel" styleClass="error-text" text="" />
+        <VBox spacing="20" alignment="CENTER">
+            <Label text="OPCIÓN B: SEMILLA PERSONALIZADA" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-opacity: 0.8;"/>
+            <HBox spacing="20" alignment="CENTER">
+                <Button fx:id="btnCustom" text="ESCRIBIR MI PROPIA SEMILLA" onAction="#handleEnableCustomSeed" styleClass="button" prefWidth="350" prefHeight="60" />
+                <TextField fx:id="seedField" promptText="Solo números (ej: 2233...)" disable="true" maxWidth="400" 
+                           style="-fx-font-size: 22px; -fx-alignment: center; -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);"/>
+            </HBox>
+            <Label fx:id="errorLabel" styleClass="error-text" text="" style="-fx-text-fill: #ff5252; -fx-font-size: 18px;" />
         </VBox>
 
-        <HBox spacing="30" alignment="CENTER">
-            <Button text="VOLVER" onAction="#handleBack" prefWidth="200" prefHeight="60" />
-            <Button text="¡A JUGAR!" onAction="#handleStartGame" styleClass="button-primary" prefWidth="280" prefHeight="65" />
+        <HBox spacing="40" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
+            <Button text="VOLVER" onAction="#handleBack" prefWidth="220" prefHeight="70" />
+            <Button text="INICIAR PARTIDA" onAction="#handleStartGame" styleClass="button-primary" prefWidth="320" prefHeight="80" />
         </HBox>
     </VBox>
 </StackPane>

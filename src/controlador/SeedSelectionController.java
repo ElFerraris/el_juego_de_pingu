@@ -5,48 +5,83 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
-import javafx.scene.Node;
+import modelo.Tablero;
 
 /**
  * SeedSelectionController
  * 
- * Permite al usuario elegir el mundo (semilla) antes de empezar la partida.
- * Los datos se guardan en el GameContext para que el Generador de Tableros los use.
+ * Gestiona la selección de mundos y semillas con validación en tiempo real.
  */
 public class SeedSelectionController {
 
     @FXML private TextField seedField;
     @FXML private Label errorLabel;
+    
+    @FXML private Button btnIsla;
+    @FXML private Button btnValle;
+    @FXML private Button btnMontana;
+    @FXML private Button btnCustom;
+
+    private boolean isCustomMode = false;
 
     @FXML
     public void initialize() {
-        // Podríamos precargar una semilla aleatoria si quisiéramos
-        seedField.setText("WORLD_" + (int)(Math.random() * 9999));
+        // Por defecto, seleccionamos la Isla con una semilla aleatoria
+        seleccionarMundo(btnIsla);
     }
 
     /**
-     * Maneja los botones de selección rápida (Isla, Valle, Montaña).
+     * Toca un botón de mundo recomendado: genera semilla y bloquea el campo manual.
      */
     @FXML
     private void handleQuickSeed(ActionEvent event) {
-        Button btn = (Button) event.getSource();
-        String quickSeed = (String) btn.getUserData();
-        if (quickSeed != null) {
-            seedField.setText(quickSeed);
-        }
+        Button selected = (Button) event.getSource();
+        seleccionarMundo(selected);
     }
 
     /**
-     * Navega de vuelta a la configuración de jugadores.
+     * Activa el modo de semilla personalizada.
      */
+    @FXML
+    private void handleEnableCustomSeed(ActionEvent event) {
+        desmarcarTodos();
+        btnCustom.getStyleClass().add("button-selected");
+        
+        isCustomMode = true;
+        seedField.setDisable(false);
+        seedField.clear();
+        seedField.setPromptText("Escribe aquí tu semilla numérica...");
+        seedField.requestFocus();
+        
+        errorLabel.setText("");
+    }
+
+    private void seleccionarMundo(Button btn) {
+        desmarcarTodos();
+        btn.getStyleClass().add("button-selected");
+        
+        isCustomMode = false;
+        seedField.setDisable(true);
+        
+        // Generamos una semilla válida real para este mundo
+        String validSeed = Tablero.generarSeedValida();
+        seedField.setText(validSeed);
+        
+        errorLabel.setText("Modo: " + btn.getText() + " (Semilla Generada)");
+    }
+
+    private void desmarcarTodos() {
+        btnIsla.getStyleClass().remove("button-selected");
+        btnValle.getStyleClass().remove("button-selected");
+        btnMontana.getStyleClass().remove("button-selected");
+        btnCustom.getStyleClass().remove("button-selected");
+    }
+
     @FXML
     private void handleBack(ActionEvent event) {
         NavigationController.navigateTo(event, "PlayerConfigView.fxml");
     }
 
-    /**
-     * Guarda la semilla y lanza el tablero de juego.
-     */
     @FXML
     private void handleStartGame(ActionEvent event) {
         String seed = seedField.getText();
@@ -56,13 +91,18 @@ public class SeedSelectionController {
             return;
         }
 
+        // Validación Real: Usamos un objeto Tablero temporal para validar
+        Tablero validador = new Tablero();
+        if (!validador.validarSeed(seed)) {
+            errorLabel.setText("Semilla inválida: Se requieren al menos 2 trineos ('3') y 2 agujeros ('2').");
+            return;
+        }
+
         // Guardamos la semilla en el contexto global
         GameContext.getInstance().setSeed(seed.trim());
+        System.out.println("► Semilla Validada: " + seed);
 
-        System.out.println("► Semilla seleccionada: " + seed);
-        System.out.println("► Jugadores listos: " + GameContext.getInstance().getConfiguredPlayers().size());
-
-        // Navegamos al tablero real (por ahora el placeholder)
+        // Navegamos al tablero
         NavigationController.navigateTo(event, "TableroJuego.fxml");
     }
 }

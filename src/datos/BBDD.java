@@ -11,6 +11,7 @@ import modelo.Jugador;
  * Clase para gestionar la conexión y operaciones con la Base de Datos.
  */
 public class BBDD {
+    // Gestor de conexión principal para el juego de pingüinos
 
     /**
      * Establece conexión con la Base de Datos Oracle.

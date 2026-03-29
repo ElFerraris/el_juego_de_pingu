@@ -15,6 +15,7 @@ import modelo.Jugador;
 import java.sql.Connection;
 
 public class Login {
+	// Controlador principal de la vista de acceso
 
 	@FXML
 	private Button btn_login;
