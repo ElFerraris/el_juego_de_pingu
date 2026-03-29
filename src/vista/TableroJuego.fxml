@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.TableroController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+    <VBox spacing="20" alignment="CENTER">
+        <Label text="¡EL TABLERO DE JUEGO LLEGARÁ PRONTO!" style="-fx-font-size: 40px; -fx-text-fill: white;" />
+        <Label fx:id="infoLabel" text="..." style="-fx-font-size: 20px; -fx-text-fill: white;" />
+        <Button text="VOLVER AL MENÚ" onAction="#handleBack" prefWidth="250" prefHeight="60" />
+    </VBox>
+</StackPane>

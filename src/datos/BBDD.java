@@ -608,6 +608,19 @@ public class BBDD {
     
     
 
-        
-    
+    public ArrayList<String> obtenerTodosLosJugadores() {
+        ArrayList<String> jugadores = new ArrayList<>();
+        String sql = "SELECT nickname FROM jugador WHERE es_cpu = 0 ORDER BY nickname";
+        try (Connection con = conectarBD();
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                jugadores.add(rs.getString("nickname"));
+            }
+        } catch (SQLException e) {
+            System.out.println("► ERROR al listar jugadores: " + e.getMessage());
+        }
+        return jugadores;
+    }
+
 }
