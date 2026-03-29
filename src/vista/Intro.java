@@ -118,18 +118,13 @@ public class Intro {
 
     private void cargarMenuPrincipal() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/vista/MenuPrincipal.fxml"));
-            Scene scene = new Scene(root);
             Stage stage = (Stage) rootPane.getScene().getWindow();
-
             if (stage != null) {
-                stage.setFullScreen(false);
-                stage.setFullScreenExitHint("");
-                stage.setScene(scene);
-                stage.centerOnScreen();
-                stage.show();
+                // Usamos nuestro controlador de navegación para unificar lógica
+                controlador.NavigationController.navigateTo(stage, "MainMenuView.fxml", true);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.err.println("Error al cargar el Menú Principal desde la Intro.");
             e.printStackTrace();
         }
     }

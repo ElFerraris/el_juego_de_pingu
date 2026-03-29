@@ -1,21 +1,18 @@
 package vista;
 
-import java.io.IOException;
-
 import datos.BBDD;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.media.AudioClip;
-import javafx.stage.Stage;
+import controlador.GameContext;
+import controlador.NavigationController;
+import modelo.Jugador;
+import java.sql.Connection;
 
 public class Login {
 
@@ -143,17 +140,23 @@ public class Login {
 
 	private void abrirIntro(ActionEvent event) {
 		try {
-			Parent root = FXMLLoader.load(getClass().getResource("/vista/Intro.fxml"));
-			Scene scene = new Scene(root);
-			Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-			stage.setScene(scene);
-			stage.centerOnScreen();
-			stage.setFullScreen(true);
-			stage.setFullScreenExitHint("");
-			stage.show();
-		} catch (IOException e) {
+			// 1. Obtenemos los datos del jugador de la BD para la sesión
+			String username = text_user.getText().trim();
+			Connection con = BBDD.conectarBD();
+			int id = BBDD.obtenerIdJugador(con, username);
+			if (con != null) con.close();
+
+			// 2. Guardamos en el contexto global (Andrei Style)
+			Jugador jugadorActual = new Jugador(id, username, "Azul"); // Azul por defecto
+			GameContext.getInstance().setCurrentUser(jugadorActual);
+			System.out.println("► Sesión iniciada para: " + username + " (ID: " + id + ")");
+
+			// 3. Navegamos a la intro usando nuestro controlador unificado
+			NavigationController.navigateTo(event, "Intro.fxml", true);
+			
+		} catch (Exception e) {
 			e.printStackTrace();
-			text_error.setText("Error al cargar la introducción");
+			text_error.setText("Error al iniciar la sesión/intro");
 		}
 	}
 }

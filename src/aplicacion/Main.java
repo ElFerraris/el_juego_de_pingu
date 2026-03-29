@@ -16,6 +16,14 @@ import javafx.scene.text.Text;
 public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
+		// REGISTRO GLOBAL DE FUENTES (Andrei Style)
+		try {
+			Font.loadFont(getClass().getResourceAsStream("/assets/fuentes/GrapeSoda.ttf"), 12);
+			Font.loadFont(getClass().getResourceAsStream("/assets/fuentes/upheavtt.ttf"), 12);
+		} catch (Exception e) {
+			System.err.println("No se pudieron cargar las fuentes desde Main: " + e.getMessage());
+		}
+
 		try {
 			// BorderPane root = new BorderPane();
 			Parent root = FXMLLoader.load(getClass().getResource("/vista/Login.fxml"));
