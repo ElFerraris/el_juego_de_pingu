@@ -58,30 +58,40 @@ public class TableroController {
         juegoSimulado.setTablero(this.tablero);
         juegoSimulado.getJugadores().addAll(this.jugadores);
 
-        // --- PERSISTENCIA (Inicio de Partida) ---
-        for (Jugador j : jugadores) {
-            int newId = bbdd.registrarJugadorSiNoExiste(j);
-            if (newId != -1) j.setId(newId);
-        }
-        
-        int idPartida = bbdd.guardarNuevaPartida(juegoSimulado);
-        if (idPartida > 0) {
-            tablero.setIdPartida(idPartida);
+        if (!GameContext.getInstance().isPartidaCargada()) {
+            // Juego Nuevo -> Guardar en BBDD
             for (Jugador j : jugadores) {
-                bbdd.insertarParticipacion(idPartida, j.getId(), j.getColor());
+                int newId = bbdd.registrarJugadorSiNoExiste(j);
+                if (newId != -1) j.setId(newId);
             }
-            log("Partida #" + idPartida + " guardada en BBDD.");
+            
+            int idPartida = bbdd.guardarNuevaPartida(juegoSimulado);
+            if (idPartida > 0) {
+                tablero.setIdPartida(idPartida);
+                for (Jugador j : jugadores) {
+                    bbdd.insertarParticipacion(idPartida, j.getId(), j.getColor());
+                }
+                log("Partida #" + idPartida + " guardada en BBDD.");
+            } else {
+                log("Aviso: No se pudo conectar a BBDD.");
+            }
+            log("¡Partida lista! Comienza " + jugadores.get(0).getNombre());
         } else {
-            log("Aviso: No se pudo conectar a BBDD.");
+            // Juego Cargado -> Restaurar estado
+            tablero.setIdPartida(GameContext.getInstance().getIdPartidaCargar());
+            this.turnoActual = GameContext.getInstance().getTurnoCargado();
+            log("Partida #" + tablero.getIdPartida() + " restaurada.");
+            log("Es el turno de " + jugadores.get(this.turnoActual).getNombre());
+            
+            // Limpiamos la bandera para futuras partidas en la misma sesión
+            GameContext.getInstance().setIdPartidaCargar(-1);
         }
-        // ------------------------------------------
         
         dibujarTablero();
         crearTarjetasJugadores();
         crearFichasJugadores();
         
         actualizarUI();
-        log("¡Partida lista! Comienza " + jugadores.get(0).getNombre());
         
         // Verificamos si el primer jugador está ya bloqueado (raro pero por si acaso)
         comprobarBloqueoInicioTurno();
@@ -258,15 +268,122 @@ public class TableroController {
             // Animación secundaria rápida para el efecto (trineo/agujero)
             moverFichaDirecta(j, posAntes, posDespues);
             
-            // Esperamos un poco después del efecto antes de pasar turno
+            // Esperamos un poco después del efecto antes de comprobar batalla
             PauseTransition wait = new PauseTransition(Duration.seconds(1));
-            wait.setOnFinished(e -> finalizarTurno());
+            wait.setOnFinished(e -> comprobarBatallaYFinalizarTurno(j));
             wait.play();
+        } else {
+            comprobarBatallaYFinalizarTurno(j);
+        }
+    }
+
+    private void comprobarBatallaYFinalizarTurno(Jugador jActual) {
+        if (jActual.getPosicion() <= 0 || jActual.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
+            finalizarTurno();
+            return;
+        }
+
+        Jugador oponente = null;
+        for (Jugador p : jugadores) {
+            if (p != jActual && p.getPosicion() == jActual.getPosicion()) {
+                oponente = p;
+                break;
+            }
+        }
+
+        if (oponente != null) {
+            log("¡COLISIÓN en casilla " + jActual.getPosicion() + "!");
+            resolverCombate(jActual, oponente);
         } else {
             finalizarTurno();
         }
     }
 
+    private void resolverCombate(Jugador atacante, Jugador defensor) {
+        boolean esFoca = (atacante instanceof CPU || defensor instanceof CPU);
+        String titulo = esFoca ? "¡Ataque de la Foca Loca!" : "¡Guerra de Bolas de Nieve!";
+        StringBuilder mensaje = new StringBuilder();
+
+        if (esFoca) {
+            Jugador humano = (atacante instanceof CPU) ? defensor : atacante;
+            CPU foca = (CPU) ((atacante instanceof CPU) ? atacante : defensor);
+            
+            mensaje.append("¡La Foca Loca choca con ").append(humano.getNombre()).append("!\n\n");
+            
+            if (humano.getInventario().tieneObjeto("Pez")) {
+                humano.getInventario().usarObjeto("Pez", humano);
+                foca.setTurnosBloqueados(foca.getTurnosBloqueados() + 2);
+                mensaje.append(humano.getNombre()).append(" lanza un veloz PEZ a la Foca.\n");
+                mensaje.append("La Foca se entretiene comiendo y pierde 2 turnos.");
+            } else {
+                mensaje.append(humano.getNombre()).append(" no tiene Peces para distraerla.\n");
+                mensaje.append("¡ZAS! Recibe un aletazo implacable.\n");
+                
+                int casillaAgujero = -1;
+                for (int i = humano.getPosicion() - 1; i >= 0; i--) {
+                    if (tablero.getCasilla(i) != null && tablero.getCasilla(i).getTipo().equals("Casilla AGUJERO")) {
+                        casillaAgujero = i;
+                        break;
+                    }
+                }
+                
+                int posAntigua = humano.getPosicion();
+                if (casillaAgujero != -1) {
+                    humano.setPosicion(casillaAgujero);
+                    mensaje.append(humano.getNombre()).append(" sale volando al Agujero de la casilla ").append(casillaAgujero).append(".");
+                } else {
+                    humano.setPosicion(0);
+                    mensaje.append(humano.getNombre()).append(" sale volando hasta la SALIDA.");
+                }
+                moverFichaDirecta(humano, posAntigua, humano.getPosicion());
+            }
+        } else {
+            int bolasAtacante = atacante.getInventario().getCantidad("BolaNieve");
+            int bolasDefensor = defensor.getInventario().getCantidad("BolaNieve");
+            
+            mensaje.append(atacante.getNombre()).append(" (").append(bolasAtacante).append(" bolas) VS ")
+                   .append(defensor.getNombre()).append(" (").append(bolasDefensor).append(" bolas)\n\n");
+            
+            if (bolasAtacante > bolasDefensor) {
+                int diff = bolasAtacante - bolasDefensor;
+                int posAntigua = defensor.getPosicion();
+                defensor.setPosicion(Math.max(0, posAntigua - diff));
+                mensaje.append(atacante.getNombre()).append(" gana.\n");
+                mensaje.append(defensor.getNombre()).append(" retrocede ").append(posAntigua - defensor.getPosicion()).append(" casillas.");
+                moverFichaDirecta(defensor, posAntigua, defensor.getPosicion());
+            } else if (bolasDefensor > bolasAtacante) {
+                int diff = bolasDefensor - bolasAtacante;
+                int posAntigua = atacante.getPosicion();
+                atacante.setPosicion(Math.max(0, posAntigua - diff));
+                mensaje.append(defensor.getNombre()).append(" se defiende y gana.\n");
+                mensaje.append(atacante.getNombre()).append(" retrocede ").append(posAntigua - atacante.getPosicion()).append(" casillas.");
+                moverFichaDirecta(atacante, posAntigua, atacante.getPosicion());
+            } else {
+                mensaje.append("¡Empate técnico! Nadie tiene más bolas. Se quedan donde están.");
+            }
+            
+            // Vaciar inventarios
+            while (atacante.getInventario().getCantidad("BolaNieve") > 0) atacante.getInventario().eliminarObjeto("BolaNieve");
+            while (defensor.getInventario().getCantidad("BolaNieve") > 0) defensor.getInventario().eliminarObjeto("BolaNieve");
+        }
+        
+        actualizarTarjetaJugador(atacante);
+        actualizarTarjetaJugador(defensor);
+        
+        log(mensaje.toString().replace("\n", "  |  "));
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje.toString());
+        try {
+            alert.getDialogPane().getStylesheets().add(getClass().getResource("/vista/style.css").toExternalForm());
+        } catch (Exception e) {}
+        alert.showAndWait();
+        
+        finalizarTurno();
+    }
+    
     private void moverFichaDirecta(Jugador j, int desde, int hasta) {
         casillaNodes.get(desde).getChildren().remove(playerTokens.get(j));
         posicionarToken(j);

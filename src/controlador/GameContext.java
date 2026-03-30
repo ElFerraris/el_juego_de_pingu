@@ -26,6 +26,9 @@ public class GameContext {
     
     // ID de la partida en caso de estar cargando una partida de la BD
     private int idPartidaCargar = -1;
+    
+    // Turno actual restaurado de una carga
+    private int turnoModoFuga = 0;
 
     // Constructor privado para evitar que se creen copias con 'new'
     private GameContext() {}
@@ -48,6 +51,7 @@ public class GameContext {
         configuredPlayers.clear();
         seed = null;
         idPartidaCargar = -1;
+        turnoModoFuga = 0;
     }
 
     // --- GETTERS Y SETTERS ---
@@ -64,4 +68,9 @@ public class GameContext {
 
     public int getIdPartidaCargar() { return idPartidaCargar; }
     public void setIdPartidaCargar(int id) { this.idPartidaCargar = id; }
+    
+    public boolean isPartidaCargada() { return idPartidaCargar != -1; }
+    
+    public int getTurnoCargado() { return turnoModoFuga; }
+    public void setTurnoCargado(int t) { this.turnoModoFuga = t; }
 }
