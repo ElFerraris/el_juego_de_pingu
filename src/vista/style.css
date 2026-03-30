@@ -3,7 +3,15 @@
     src: url("../assets/fuentes/GrapeSoda.ttf");
 }
 
-.root, .label, .button, .text, .text-field, .combo-box, .list-cell, .table-view, .text-area {
+.root,
+.label,
+.button,
+.text,
+.text-field,
+.combo-box,
+.list-cell,
+.table-view,
+.text-area {
     -fx-font-family: 'GrapeSoda', sans-serif !important;
 }
 
@@ -13,13 +21,13 @@
 
 /* SCREEN BACKGROUNDS */
 .root-main-bg {
-    -fx-background-image: url("../assets/imagenes/TITULO CON FONDO.png");
+    -fx-background-image: url("../assets/imagenes/TITULO_CON_FONDO.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }
 
 .root-plain-bg {
-    -fx-background-image: url("../assets/imagenes/FONDO SOLO BORROSO.png");
+    -fx-background-image: url("../assets/imagenes/FONDO_SOLO_BORROSO.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }
@@ -33,7 +41,7 @@
     -fx-font-size: 70px;
     -fx-fill: #0d47a1;
     -fx-text-fill: #0d47a1;
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 0, 0, 4, 4);
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.2), 0, 0, 4, 4);
 }
 
 /* 
@@ -56,7 +64,7 @@
     -fx-font-size: 22px;
     -fx-padding: 12 24;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.5), 0, 0, 0, 4);
+    -fx-effect: dropshadow(one-pass-box, rgba(13, 71, 161, 0.5), 0, 0, 0, 4);
 }
 
 .button:hover {
@@ -64,15 +72,16 @@
         #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0,
         #d6eaff, #d6eaff, #d6eaff, #d6eaff, #d6eaff, #d6eaff, #d6eaff;
     -fx-translate-y: -2;
-    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.5), 0, 0, 0, 6);
+    -fx-effect: dropshadow(one-pass-box, rgba(13, 71, 161, 0.5), 0, 0, 0, 6);
 }
 
-.button:pressed, .button-selected {
+.button:pressed,
+.button-selected {
     -fx-background-color:
         #0a3478, #0a3478, #0a3478, #0a3478, #0a3478, #0a3478, #0a3478,
         #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee;
     -fx-translate-y: 2;
-    -fx-effect: dropshadow(one-pass-box, rgba(13,71,161,0.5), 0, 0, 0, 0);
+    -fx-effect: dropshadow(one-pass-box, rgba(13, 71, 161, 0.5), 0, 0, 0, 0);
 }
 
 .button-primary {
@@ -81,11 +90,13 @@
         #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5;
     -fx-text-fill: white;
 }
+
 .button-primary:hover {
     -fx-background-color:
         #023a80, #023a80, #023a80, #023a80, #023a80, #023a80, #023a80,
         #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0;
 }
+
 .button-primary:pressed {
     -fx-background-color:
         #01205a, #01205a, #01205a, #01205a, #01205a, #01205a, #01205a,
@@ -100,6 +111,7 @@
     -fx-font-size: 30px;
     -fx-padding: 16 42;
 }
+
 .button-large:hover {
     -fx-background-color:
         #023a80, #023a80, #023a80, #023a80, #023a80, #023a80, #023a80,
@@ -113,6 +125,7 @@
         #78909c, #78909c, #78909c, #78909c, #78909c, #78909c, #78909c;
     -fx-text-fill: white;
 }
+
 .button-secondary:hover {
     -fx-background-color:
         #263238, #263238, #263238, #263238, #263238, #263238, #263238,
@@ -124,13 +137,13 @@
     -fx-background-radius: 0;
     -fx-border-width: 0;
     -fx-background-color:
-        rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4), rgba(13,71,161,0.4),
-        rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85), rgba(255,255,255,0.85);
+        rgba(13, 71, 161, 0.4), rgba(13, 71, 161, 0.4), rgba(13, 71, 161, 0.4), rgba(13, 71, 161, 0.4), rgba(13, 71, 161, 0.4), rgba(13, 71, 161, 0.4), rgba(13, 71, 161, 0.4),
+        rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85);
     -fx-background-insets:
         0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
         3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
     -fx-padding: 40;
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.15), 0, 0, 8, 8);
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.15), 0, 0, 8, 8);
 }
 
 .welcome-text {
@@ -140,7 +153,7 @@
 
 /* CASILLAS DEL TABLERO */
 .casilla-base {
-    -fx-background-color: rgba(255,255,255,0.7);
+    -fx-background-color: rgba(255, 255, 255, 0.7);
     -fx-border-color: #0d47a1;
     -fx-border-width: 1px;
     -fx-alignment: center;
@@ -148,38 +161,82 @@
     -fx-pref-height: 80px;
 }
 
-.casilla-normal { -fx-background-color: rgba(187,222,251,0.6); }
-.casilla-oso { -fx-background-color: rgba(255,167,38,0.6); } /* Naranja */
-.casilla-agujero { -fx-background-color: rgba(66,66,66,0.6); } /* Gris Oscuro */
-.casilla-trineo { -fx-background-color: rgba(212,225,87,0.6); } /* Lima */
-.casilla-interrogante { -fx-background-color: rgba(171,71,188,0.6); } /* Púrpura */
-.casilla-rompediza { -fx-background-color: rgba(239,83,80,0.6); } /* Rojo */
+.casilla-normal {
+    -fx-background-color: rgba(187, 222, 251, 0.6);
+}
+
+.casilla-oso {
+    -fx-background-color: rgba(255, 167, 38, 0.6);
+}
+
+/* Naranja */
+.casilla-agujero {
+    -fx-background-color: rgba(66, 66, 66, 0.6);
+}
+
+/* Gris Oscuro */
+.casilla-trineo {
+    -fx-background-color: rgba(212, 225, 87, 0.6);
+}
+
+/* Lima */
+.casilla-interrogante {
+    -fx-background-color: rgba(171, 71, 188, 0.6);
+}
+
+/* Púrpura */
+.casilla-rompediza {
+    -fx-background-color: rgba(239, 83, 80, 0.6);
+}
+
+.casilla-active {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-effect: dropshadow(three-pass-box, #0d47a1, 15, 0.5, 0, 0);
+    -fx-border-color: white;
+    -fx-border-width: 2px;
+}
+
+/* Rojo */
 
 .label-num-casilla {
     -fx-font-size: 14px;
-    -fx-opacity: 0.5;
-    -fx-alignment: top-left;
-    -fx-padding: 2;
+    -fx-opacity: 0.7;
+    -fx-text-fill: rgba(13, 71, 161, 0.5);
+    -fx-padding: 3;
+}
+
+.label-nombre-casilla {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-radius: 4px;
+    -fx-padding: 2px 4px;
 }
 
 /* FICHAS DE JUGADOR */
 .player-token {
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 5, 0, 0, 0);
 }
 
 /* CARDS DE JUGADOR (Panel lateral) */
 .player-status-card {
-    -fx-background-color: rgba(13,71,161,0.1);
-    -fx-padding: 10;
-    -fx-background-radius: 10;
+    -fx-background-color: rgba(255, 255, 255, 0.4);
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.05), 0, 0, 2, 2);
+    -fx-border-width: 0 0 0 4;
+    -fx-border-color: transparent;
 }
-.player-status-card.active {
+
+.player-active-card {
+    -fx-background-color: rgba(187, 222, 251, 0.6);
+    -fx-effect: dropshadow(three-pass-box, rgba(13, 71, 161, 0.3), 10, 0, 0, 0);
+    -fx-translate-x: -5;
     -fx-border-color: #0d47a1;
-    -fx-border-width: 2px;
-    -fx-background-color: rgba(13,71,161,0.2);
 }
 
 .text-field:disabled {
     -fx-opacity: 0.6;
-    -fx-background-color: rgba(0,0,0,0.1);
+    -fx-background-color: rgba(0, 0, 0, 0.1);
 }
