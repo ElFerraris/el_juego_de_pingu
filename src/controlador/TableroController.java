@@ -10,6 +10,7 @@ import javafx.scene.shape.Circle;
 import javafx.geometry.Pos;
 import javafx.event.ActionEvent;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.util.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -260,7 +261,12 @@ public class TableroController {
 
     private void procesarEfectosCasilla(Jugador j) {
         int posAntes = j.getPosicion();
-        tablero.aplicarEfectoCasilla(j);
+        
+        String logEfecto = tablero.aplicarEfectoCasilla(j);
+        if (logEfecto != null && !logEfecto.isEmpty()) {
+            log(logEfecto.replace("\n", " "));
+        }
+        
         int posDespues = j.getPosicion();
 
         if (posAntes != posDespues) {
@@ -372,16 +378,18 @@ public class TableroController {
         
         log(mensaje.toString().replace("\n", "  |  "));
         
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje.toString());
-        try {
-            alert.getDialogPane().getStylesheets().add(getClass().getResource("/vista/style.css").toExternalForm());
-        } catch (Exception e) {}
-        alert.showAndWait();
-        
-        finalizarTurno();
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle(titulo);
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje.toString());
+            try {
+                alert.getDialogPane().getStylesheets().add(getClass().getResource("/vista/style.css").toExternalForm());
+            } catch (Exception e) {}
+            alert.showAndWait();
+            
+            finalizarTurno();
+        });
     }
     
     private void moverFichaDirecta(Jugador j, int desde, int hasta) {
@@ -399,10 +407,7 @@ public class TableroController {
         // Guardar estado en BBDD
         int idPartida = tablero.getIdPartida();
         if (idPartida > 0) {
-            bbdd.actualizarEstadoPartida(idPartida, juegoSimulado);
-            for (Jugador j : jugadores) {
-                bbdd.actualizarParticipacion(idPartida, j);
-            }
+            bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
         }
         
         // Comprobar Victoria

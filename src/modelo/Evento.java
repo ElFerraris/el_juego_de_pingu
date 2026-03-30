@@ -15,47 +15,33 @@ public class Evento {
         this.tipoEvento = tipoEvento;
     }
 
-    /**
-     * Aplica el efecto del evento sobre el jugador.
-     */
-    public void aplicarEfecto(Jugador jugador, Tablero tablero) {
-        System.out.println("Evento aleatorio: " + tipoEvento);
-
+    public String aplicarEfecto(Jugador jugador, Tablero tablero) {
         switch (tipoEvento) {
             case "Pez":
                 jugador.getInventario().agregarObjeto("Pez");
-                break;
+                return "¡Encontraste un Sabroso Pez! \uD83D\uDC1F";
             case "BolaNieve":
                 Random r = new Random();
                 int cantidad = r.nextInt(3) + 1;
-                for (int i = 0; i < cantidad; i++) { 
-                    jugador.getInventario().agregarObjeto("BolaNieve");
-                }
-                break;
+                for (int i = 0; i < cantidad; i++) jugador.getInventario().agregarObjeto("BolaNieve");
+                return "¡Has recogido " + cantidad + " Bolas de Nieve! \u2744\uFE0F";
             case "DadoRapido":
                 jugador.getInventario().agregarObjeto("DadoRapido");
-                break;
+                return "¡Encontraste un Dado Rápido! \uD83C\uDFB2\u26A1";
             case "DadoLento":
                 jugador.getInventario().agregarObjeto("DadoLento");
-                break;
+                return "¡Encontraste un Dado Lento! \uD83C\uDFB2\uD83D\uDC22";
             case "MotoNeu":
-            	// Lógica para ir al siguiente trineo
-                boolean encontrado = false;
-                // Empezamos a buscar desde la posición siguiente a la del jugador
                 for (int i = jugador.getPosicion() + 1; i < Tablero.TAMANYO_TABLERO; i++) {
                     Casilla c = tablero.getCasilla(i);
                     if (c instanceof CasillaTrineo) {
-                        System.out.println("¡La Moto de Nieve te lleva al trineo en la posición " + i + "!");
                         jugador.setPosicion(i);
-                        encontrado = true;
-                        break; 
+                        return "¡BRRUUUM! Una Moto de Nieve te lleva hasta el Trineo en la casilla " + i + "!";
                     }
                 }
-                if (!encontrado) {
-                    System.out.println("No hay más trineos adelante, la moto se queda donde está.");
-                }
-                break;
+                return "Una Moto de Nieve... pero no hay más trineos adelante.";
         }
+        return "No hay objeto.";
     }
 
     public String getTipoEvento() {

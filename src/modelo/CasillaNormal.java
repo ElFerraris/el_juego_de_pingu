@@ -10,7 +10,7 @@ public class CasillaNormal extends Casilla {
     }
 
     @Override
-    public void activarEfecto(Jugador jugador) {
-        // Sin efecto
+    public String activarEfecto(Jugador jugador) {
+        return "";
     }
 }

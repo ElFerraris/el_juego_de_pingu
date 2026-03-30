@@ -18,12 +18,8 @@ public class CasillaAgujero extends Casilla {
     }
 
     @Override
-    public void activarEfecto(Jugador jugador) {
-        enviarAgujeroAnterior(jugador);
-    }
-
-    private void enviarAgujeroAnterior(Jugador jugador) {
-        System.out.println(jugador.getNombre() + " cae en un agujero y retrocede a la casilla " + posicionAgujeroAnterior + ".");
+    public String activarEfecto(Jugador jugador) {
         jugador.setPosicion(posicionAgujeroAnterior);
+        return jugador.getNombre() + " cae en un agujero y retrocede a la casilla " + posicionAgujeroAnterior + ".";
     }
 }
