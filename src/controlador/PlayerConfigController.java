@@ -161,8 +161,27 @@ public class PlayerConfigController {
                 updateAllComboCells();
             });
 
-            // Color inicial (Azul para P1, Rojo para P2, Verde para otros)
-            selectedColor = mandatory ? (slots.size() == 0 ? "Azul" : "Rojo") : "Verde";
+            // Color inicial (Azul para P1, Rojo para P2, primer color libre para otros)
+            if (mandatory && slots.size() == 0) {
+                selectedColor = "Azul";
+            } else if (mandatory && slots.size() == 1) {
+                selectedColor = "Rojo";
+            } else {
+                selectedColor = "Verde"; // Fallback
+                for (String cName : COLORS) {
+                    boolean taken = false;
+                    for (Slot existingSlot : slots) {
+                        if (cName.equals(existingSlot.getColor())) {
+                            taken = true;
+                            break;
+                        }
+                    }
+                    if (!taken) {
+                        selectedColor = cName;
+                        break;
+                    }
+                }
+            }
             colorCircle = new Circle(25, colorDesdeNombre(selectedColor));
             colorCircle.getStyleClass().add("color-circle");
             colorCircle.setCursor(Cursor.HAND);
