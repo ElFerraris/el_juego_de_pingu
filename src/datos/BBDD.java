@@ -342,6 +342,56 @@ public class BBDD {
         }
     }
     
+    public boolean guardarEstadoCompleto(int idPartida, Juego juego) {
+        String sqlPartida = "{call actualizar_partida(?, ?, ?)}";
+        String sqlJugador = "{call actualizar_participacion(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        
+        try (Connection con = conectarBD()) {
+            if (con == null) return false;
+            
+            // Iniciamos transacción para evitar guardados a medias
+            con.setAutoCommit(false);
+            
+            // 1. Guardar la Partida
+            try (CallableStatement cstmtP = con.prepareCall(sqlPartida)) {
+                cstmtP.setInt(1, idPartida);
+                cstmtP.setInt(2, juego.getTurnoActual());
+                if (juego.getGanador() != null) {
+                    cstmtP.setInt(3, juego.getGanador().getId());
+                } else {
+                    cstmtP.setNull(3, java.sql.Types.INTEGER);
+                }
+                cstmtP.execute();
+            }
+            
+            // 2. Guardar a todos los Jugadores
+            try (CallableStatement cstmtJ = con.prepareCall(sqlJugador)) {
+                for (Jugador j : juego.getJugadores()) {
+                    cstmtJ.setInt(1, idPartida);
+                    cstmtJ.setInt(2, j.getId());
+                    cstmtJ.setInt(3, j.getPosicion());
+                    cstmtJ.setString(4, j.getColor());
+                    cstmtJ.setInt(5, j.getInventario().getCantidad("Pez"));
+                    cstmtJ.setInt(6, j.getInventario().getCantidad("BolaNieve"));
+                    cstmtJ.setInt(7, j.getInventario().getCantidad("DadoLento"));
+                    cstmtJ.setInt(8, j.getInventario().getCantidad("DadoRapido"));
+                    cstmtJ.setInt(9, j.getTurnosBloqueados());
+                    
+                    cstmtJ.execute();
+                }
+            }
+            
+            con.commit();
+            // Restaurar a true (aunque la conexión se cierra justo abajo)
+            con.setAutoCommit(true);
+            return true;
+            
+        } catch (SQLException e) {
+            System.out.println("► ERROR al guardar estado completo: " + e.getMessage());
+            return false;
+        }
+    }
+    
     public boolean cargarDatosPartida(int idPartida, Juego juego) {
         String sqlPartida = "SELECT seed, torn_actual FROM partida WHERE num_partida = ?";
         String sqlJugadores = "SELECT j.id_jugador, j.nickname, j.es_cpu, p.posicion_actual, p.color, " +
