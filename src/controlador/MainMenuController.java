@@ -15,7 +15,8 @@ import javafx.application.Platform;
  */
 public class MainMenuController {
 
-    @FXML private Label welcomeLabel;
+    @FXML
+    private Label welcomeLabel;
 
     @FXML
     public void initialize() {

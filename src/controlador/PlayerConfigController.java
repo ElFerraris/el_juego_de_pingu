@@ -25,14 +25,17 @@ import datos.BBDD;
  */
 public class PlayerConfigController {
 
-    @FXML private HBox playerSlotsContainer;
-    @FXML private CheckBox focaCheckbox;
-    @FXML private Label errorLabel;
+    @FXML
+    private HBox playerSlotsContainer;
+    @FXML
+    private CheckBox focaCheckbox;
+    @FXML
+    private Label errorLabel;
 
     private List<Slot> slots = new ArrayList<>();
     private List<String> allPlayerNames = new ArrayList<>();
     private static final int MAX_PLAYERS = 4;
-    private static final String[] COLORS = {"Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"};
+    private static final String[] COLORS = { "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa" };
     private BBDD db = new BBDD();
 
     @FXML
@@ -45,7 +48,7 @@ public class PlayerConfigController {
     private void setupInitialSlots() {
         playerSlotsContainer.getChildren().clear();
         slots.clear();
-        
+
         // Al menos 2 jugadores obligatorios
         for (int i = 0; i < 2; i++) {
             addSlot(true);
@@ -65,7 +68,7 @@ public class PlayerConfigController {
             // Re-indexamos el título (P1, P2...)
             Label title = (Label) ((HBox) s.getCard().getChildren().get(0)).getChildren().get(0);
             title.setText("P" + (i + 1));
-            
+
             playerSlotsContainer.getChildren().add(s.getCard());
         }
 
@@ -87,7 +90,8 @@ public class PlayerConfigController {
     private boolean isUpdatingAll = false;
 
     private void updateAllComboCells() {
-        if (isUpdatingAll) return;
+        if (isUpdatingAll)
+            return;
         isUpdatingAll = true;
         try {
             for (Slot s : slots) {
@@ -110,7 +114,7 @@ public class PlayerConfigController {
             // Color por defecto en el constructor, se actualizará según el Slot
             configured.add(new Jugador(-1, name, s.getColor()));
         }
-        
+
         if (focaCheckbox.isSelected()) {
             configured.add(new CPU(-1, "Foca Loca"));
         }
@@ -122,7 +126,7 @@ public class PlayerConfigController {
 
         // Guardamos los jugadores configurados en el contexto global
         GameContext.getInstance().setConfiguredPlayers(configured);
-        
+
         // Navegamos a la selección de SEED (Mundo)
         NavigationController.navigateTo(event, "SeedSelectionView.fxml");
     }
@@ -143,16 +147,16 @@ public class PlayerConfigController {
         public Slot(boolean mandatory) {
             card = new VBox(15);
             card.getStyleClass().add("player-card");
-            
+
             // Etiqueta de título
-            Label title = new Label("P?"); 
+            Label title = new Label("P?");
             title.setStyle("-fx-font-weight: bold;");
 
             nameCombo = new ComboBox<>();
             nameCombo.getItems().addAll(allPlayerNames);
             nameCombo.setPromptText("Seleccionar...");
             nameCombo.setPrefWidth(160);
-            
+
             // Personalizamos las celdas para deshabilitar nombres ya usados
             nameCombo.setCellFactory(lv -> new PlayerCell());
             nameCombo.setButtonCell(new PlayerCell());
@@ -193,7 +197,7 @@ public class PlayerConfigController {
             pickerGrid.setVgap(10);
             pickerGrid.setPadding(new Insets(10));
             pickerGrid.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
-            
+
             CustomMenuItem customItem = new CustomMenuItem(pickerGrid);
             customItem.setHideOnClick(false);
             colorMenu.getItems().add(customItem);
@@ -255,10 +259,18 @@ public class PlayerConfigController {
             }
         }
 
-        public VBox getCard() { return card; }
-        public String getName() { return nameCombo.getValue(); }
-        public String getColor() { return selectedColor; }
-        
+        public VBox getCard() {
+            return card;
+        }
+
+        public String getName() {
+            return nameCombo.getValue();
+        }
+
+        public String getColor() {
+            return selectedColor;
+        }
+
         public void refreshCombo() {
             // Refrescamos la visualización sin disparar eventos de cambio
             var cellFactory = nameCombo.getCellFactory();
@@ -268,15 +280,17 @@ public class PlayerConfigController {
 
         private void populateColorGrid(ContextMenu parent) {
             pickerGrid.getChildren().clear();
-            int col = 0; int row = 0;
+            int col = 0;
+            int row = 0;
             for (String cName : COLORS) {
                 Color color = colorDesdeNombre(cName);
                 Circle c = new Circle(15, color);
-                
+
                 boolean taken = false;
                 for (Slot s : slots) {
                     if (s != this && cName.equals(s.getColor())) {
-                        taken = true; break;
+                        taken = true;
+                        break;
                     }
                 }
 
@@ -293,23 +307,34 @@ public class PlayerConfigController {
                         parent.hide();
                     });
                 }
-                
+
                 pickerGrid.add(c, col, row);
                 col++;
-                if (col > 2) { col = 0; row++; }
+                if (col > 2) {
+                    col = 0;
+                    row++;
+                }
             }
         }
 
         private Color colorDesdeNombre(String nombre) {
             switch (nombre.toLowerCase()) {
-                case "rojo":     return Color.RED;
-                case "azul":     return Color.BLUE;
-                case "verde":    return Color.GREEN;
-                case "amarillo": return Color.YELLOW;
-                case "naranja":  return Color.ORANGE;
-                case "morado":   return Color.PURPLE;
-                case "rosa":     return Color.PINK;
-                default:         return Color.GRAY;
+                case "rojo":
+                    return Color.RED;
+                case "azul":
+                    return Color.BLUE;
+                case "verde":
+                    return Color.GREEN;
+                case "amarillo":
+                    return Color.YELLOW;
+                case "naranja":
+                    return Color.ORANGE;
+                case "morado":
+                    return Color.PURPLE;
+                case "rosa":
+                    return Color.PINK;
+                default:
+                    return Color.GRAY;
             }
         }
     }

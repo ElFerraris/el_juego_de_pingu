@@ -14,13 +14,19 @@ import modelo.Tablero;
  */
 public class SeedSelectionController {
 
-    @FXML private TextField seedField;
-    @FXML private Label errorLabel;
-    
-    @FXML private Button btnIsla;
-    @FXML private Button btnValle;
-    @FXML private Button btnMontana;
-    @FXML private Button btnCustom;
+    @FXML
+    private TextField seedField;
+    @FXML
+    private Label errorLabel;
+
+    @FXML
+    private Button btnIsla;
+    @FXML
+    private Button btnValle;
+    @FXML
+    private Button btnMontana;
+    @FXML
+    private Button btnCustom;
 
     private boolean isCustomMode = false;
 
@@ -46,27 +52,27 @@ public class SeedSelectionController {
     private void handleEnableCustomSeed(ActionEvent event) {
         desmarcarTodos();
         btnCustom.getStyleClass().add("button-selected");
-        
+
         isCustomMode = true;
         seedField.setDisable(false);
         seedField.clear();
         seedField.setPromptText("Escribe aquí tu semilla numérica...");
         seedField.requestFocus();
-        
+
         errorLabel.setText("");
     }
 
     private void seleccionarMundo(Button btn) {
         desmarcarTodos();
         btn.getStyleClass().add("button-selected");
-        
+
         isCustomMode = false;
         seedField.setDisable(true);
-        
+
         // Generamos una semilla válida real para este mundo
         String validSeed = Tablero.generarSeedValida();
         seedField.setText(validSeed);
-        
+
         errorLabel.setText("Modo: " + btn.getText() + " (Semilla Generada)");
     }
 
