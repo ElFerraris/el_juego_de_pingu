@@ -32,15 +32,14 @@ public class LoadGameController {
     @FXML
     private void handleJugar(ActionEvent event) {
         PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
-
+        
         if (seleccionada == null) {
-            mostrarAlerta("Atención", "Por favor, selecciona una partida de la lista para continuar.",
-                    Alert.AlertType.WARNING);
+            mostrarAlerta("Atención", "Por favor, selecciona una partida de la lista para continuar.", Alert.AlertType.WARNING);
             return;
         }
 
         System.out.println("► Intentando cargar partida ID: " + seleccionada.getIdPartida());
-
+        
         Juego juegoTemp = new Juego();
         boolean ok = bbdd.cargarDatosPartida(seleccionada.getIdPartida(), juegoTemp);
 
@@ -51,20 +50,20 @@ public class LoadGameController {
             context.setSeed(juegoTemp.getTablero().getSeed());
             context.setConfiguredPlayers(juegoTemp.getJugadores());
             context.setTurnoCargado(juegoTemp.getTurnoActual());
-
+            
             // Navegamos al tablero
             NavigationController.navigateTo(event, "TableroJuego.fxml");
         } else {
-            mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada desde la base de datos.",
-                    Alert.AlertType.ERROR);
+            mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada desde la base de datos.", Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     private void handleVolver(ActionEvent event) {
-        NavigationController.navigateTo(event, "MainMenuView.fxml");
+        // Volvemos al menú principal con transición a la derecha
+        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.RIGHT);
     }
-
+    
     private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);
@@ -72,8 +71,7 @@ public class LoadGameController {
         alerta.setContentText(contenido);
         try {
             alerta.getDialogPane().getStylesheets().add(getClass().getResource("/vista/style.css").toExternalForm());
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
         alerta.showAndWait();
     }
 }

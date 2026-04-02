@@ -15,8 +15,7 @@ import javafx.application.Platform;
  */
 public class MainMenuController {
 
-    @FXML
-    private Label welcomeLabel;
+    @FXML private Label welcomeLabel;
 
     @FXML
     public void initialize() {
@@ -31,8 +30,8 @@ public class MainMenuController {
 
     @FXML
     private void showPlayerConfig(ActionEvent event) {
-        // Navegamos a la configuración de jugadores
-        NavigationController.navigateTo(event, "PlayerConfigView.fxml");
+        // Navegamos a la configuración de jugadores con transición a la izquierda
+        NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.LEFT);
     }
 
     @FXML
