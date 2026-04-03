@@ -50,7 +50,7 @@ public class NavigationController {
     }
 
     public enum Direction {
-        LEFT, RIGHT, UP, DOWN, NONE
+        LEFT, RIGHT, UP, DOWN, FORWARD, BACKWARD, TO_BOARD, NONE
     }
 
     /**
@@ -118,13 +118,14 @@ public class NavigationController {
         Parent newRoot = loader.load();
         Scene scene = stage.getScene();
 
-        if (scene == null || !(scene.getRoot() instanceof StackPane) || !(newRoot instanceof StackPane)) {
+        // Ahora permitimos cualquier Pane (StackPane, BorderPane, etc.) para la animación
+        if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane) || !(newRoot instanceof javafx.scene.layout.Pane)) {
             loadAndSet(stage, fxmlFile, true);
             return;
         }
 
-        StackPane currentRoot = (StackPane) scene.getRoot();
-        StackPane nextRoot = (StackPane) newRoot;
+        javafx.scene.layout.Pane currentRoot = (javafx.scene.layout.Pane) scene.getRoot();
+        javafx.scene.layout.Pane nextRoot = (javafx.scene.layout.Pane) newRoot;
 
         // Comprobamos si ambos tienen el mismo tipo de fondo (por la clase CSS)
         boolean sameBg = currentRoot.getStyleClass().contains("root-plain-bg") && 
@@ -135,6 +136,52 @@ public class NavigationController {
             return;
         }
 
+        // Aseguramos que el CSS esté cargado en la escena
+        ensureCssLoaded(scene);
+
+        // Si es hacia el tablero, no extraemos el "glass-panel" para no romper el BorderPane
+        if (dir == Direction.TO_BOARD) {
+            // Animamos la raíz completa del tablero
+            currentRoot.getChildren().add(newRoot);
+            newRoot.setOpacity(0);
+            applyGlobalEffects(newRoot, fxmlFile);
+            
+            // Buscamos el contenido viejo para deslizarlo
+            Node oldContentToSlide = null;
+            for (Node n : currentRoot.getChildren()) {
+                if (n.getStyleClass().contains("glass-panel")) {
+                    oldContentToSlide = n;
+                    break;
+                }
+            }
+            
+            double height = scene.getHeight();
+            ParallelTransition pt = new ParallelTransition();
+            pt.setInterpolator(Interpolator.EASE_BOTH);
+            
+            // El menú cae
+            if (oldContentToSlide != null) {
+                TranslateTransition slideDown = new TranslateTransition(Duration.millis(500), oldContentToSlide);
+                slideDown.setToY(height);
+                pt.getChildren().add(slideDown);
+            }
+            
+            // El tablero funde
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(600), newRoot);
+            fadeIn.setToValue(1.0);
+            pt.getChildren().add(fadeIn);
+            
+            pt.setOnFinished(e -> {
+                currentRoot.getChildren().remove(newRoot);
+                scene.setRoot(newRoot);
+                newRoot.setOpacity(1.0);
+                newRoot.layout(); // Forzamos recalculado de layout
+            });
+            pt.play();
+            return;
+        }
+
+        // --- LÓGICA ESTÁNDAR PARA MENÚS (glass-panel) ---
         // Buscamos el panel de contenido ("glass-panel")
         Node oldContent = null;
         for (Node n : currentRoot.getChildren()) {
@@ -159,38 +206,78 @@ public class NavigationController {
 
         // Preparamos la escena para el nuevo contenido
         currentRoot.getChildren().add(newContent);
-        applyGlobalEffects(newContent);
+        applyGlobalEffects(newContent, fxmlFile);
 
         double width = scene.getWidth();
         double height = scene.getHeight();
 
-        // Configuración de la animación con suavizado (Ease Both)
-        TranslateTransition out = new TranslateTransition(Duration.millis(500), oldContent);
-        out.setInterpolator(Interpolator.EASE_BOTH);
-        
-        TranslateTransition in = new TranslateTransition(Duration.millis(500), newContent);
-        in.setInterpolator(Interpolator.EASE_BOTH);
+        // Configuración de las animaciones (usando ParallelTransition para combinar efectos)
+        ParallelTransition pt = new ParallelTransition();
+        pt.setInterpolator(Interpolator.EASE_BOTH);
 
         switch (dir) {
             case LEFT:
                 newContent.setTranslateX(width);
-                out.setToX(-width);
-                in.setToX(0);
+                TranslateTransition outL = new TranslateTransition(Duration.millis(350), oldContent);
+                outL.setToX(-width);
+                TranslateTransition inL = new TranslateTransition(Duration.millis(350), newContent);
+                inL.setToX(0);
+                pt.getChildren().addAll(outL, inL);
                 break;
             case RIGHT:
                 newContent.setTranslateX(-width);
-                out.setToX(width);
-                in.setToX(0);
+                TranslateTransition outR = new TranslateTransition(Duration.millis(350), oldContent);
+                outR.setToX(width);
+                TranslateTransition inR = new TranslateTransition(Duration.millis(350), newContent);
+                inR.setToX(0);
+                pt.getChildren().addAll(outR, inR);
+                break;
+            case FORWARD:
+                newContent.setTranslateY(height);
+                newContent.setOpacity(0);
+                
+                TranslateTransition slideUp = new TranslateTransition(Duration.millis(400), newContent);
+                slideUp.setToY(0);
+                
+                FadeTransition fadeInNew = new FadeTransition(Duration.millis(400), newContent);
+                fadeInNew.setToValue(1.0);
+                
+                FadeTransition fadeOutOld = new FadeTransition(Duration.millis(300), oldContent);
+                fadeOutOld.setToValue(0.0);
+                
+                pt.getChildren().addAll(slideUp, fadeInNew, fadeOutOld);
+                break;
+            case BACKWARD:
+                newContent.setOpacity(0);
+                newContent.setTranslateY(0);
+                
+                TranslateTransition slideDown = new TranslateTransition(Duration.millis(400), oldContent);
+                slideDown.setToY(height);
+                
+                FadeTransition fadeInOlder = new FadeTransition(Duration.millis(400), newContent);
+                fadeInOlder.setToValue(1.0);
+                
+                pt.getChildren().addAll(slideDown, fadeInOlder);
                 break;
             case UP:
                 newContent.setTranslateY(height);
-                out.setToY(-height);
-                in.setToY(0);
+                TranslateTransition outU = new TranslateTransition(Duration.millis(350), oldContent);
+                outU.setToY(-height);
+                TranslateTransition inU = new TranslateTransition(Duration.millis(350), newContent);
+                inU.setToY(0);
+                pt.getChildren().addAll(outU, inU);
                 break;
             case DOWN:
                 newContent.setTranslateY(-height);
-                out.setToY(height);
-                in.setToY(0);
+                TranslateTransition outD = new TranslateTransition(Duration.millis(350), oldContent);
+                outD.setToY(height);
+                TranslateTransition inD = new TranslateTransition(Duration.millis(350), newContent);
+                inD.setToY(0);
+                pt.getChildren().addAll(outD, inD);
+                break;
+            case TO_BOARD:
+                // Esta rama ya no se debería alcanzar por el 'return' de arriba, 
+                // pero la mantenemos por coherencia o por si se refactoriza.
                 break;
             default:
                 break;
@@ -198,20 +285,18 @@ public class NavigationController {
 
         final Node contentToMoveBack = newContent;
         final Node contentToRemove = oldContent;
-        ParallelTransition pt = new ParallelTransition(out, in);
         pt.setOnFinished(e -> {
-            // Limpieza: quitamos el nuevo contenido del root viejo
+            // Caso estándar de menús (glass-panel)
             currentRoot.getChildren().remove(contentToMoveBack);
             currentRoot.getChildren().remove(contentToRemove);
             
-            // IMPORTANTE: Devolvemos el contenido a su root original (nextRoot) 
-            // antes de cambiar el root de la escena, para que no desaparezca.
             contentToMoveBack.setTranslateX(0);
             contentToMoveBack.setTranslateY(0);
+            contentToMoveBack.setOpacity(1.0);
             nextRoot.getChildren().add(contentToMoveBack);
             
-            // Ahora sí, cambiamos el root de la escena de forma definitiva
             scene.setRoot(nextRoot);
+            nextRoot.layout();
         });
         pt.play();
     }
@@ -236,30 +321,73 @@ public class NavigationController {
             scene.setRoot(root);
         }
 
+        ensureCssLoaded(scene);
+        applyGlobalEffects(root, fxmlFile);
+        stage.setFullScreen(fullScreen);
+    }
+
+    /**
+     * Garantiza que el archivo de estilos principal esté cargado en la escena.
+     */
+    private static void ensureCssLoaded(Scene scene) {
+        if (scene == null) return;
         try {
             String cssPath = NavigationController.class.getResource(CSS_PATH).toExternalForm();
             if (!scene.getStylesheets().contains(cssPath)) {
                 scene.getStylesheets().add(cssPath);
             }
-        } catch (Exception e) {}
-        
-        applyGlobalEffects(root);
-        stage.setFullScreen(fullScreen);
+        } catch (Exception e) {
+            System.err.println("Error cargando CSS: " + e.getMessage());
+        }
     }
 
     /**
-     * Busca elementos interactivos en la nueva escena y les pone animaciones.
+     * Busca elementos interactivos en la nueva escena y les pone animaciones y sonidos.
      */
-    private static void applyGlobalEffects(Parent root) {
+    private static void applyGlobalEffects(Parent root, String fxmlFile) {
         if (root == null) return;
-        root.lookupAll(".button").forEach(node -> util.UIUtils.applyHoverAnimation(node));
-        root.lookupAll(".remove-slot-button").forEach(node -> util.UIUtils.applyHoverAnimation(node));
-        root.lookupAll(".add-player-button").forEach(node -> util.UIUtils.applyHoverAnimation(node));
+
+        // Filtramos para NO aplicar estos sonidos en Login o Tablero
+        boolean menuSoundsEnabled = fxmlFile != null && 
+                                   !fxmlFile.equalsIgnoreCase("LoginView.fxml") && // Ajustar según nombre real
+                                   !fxmlFile.equalsIgnoreCase("TableroJuego.fxml") &&
+                                   !fxmlFile.equalsIgnoreCase("Intro.fxml");
+
+        root.lookupAll(".button").forEach(node -> {
+            util.UIUtils.applyHoverAnimation(node);
+            if (menuSoundsEnabled) attachMenuSounds(node);
+        });
+
+        root.lookupAll(".remove-slot-button").forEach(node -> {
+            util.UIUtils.applyHoverAnimation(node);
+            if (menuSoundsEnabled) attachMenuSounds(node);
+        });
+
+        root.lookupAll(".add-player-button").forEach(node -> {
+            util.UIUtils.applyHoverAnimation(node);
+            if (menuSoundsEnabled) attachMenuSounds(node);
+        });
     }
 
-    private static void applyGlobalEffects(Node node) {
+    private static void attachMenuSounds(Node node) {
+        node.setOnMouseClicked(e -> {
+            if (node.getStyleClass().contains("button-primary") || 
+                node.getStyleClass().contains("button-danger") ||
+                node.getStyleClass().contains("add-player-button")) {
+                util.SoundManager.playConfirm();
+            } else if (node.getStyleClass().contains("button-secondary") || 
+                       node.getStyleClass().contains("remove-slot-button")) {
+                util.SoundManager.playBack();
+            } else {
+                // Sonido por defecto si no tiene clase específica
+                util.SoundManager.playConfirm();
+            }
+        });
+    }
+
+    private static void applyGlobalEffects(Node node, String fxmlFile) {
         if (node instanceof Parent) {
-            applyGlobalEffects((Parent) node);
+            applyGlobalEffects((Parent) node, fxmlFile);
         }
     }
 }

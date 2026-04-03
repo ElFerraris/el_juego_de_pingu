@@ -30,26 +30,27 @@ public class MainMenuController {
 
     @FXML
     private void showPlayerConfig(ActionEvent event) {
-        // Navegamos a la configuración de jugadores con transición a la izquierda
-        NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.LEFT);
+        // Navegamos a la configuración de jugadores con transición hacia adelante (sube)
+        NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.FORWARD);
     }
 
     @FXML
     private void showLoadGame(ActionEvent event) {
-        // Navegamos a la carga de partidas
-        NavigationController.navigateTo(event, "LoadGameView.fxml");
+        // Navegamos a la carga de partidas con transición hacia adelante
+        NavigationController.navigateTo(event, "LoadGameView.fxml", NavigationController.Direction.FORWARD);
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        // Obtenemos la ventana actual y pedimos un reinicio limpio
-        Stage currentStage = (Stage) welcomeLabel.getScene().getWindow();
-        NavigationController.logoutAndRestart(currentStage);
+        // Marcamos la acción a confirmar y navegamos al diálogo
+        GameContext.getInstance().setActionToConfirm(GameContext.ActionConfirmType.LOGOUT);
+        NavigationController.navigateTo(event, "ConfirmDialogView.fxml", NavigationController.Direction.FORWARD);
     }
 
     @FXML
     private void handleQuitGame(ActionEvent event) {
-        // Cerramos la aplicación de forma segura
-        javafx.application.Platform.exit();
+        // Marcamos la acción a confirmar y navegamos al diálogo
+        GameContext.getInstance().setActionToConfirm(GameContext.ActionConfirmType.QUIT);
+        NavigationController.navigateTo(event, "ConfirmDialogView.fxml", NavigationController.Direction.FORWARD);
     }
 }

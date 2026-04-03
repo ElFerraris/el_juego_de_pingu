@@ -15,6 +15,10 @@ import java.util.List;
 public class GameContext {
     private static GameContext instance;
 
+    // Tipos de acción que pueden necesitar confirmación
+    public enum ActionConfirmType { LOGOUT, QUIT }
+    private ActionConfirmType actionToConfirm;
+
     // Usuario que ha hecho login actualmente
     private Jugador currentUser;
     
@@ -52,6 +56,7 @@ public class GameContext {
         seed = null;
         idPartidaCargar = -1;
         turnoModoFuga = 0;
+        actionToConfirm = null;
     }
 
     // --- GETTERS Y SETTERS ---
@@ -73,4 +78,7 @@ public class GameContext {
     
     public int getTurnoCargado() { return turnoModoFuga; }
     public void setTurnoCargado(int t) { this.turnoModoFuga = t; }
+
+    public ActionConfirmType getActionToConfirm() { return actionToConfirm; }
+    public void setActionToConfirm(ActionConfirmType action) { this.actionToConfirm = action; }
 }

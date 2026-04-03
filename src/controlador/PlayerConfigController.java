@@ -11,6 +11,7 @@ import javafx.geometry.Side;
 import javafx.event.ActionEvent;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
 import modelo.Jugador;
@@ -37,9 +38,18 @@ public class PlayerConfigController {
 
     @FXML
     public void initialize() {
-        // Cargamos los nombres reales de la BD
-        allPlayerNames = db.obtenerTodosLosJugadores();
-        setupInitialSlots();
+        // Cargamos los nombres de la BD en un hilo secundario para no bloquear la animación
+        new Thread(() -> {
+            try {
+                List<String> names = db.obtenerTodosLosJugadores();
+                Platform.runLater(() -> {
+                    allPlayerNames = names;
+                    setupInitialSlots();
+                });
+            } catch (Exception e) {
+                System.err.println("Error cargando jugadores en segundo plano: " + e.getMessage());
+            }
+        }).start();
     }
 
     private void setupInitialSlots() {
@@ -123,14 +133,14 @@ public class PlayerConfigController {
         // Guardamos los jugadores configurados en el contexto global
         GameContext.getInstance().setConfiguredPlayers(configured);
         
-        // Navegamos a la selección de SEED (Mundo) con transición a la izquierda
-        NavigationController.navigateTo(event, "SeedSelectionView.fxml", NavigationController.Direction.LEFT);
+        // Navegamos a la selección de SEED (Mundo) con transición hacia adelante (sube)
+        NavigationController.navigateTo(event, "SeedSelectionView.fxml", NavigationController.Direction.FORWARD);
     }
 
     @FXML
     private void showMainMenu(ActionEvent event) {
-        // Volvemos al menú principal con transición a la derecha
-        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.RIGHT);
+        // Volvemos al menú principal con transición hacia atrás (baja)
+        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
     }
 
     // --- Clase interna para la gestión de cada "Tarjeta" de jugador ---

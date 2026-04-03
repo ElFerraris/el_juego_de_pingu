@@ -51,8 +51,8 @@ public class LoadGameController {
             context.setConfiguredPlayers(juegoTemp.getJugadores());
             context.setTurnoCargado(juegoTemp.getTurnoActual());
             
-            // Navegamos al tablero
-            NavigationController.navigateTo(event, "TableroJuego.fxml");
+            // Navegamos al tablero con la nueva transición especial (Menú cae, Tablero funde)
+            NavigationController.navigateTo(event, "TableroJuego.fxml", NavigationController.Direction.TO_BOARD);
         } else {
             mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada desde la base de datos.", Alert.AlertType.ERROR);
         }
@@ -60,8 +60,8 @@ public class LoadGameController {
 
     @FXML
     private void handleVolver(ActionEvent event) {
-        // Volvemos al menú principal con transición a la derecha
-        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.RIGHT);
+        // Volvemos al menú principal con transición hacia atrás (baja)
+        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
     }
     
     private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {

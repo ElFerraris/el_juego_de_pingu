@@ -79,8 +79,8 @@ public class SeedSelectionController {
 
     @FXML
     private void handleBack(ActionEvent event) {
-        // Volvemos a la configuración de jugadores con transición a la derecha
-        NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.RIGHT);
+        // Volvemos a la configuración de jugadores con transición hacia atrás (baja)
+        NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.BACKWARD);
     }
 
     @FXML
@@ -103,7 +103,7 @@ public class SeedSelectionController {
         GameContext.getInstance().setSeed(seed.trim());
         System.out.println("► Semilla Validada: " + seed);
 
-        // Navegamos al tablero
-        NavigationController.navigateTo(event, "TableroJuego.fxml");
+        // Navegamos al tablero con la nueva transición especial (Menú cae, Tablero funde)
+        NavigationController.navigateTo(event, "TableroJuego.fxml", NavigationController.Direction.TO_BOARD);
     }
 }

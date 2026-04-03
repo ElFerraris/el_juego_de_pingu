@@ -33,6 +33,7 @@ public class UIUtils {
             node.setOnMouseEntered(e -> {
                 scaleOut.stop();
                 scaleIn.playFromStart();
+                SoundManager.playHover(); // Nuevo: Sonido al pasar el ratón
             });
 
             node.setOnMouseExited(e -> {

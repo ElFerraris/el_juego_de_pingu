@@ -132,6 +132,25 @@
         #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a;
 }
 
+.button-danger {
+    -fx-background-color:
+        #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
+        #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350;
+    -fx-text-fill: white;
+}
+
+.button-danger:hover {
+    -fx-background-color:
+        #7f0000, #7f0000, #7f0000, #7f0000, #7f0000, #7f0000, #7f0000,
+        #d32f2f, #d32f2f, #d32f2f, #d32f2f, #d32f2f, #d32f2f, #d32f2f;
+}
+
+.button-danger:pressed {
+    -fx-background-color:
+        #4b0000, #4b0000, #4b0000, #4b0000, #4b0000, #4b0000, #4b0000,
+        #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c;
+}
+
 /* TRUE CIRCULAR GLASS PANEL */
 .glass-panel {
     -fx-background-radius: 0;
