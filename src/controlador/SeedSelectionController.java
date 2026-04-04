@@ -103,7 +103,11 @@ public class SeedSelectionController {
         GameContext.getInstance().setSeed(seed.trim());
         System.out.println("► Semilla Validada: " + seed);
 
+        // Mostramos el GIF de carga antes de la transición
+        NavigationController.showLoading(seedField.getScene());
+
         // Navegamos al tablero con la nueva transición especial (Menú cae, Tablero funde)
+        // hideLoading se llamará automáticamente al cambiar de escena o podemos confiar en que la nueva raíz no lo tenga
         NavigationController.navigateTo(event, "TableroJuego.fxml", NavigationController.Direction.TO_BOARD);
     }
 }

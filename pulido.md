@@ -15,4 +15,8 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - Añadidos sonidos de confirmación a los botones de navegar y aplicar cambios.
     - Añadidos sonidos de retroceso a los botones de "Volver" y "No" en el overlay.
 - [x] **5. Validación en Cargar Partida**
-    - El botón "Jugar Partida" ahora se deshabilita automáticamente si no hay ninguna partida seleccionada, eliminando el popup de advertencia anterior.
+    - El botón "Jugar Partida" ahora se deshabilita automáticamente si no hay ninguna partida seleccionada en la lista, eliminando el popup de advertencia anterior.
+- [x] **6. GIF de Carga Global (Tongo Dancing)**
+    - Implementación de `util.LoadingOverlay` para mostrar el GIF de carga en la esquina inferior derecha.
+    - Integración en `LoadGameController` (al cargar lista y cargar partida), `PlayerConfigController` (al cargar nombres) y `SeedSelectionController` (al generar la partida).
+    - El GIF utiliza hilos secundarios para no bloquear la interfaz y tiene animaciones de fundido suave.

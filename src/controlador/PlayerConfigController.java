@@ -41,12 +41,22 @@ public class PlayerConfigController {
         // Cargamos los nombres de la BD en un hilo secundario para no bloquear la animación
         new Thread(() -> {
             try {
+                // Notamos que necesitamos la escena para mostrar el loading
+                Platform.runLater(() -> {
+                    if (playerSlotsContainer.getScene() != null) {
+                        NavigationController.showLoading(playerSlotsContainer.getScene());
+                    }
+                });
+
                 List<String> names = db.obtenerTodosLosJugadores();
+                
                 Platform.runLater(() -> {
                     allPlayerNames = names;
                     setupInitialSlots();
+                    NavigationController.hideLoading();
                 });
             } catch (Exception e) {
+                Platform.runLater(NavigationController::hideLoading);
                 System.err.println("Error cargando jugadores en segundo plano: " + e.getMessage());
             }
         }).start();

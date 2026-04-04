@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.layout.StackPane;
+import util.LoadingOverlay;
 
 /**
  * NavigationController
@@ -405,5 +406,19 @@ public class NavigationController {
         if (node instanceof Parent) {
             applyGlobalEffects((Parent) node, fxmlFile);
         }
+    }
+
+    /**
+     * Muestra el GIF de carga en la escena actual.
+     */
+    public static void showLoading(Scene scene) {
+        LoadingOverlay.show(scene);
+    }
+
+    /**
+     * Oculta el GIF de carga.
+     */
+    public static void hideLoading() {
+        LoadingOverlay.hide();
     }
 }
