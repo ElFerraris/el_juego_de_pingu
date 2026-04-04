@@ -41,6 +41,12 @@ public class MainMenuController {
     }
 
     @FXML
+    private void showOptions(ActionEvent event) {
+        // Navegamos a las opciones con transición hacia adelante
+        NavigationController.navigateTo(event, "OptionsView.fxml", NavigationController.Direction.FORWARD);
+    }
+
+    @FXML
     private void handleLogout(ActionEvent event) {
         // Marcamos la acción a confirmar y navegamos al diálogo
         GameContext.getInstance().setActionToConfirm(GameContext.ActionConfirmType.LOGOUT);

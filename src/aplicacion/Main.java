@@ -12,6 +12,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import util.SettingsManager;
+import util.SoundManager;
 
 public class Main extends Application {
 	@Override
@@ -25,12 +27,34 @@ public class Main extends Application {
 		}
 
 		try {
-			// BorderPane root = new BorderPane();
+			// CARGAR CONFIGURACIÓN (Documentos/pingu/properties/)
+			SettingsManager sm = SettingsManager.getInstance();
+			
 			Parent root = FXMLLoader.load(getClass().getResource("/vista/Login.fxml"));
 			Scene scene = new Scene(root);
 			primaryStage.setScene(scene);
+			
+			// EL LOGIN SIEMPRE EN VENTANA Y FIJO (Andrei Style)
 			primaryStage.setResizable(false);
+			primaryStage.setFullScreen(false);
+			primaryStage.setWidth(1200);
+			primaryStage.setHeight(700);
+			primaryStage.centerOnScreen();
+			
+			// Listener para PERSISTIR el cambio de pantalla completa (Ej: al pulsar ESC)
+			primaryStage.fullScreenProperty().addListener((obs, wasFull, isFull) -> {
+				if (!isFull && sm.isFullscreen()) {
+					System.out.println("► Detectada salida de pantalla completa. Guardando preferencia...");
+					sm.setFullscreen(false);
+					sm.save();
+				}
+			});
+			
 			primaryStage.show();
+			
+			// Ajustar volumen inicial de SFX
+			SoundManager.setVolume(sm.getSfxVolume());
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -43,9 +43,17 @@ public class Login {
 
 	private void cargarSonidos() {
 		try {
+			double sfxVol = util.SettingsManager.getInstance().getSfxVolume();
+			
 			soundButton = new AudioClip(getClass().getResource("/assets/login/login_button.wav").toExternalForm());
 			soundCorrect = new AudioClip(getClass().getResource("/assets/login/login_correct.wav").toExternalForm());
 			soundError = new AudioClip(getClass().getResource("/assets/login/login_error.wav").toExternalForm());
+			
+			// Aplicar volumen actual
+			soundButton.setVolume(sfxVol);
+			soundCorrect.setVolume(sfxVol);
+			soundError.setVolume(sfxVol);
+			
 		} catch (Exception e) {
 			System.err.println("No se pudieron cargar los sonidos de login: " + e.getMessage());
 		}
@@ -152,8 +160,8 @@ public class Login {
 			GameContext.getInstance().setCurrentUser(jugadorActual);
 			System.out.println("► Sesión iniciada para: " + username + " (ID: " + id + ")");
 
-			// 3. Navegamos a la intro usando nuestro controlador unificado
-			NavigationController.navigateTo(event, "Intro.fxml", true);
+			// 3. Navegamos a la intro respetando el modo pantalla completa de las opciones (Andrei Style)
+			NavigationController.navigateTo(event, "Intro.fxml", util.SettingsManager.getInstance().isFullscreen());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

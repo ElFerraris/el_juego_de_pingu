@@ -41,6 +41,7 @@ public class NavigationController {
         Platform.runLater(() -> {
             try {
                 Stage newStage = new Stage();
+                newStage.setResizable(false); // <--- DESACTIVAR REDIMENSIÓN
                 new aplicacion.Main().start(newStage);
             } catch (Exception e) {
                 System.err.println("Error al reiniciar la aplicación: " + e.getMessage());
@@ -107,7 +108,7 @@ public class NavigationController {
 
     private static void loadAndSetWithTransition(Stage stage, String fxmlFile, Direction dir) throws IOException {
         if (dir == Direction.NONE) {
-            loadAndSet(stage, fxmlFile, true);
+            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
             return;
         }
 
@@ -120,7 +121,7 @@ public class NavigationController {
 
         // Ahora permitimos cualquier Pane (StackPane, BorderPane, etc.) para la animación
         if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane) || !(newRoot instanceof javafx.scene.layout.Pane)) {
-            loadAndSet(stage, fxmlFile, true);
+            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
             return;
         }
 
@@ -132,7 +133,7 @@ public class NavigationController {
                         nextRoot.getStyleClass().contains("root-plain-bg");
 
         if (!sameBg) {
-            loadAndSet(stage, fxmlFile, true);
+            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
             return;
         }
 
@@ -200,7 +201,7 @@ public class NavigationController {
         }
 
         if (oldContent == null || newContent == null) {
-            loadAndSet(stage, fxmlFile, true);
+            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
             return;
         }
 

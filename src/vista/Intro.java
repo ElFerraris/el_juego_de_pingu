@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -23,7 +24,7 @@ public class Intro {
     private MediaView mediaView;
 
     @FXML
-    private AnchorPane rootPane;
+    private StackPane rootPane;
 
     private MediaPlayer mediaPlayer;
 
@@ -38,6 +39,9 @@ public class Intro {
             mediaPlayer = new MediaPlayer(media);
             mediaView.setMediaPlayer(mediaPlayer);
             mediaView.setPreserveRatio(true);
+
+            // Aplicar volumen de música guardado
+            mediaPlayer.setVolume(util.SettingsManager.getInstance().getMusicVolume());
 
             // Al terminar el video, pasar al menú principal
             mediaPlayer.setOnEndOfMedia(this::finalizarIntro);
@@ -120,8 +124,9 @@ public class Intro {
         try {
             Stage stage = (Stage) rootPane.getScene().getWindow();
             if (stage != null) {
-                // Usamos nuestro controlador de navegación para unificar lógica
-                controlador.NavigationController.navigateTo(stage, "MainMenuView.fxml", true);
+                // Usamos nuestro controlador de navegación respetando los ajustes guardados (Andrei Style)
+                boolean fs = util.SettingsManager.getInstance().isFullscreen();
+                controlador.NavigationController.navigateTo(stage, "MainMenuView.fxml", fs);
             }
         } catch (Exception e) {
             System.err.println("Error al cargar el Menú Principal desde la Intro.");

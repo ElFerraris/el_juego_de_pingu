@@ -67,6 +67,16 @@
     -fx-effect: dropshadow(one-pass-box, rgba(13, 71, 161, 0.5), 0, 0, 0, 4);
 }
 
+.button:disabled {
+    -fx-opacity: 0.6;
+    -fx-background-color:
+        #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a,
+        #b0bec5, #b0bec5, #b0bec5, #b0bec5, #b0bec5, #b0bec5, #b0bec5;
+    -fx-text-fill: #546e7a;
+    -fx-effect: none;
+    -fx-cursor: default;
+}
+
 .button:hover {
     -fx-background-color:
         #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0,
@@ -258,4 +268,96 @@
 .text-field:disabled {
     -fx-opacity: 0.6;
     -fx-background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* OPCIONES: SLIDERS Y COMBOBOX */
+.progress-bar > .track,
+.slider > .track {
+    -fx-background-color: rgba(13, 71, 161, 0.2);
+    -fx-background-radius: 5;
+}
+
+.slider > .thumb {
+    -fx-background-color: #0d47a1;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0.0, 0, 1);
+}
+
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 2;
+    -fx-font-size: 18px;
+    -fx-padding: 5;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #0d47a1;
+}
+
+.premium-checkbox {
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 20px;
+    -fx-cursor: hand;
+}
+
+.premium-checkbox .box {
+    -fx-background-color: white;
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+}
+
+.premium-checkbox:selected .mark {
+    -fx-background-color: #0d47a1;
+}
+
+/* TABPANE PREMIUM (OPCIONES) */
+.tab-pane .tab-header-area {
+    -fx-padding: 0 0 10 0;
+}
+
+.tab-pane .divider {
+    -fx-background-color: rgba(13, 71, 161, 0.4);
+    -fx-pref-height: 2;
+}
+
+.tab-pane .tab {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-padding: 10 30;
+    -fx-background-radius: 5 5 0 0;
+    -fx-cursor: hand;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #0d47a1;
+    -fx-border-color: transparent;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: transparent;
+}
+
+/* DIRTY STATE FOR APPLY BUTTON (GREEN) */
+.button-dirty {
+    -fx-background-color:
+        #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20,
+        #4caf50, #4caf50, #4caf50, #4caf50, #4caf50, #4caf50, #4caf50;
+    -fx-text-fill: white;
+}
+
+.button-dirty:hover {
+    -fx-background-color:
+        #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a,
+        #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32;
 }
