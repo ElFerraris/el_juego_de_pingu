@@ -4,6 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -18,6 +20,8 @@ import java.util.Map;
 
 import modelo.*;
 import datos.BBDD;
+import util.SettingsManager;
+import util.SoundManager;
 
 /**
  * TableroController
@@ -36,6 +40,33 @@ public class TableroController {
     @FXML private Button btnDadoLento;
     @FXML private Button btnDadoRapido;
 
+    // --- ELEMENTOS DE RAÍZ Y OVERLAY ---
+    @FXML private StackPane rootStack;
+    @FXML private StackPane overlayPane;
+    @FXML private VBox menuPausa;
+    @FXML private VBox optionsOverlay;
+    @FXML private VBox confirmOverlay;
+    
+    // Controles de Opciones en Overlay
+    @FXML private ComboBox<String> resComboOverlay;
+    @FXML private CheckBox fsCheckOverlay;
+    @FXML private Slider musicSliderOverlay;
+    @FXML private Slider sfxSliderOverlay;
+    @FXML private Button btnApplyOverlay;
+    
+    // Controles de Confirmación
+    @FXML private Label confirmTitle;
+    @FXML private Label confirmMessage;
+
+    // Valores iniciales para Opciones (Dirty State)
+    private String initialResolution;
+    private boolean initialFullscreen;
+    private double initialMusic;
+    private double initialSfx;
+    
+    // Estado de confirmación actual
+    private GameContext.ActionConfirmType pendingAction;
+
     private Tablero tablero;
     private List<Jugador> jugadores;
     private int turnoActual = 0;
@@ -50,6 +81,9 @@ public class TableroController {
 
     @FXML
     public void initialize() {
+        // Inicialización de Opciones Overlay
+        initOptionsOverlay();
+        
         this.tablero = new Tablero();
         String seed = GameContext.getInstance().getSeed();
         tablero.introducirSeed(seed);
@@ -473,9 +507,152 @@ public class TableroController {
         handleBack(null);
     }
 
+    // --- GESTIÓN DE MENÚS Y OVERLAYS ---
+
+    @FXML
+    private void handleToggleMenu(ActionEvent event) {
+        overlayPane.setVisible(true);
+        menuPausa.setVisible(true);
+        optionsOverlay.setVisible(false);
+        confirmOverlay.setVisible(false);
+    }
+
+    @FXML
+    private void handleResume(ActionEvent event) {
+        overlayPane.setVisible(false);
+    }
+
+    @FXML
+    private void handleShowOptions(ActionEvent event) {
+        menuPausa.setVisible(false);
+        optionsOverlay.setVisible(true);
+        // Recargar valores por si cambiaron fuera
+        syncOptionsOverlayValues();
+    }
+
+    @FXML
+    private void handleBackFromOptions(ActionEvent event) {
+        optionsOverlay.setVisible(false);
+        menuPausa.setVisible(true);
+    }
+
+    @FXML
+    private void handleGoToMainMenu(ActionEvent event) {
+        saveGame();
+        pendingAction = GameContext.ActionConfirmType.LOGOUT;
+        confirmTitle.setText("VOLVER AL MENÚ");
+        confirmMessage.setText("La partida se ha guardado. ¿Seguro que quieres volver al menú principal?");
+        menuPausa.setVisible(false);
+        confirmOverlay.setVisible(true);
+    }
+
+    @FXML
+    private void handleExitGame(ActionEvent event) {
+        saveGame();
+        pendingAction = GameContext.ActionConfirmType.QUIT;
+        confirmTitle.setText("SALIR DEL JUEGO");
+        confirmMessage.setText("La partida se ha guardado. ¿Seguro que quieres cerrar el juego?");
+        menuPausa.setVisible(false);
+        confirmOverlay.setVisible(true);
+    }
+
+    @FXML
+    private void handleConfirmYes(ActionEvent event) {
+        if (pendingAction == GameContext.ActionConfirmType.LOGOUT) {
+            NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
+        } else if (pendingAction == GameContext.ActionConfirmType.QUIT) {
+            Platform.exit();
+        }
+    }
+
+    @FXML
+    private void handleConfirmNo(ActionEvent event) {
+        confirmOverlay.setVisible(false);
+        menuPausa.setVisible(true);
+    }
+
+    private void saveGame() {
+        int idPartida = tablero.getIdPartida();
+        if (idPartida > 0) {
+            juegoSimulado.setTurnoActual(turnoActual);
+            bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
+            log("Partida guardada automáticamente.");
+        }
+    }
+
+    // --- LÓGICA DE OPCIONES INTEGRADA ---
+
+    private void initOptionsOverlay() {
+        resComboOverlay.getItems().addAll("1280x720", "1600x900", "1920x1080");
+        syncOptionsOverlayValues();
+        
+        resComboOverlay.valueProperty().addListener((o, old, n) -> checkOptionsDirty());
+        fsCheckOverlay.selectedProperty().addListener((o, old, n) -> checkOptionsDirty());
+        musicSliderOverlay.valueProperty().addListener((o, old, n) -> checkOptionsDirty());
+        sfxSliderOverlay.valueProperty().addListener((o, old, n) -> checkOptionsDirty());
+    }
+
+    private void syncOptionsOverlayValues() {
+        SettingsManager sm = SettingsManager.getInstance();
+        initialResolution = sm.getResolution();
+        initialFullscreen = sm.isFullscreen();
+        initialMusic = sm.getMusicVolume() * 100;
+        initialSfx = sm.getSfxVolume() * 100;
+
+        resComboOverlay.setValue(initialResolution);
+        fsCheckOverlay.setSelected(initialFullscreen);
+        musicSliderOverlay.setValue(initialMusic);
+        sfxSliderOverlay.setValue(initialSfx);
+
+        btnApplyOverlay.setDisable(true);
+        btnApplyOverlay.getStyleClass().remove("button-dirty");
+    }
+
+    private void checkOptionsDirty() {
+        boolean changed = !resComboOverlay.getValue().equals(initialResolution) ||
+                         fsCheckOverlay.isSelected() != initialFullscreen ||
+                         Math.abs(musicSliderOverlay.getValue() - initialMusic) > 0.1 ||
+                         Math.abs(sfxSliderOverlay.getValue() - initialSfx) > 0.1;
+
+        btnApplyOverlay.setDisable(!changed);
+        if (changed) {
+            if (!btnApplyOverlay.getStyleClass().contains("button-dirty")) {
+                btnApplyOverlay.getStyleClass().add("button-dirty");
+            }
+        } else {
+            btnApplyOverlay.getStyleClass().remove("button-dirty");
+        }
+    }
+
+    @FXML
+    private void handleApplyOptionsOverlay(ActionEvent event) {
+        SettingsManager sm = SettingsManager.getInstance();
+        sm.setResolution(resComboOverlay.getValue());
+        sm.setFullscreen(fsCheckOverlay.isSelected());
+        sm.setMusicVolume(musicSliderOverlay.getValue() / 100.0);
+        sm.setSfxVolume(sfxSliderOverlay.getValue() / 100.0);
+        sm.save();
+
+        initialResolution = sm.getResolution();
+        initialFullscreen = sm.isFullscreen();
+        initialMusic = musicSliderOverlay.getValue();
+        initialSfx = sfxSliderOverlay.getValue();
+        checkOptionsDirty();
+
+        Stage stage = (Stage) rootStack.getScene().getWindow();
+        stage.setFullScreen(sm.isFullscreen());
+        if (!sm.isFullscreen()) {
+            String[] res = sm.getResolution().split("x");
+            stage.setWidth(Double.parseDouble(res[0]));
+            stage.setHeight(Double.parseDouble(res[1]));
+            stage.centerOnScreen();
+        }
+        SoundManager.setVolume(sm.getSfxVolume());
+    }
+
     @FXML
     private void handleBack(ActionEvent event) {
-        NavigationController.navigateTo(event, "MainMenuView.fxml");
+        handleToggleMenu(event); // Reutilizamos el nuevo sistema
     }
 
     // --- Helpers ---

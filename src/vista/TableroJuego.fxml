@@ -1,72 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Circle?>
 <?import java.net.URL?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="controlador.TableroController" 
-            styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+<StackPane fx:id="rootStack" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="controlador.TableroController" prefHeight="720.0" prefWidth="1280.0">
+    
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
-    
-    <!-- PANEL SUPERIOR: Información de Turno -->
-    <top>
-        <HBox alignment="CENTER" spacing="20" style="-fx-background-color: rgba(13,71,161,0.7); -fx-padding: 10;">
-            <Label fx:id="turnoLabel" text="TURNO DE: JUGADOR 1" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" />
-            <Separator orientation="VERTICAL" />
-            <Label fx:id="dadoResultadoLabel" text="Último dado: -" style="-fx-text-fill: #e3f2fd; -fx-font-size: 22px;" />
-        </HBox>
-    </top>
 
-    <!-- PANEL CENTRAL: El Tablero (Grid 10x5) -->
-    <center>
-        <StackPane>
-            <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
-            </padding>
-            <GridPane fx:id="boardGrid" hgap="5" vgap="5" alignment="CENTER" styleClass="glass-panel" style="-fx-padding: 15;">
-                <!-- Las casillas se inyectarán dinámicamente desde el controlador -->
-            </GridPane>
-        </StackPane>
-    </center>
+    <!-- CAPA 0: EL JUEGO -->
+    <BorderPane fx:id="gamePane" styleClass="root-plain-bg">
+        <!-- PANEL SUPERIOR: Información de Turno -->
+        <top>
+            <HBox alignment="CENTER" spacing="20" style="-fx-background-color: rgba(13,71,161,0.7); -fx-padding: 10;">
+                <Label fx:id="turnoLabel" text="TURNO DE: JUGADOR 1" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" />
+                <Separator orientation="VERTICAL" />
+                <Label fx:id="dadoResultadoLabel" text="Último dado: -" style="-fx-text-fill: #e3f2fd; -fx-font-size: 22px;" />
+            </HBox>
+        </top>
 
-    <!-- PANEL DERECHO: Inventario y Estado de Jugadores -->
-    <right>
-        <VBox spacing="15" prefWidth="300" styleClass="glass-panel" style="-fx-background-radius: 0; -fx-background-insets: 0 0 0 5;">
-            <padding>
-                <Insets top="20" right="15" bottom="20" left="15"/>
-            </padding>
-            <Label text="PINGÜINOS" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-            <Separator />
-            <VBox fx:id="playersStatusContainer" spacing="10" VBox.vgrow="ALWAYS">
-                <!-- Tarjetas de estado de cada jugador inyectadas aquí -->
-            </VBox>
-            <Separator />
-            <Button text="MENÚ PRINCIPAL" onAction="#handleBack" prefWidth="270" styleClass="button-secondary" />
-        </VBox>
-    </right>
+        <!-- PANEL CENTRAL: El Tablero -->
+        <center>
+            <StackPane>
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                <GridPane fx:id="boardGrid" hgap="5" vgap="5" alignment="CENTER" styleClass="glass-panel" style="-fx-padding: 15;">
+                    <!-- Las casillas se inyectarán dinámicamente -->
+                </GridPane>
+            </StackPane>
+        </center>
 
-    <!-- PANEL INFERIOR: Acciones y Mensajes -->
-    <bottom>
-        <HBox spacing="30" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 20;">
-            <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="600">
-                <Label text="LOG DE PARTIDA" style="-fx-font-size: 14px; -fx-opacity: 0.7;"/>
-                <TextArea fx:id="gameLogArea" editable="false" prefHeight="80" 
-                          style="-fx-control-inner-background: rgba(0,0,0,0.1); -fx-text-fill: #0d47a1; -fx-font-size: 16px;" 
-                          wrapText="true" />
-            </VBox>
-            
-            <VBox spacing="10" alignment="CENTER">
-                <HBox spacing="15" alignment="CENTER">
-                    <Button fx:id="btnDadoLento" text="D. LENTO" styleClass="button-secondary" prefWidth="120" onAction="#handleUseDadoLento"/>
-                    <Button fx:id="btnDado" text="TIRAR DADO" onAction="#handleRollDice" prefWidth="220" prefHeight="60" styleClass="button-primary" />
-                    <Button fx:id="btnDadoRapido" text="D. RÁPIDO" styleClass="button-secondary" prefWidth="120" onAction="#handleUseDadoRapido"/>
+        <!-- PANEL DERECHO: Inventario y Menú -->
+        <right>
+            <VBox spacing="15" prefWidth="300" styleClass="glass-panel" style="-fx-background-radius: 0; -fx-background-insets: 0 0 0 5;">
+                <padding>
+                    <Insets top="20" right="15" bottom="20" left="15"/>
+                </padding>
+                
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="PINGÜINOS" style="-fx-font-size: 24px; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <!-- BOTÓN HAMBURGUESA -->
+                    <Button fx:id="btnMenu" onAction="#handleToggleMenu" styleClass="button-hamburger">
+                        <graphic>
+                            <VBox spacing="4" alignment="CENTER">
+                                <Region styleClass="hamburger-line" />
+                                <Region styleClass="hamburger-line" />
+                                <Region styleClass="hamburger-line" />
+                            </VBox>
+                        </graphic>
+                    </Button>
                 </HBox>
-                <Label text="DADOS ESPECIALES DISPONIBLES" style="-fx-font-size: 12px; -fx-opacity: 0.6;"/>
+                
+                <Separator />
+                <VBox fx:id="playersStatusContainer" spacing="10" VBox.vgrow="ALWAYS">
+                    <!-- Tarjetas de estado -->
+                </VBox>
+                <Separator />
+                <!-- El botón de Menú Principal ha sido movido al menú hamburguesa -->
             </VBox>
-        </HBox>
-    </bottom>
-</BorderPane>
+        </right>
+
+        <!-- PANEL INFERIOR: Acciones -->
+        <bottom>
+            <HBox spacing="30" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 20;">
+                <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="600">
+                    <Label text="LOG DE PARTIDA" style="-fx-font-size: 14px; -fx-opacity: 0.7;"/>
+                    <TextArea fx:id="gameLogArea" editable="false" prefHeight="80" 
+                              style="-fx-control-inner-background: rgba(0,0,0,0.1); -fx-text-fill: #0d47a1; -fx-font-size: 16px;" 
+                              wrapText="true" />
+                </VBox>
+                
+                <VBox spacing="10" alignment="CENTER">
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button fx:id="btnDadoLento" text="D. LENTO" styleClass="button-secondary" prefWidth="120" onAction="#handleUseDadoLento"/>
+                        <Button fx:id="btnDado" text="TIRAR DADO" onAction="#handleRollDice" prefWidth="220" prefHeight="60" styleClass="button-primary" />
+                        <Button fx:id="btnDadoRapido" text="D. RÁPIDO" styleClass="button-secondary" prefWidth="120" onAction="#handleUseDadoRapido"/>
+                    </HBox>
+                    <Label text="DADOS ESPECIALES DISPONIBLES" style="-fx-font-size: 12px; -fx-opacity: 0.6;"/>
+                </VBox>
+            </HBox>
+        </bottom>
+    </BorderPane>
+
+    <!-- CAPA 1: OVERLAY CONTENEDOR (Fondo Oscurecido) -->
+    <StackPane fx:id="overlayPane" visible="false" styleClass="overlay-pane">
+        
+        <!-- PANEL DE PAUSA (HAMBURGUESA) -->
+        <VBox fx:id="menuPausa" spacing="20" alignment="CENTER" maxWidth="400" maxHeight="500" styleClass="glass-panel, floating-window">
+            <Label text="MENÚ" styleClass="title-text" style="-fx-font-size: 50px;" />
+            <Separator />
+            <Button text="REANUDAR" onAction="#handleResume" prefWidth="300" prefHeight="60" styleClass="button-primary" />
+            <Button text="OPCIONES" onAction="#handleShowOptions" prefWidth="300" prefHeight="60" styleClass="button-secondary" />
+            <Button text="MENÚ PRINCIPAL" onAction="#handleGoToMainMenu" prefWidth="300" prefHeight="60" styleClass="button-secondary" />
+            <Button text="SALIR AL ESCRITORIO" onAction="#handleExitGame" prefWidth="300" prefHeight="60" styleClass="button-danger" />
+        </VBox>
+
+        <!-- PANEL DE OPCIONES INTEGRADO -->
+        <VBox fx:id="optionsOverlay" visible="false" spacing="20" alignment="CENTER" maxWidth="900" maxHeight="650" styleClass="glass-panel, floating-window">
+            <Label text="OPCIONES" styleClass="title-text" style="-fx-font-size: 50px;" />
+            
+            <TabPane tabClosingPolicy="UNAVAILABLE" prefHeight="350">
+                <tabs>
+                    <Tab text="VÍDEO">
+                        <VBox spacing="20" style="-fx-padding: 30;">
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="RESOLUCIÓN" style="-fx-font-size: 20px; -fx-text-fill: #0d47a1;" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <ComboBox fx:id="resComboOverlay" prefWidth="300" />
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="PANTALLA COMPLETA" style="-fx-font-size: 20px; -fx-text-fill: #0d47a1;" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <CheckBox fx:id="fsCheckOverlay" styleClass="premium-checkbox" />
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="AUDIO">
+                        <VBox spacing="20" style="-fx-padding: 30;">
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="MÚSICA" style="-fx-font-size: 20px; -fx-text-fill: #0d47a1;" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Slider fx:id="musicSliderOverlay" prefWidth="350" min="0" max="100" />
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="EFECTOS (SFX)" style="-fx-font-size: 20px; -fx-text-fill: #0d47a1;" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Slider fx:id="sfxSliderOverlay" prefWidth="350" min="0" max="100" />
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                </tabs>
+            </TabPane>
+            
+            <HBox spacing="20" alignment="CENTER">
+                <Button text="VOLVER" onAction="#handleBackFromOptions" prefWidth="250" styleClass="button-secondary" />
+                <Button fx:id="btnApplyOverlay" text="APLICAR CAMBIOS" onAction="#handleApplyOptionsOverlay" prefWidth="350" styleClass="button-primary" />
+            </HBox>
+        </VBox>
+
+        <!-- PANEL DE CONFIRMACIÓN -->
+        <VBox fx:id="confirmOverlay" visible="false" spacing="30" alignment="CENTER" maxWidth="600" maxHeight="350" styleClass="glass-panel, floating-window">
+            <Label fx:id="confirmTitle" text="¿ESTÁS SEGURO?" styleClass="title-text" style="-fx-font-size: 40px;" />
+            <Label fx:id="confirmMessage" text="La partida se guardará automáticamente." 
+                   style="-fx-font-size: 22px; -fx-text-fill: #0d47a1; -fx-text-alignment: center;" wrapText="true" />
+            <HBox spacing="30" alignment="CENTER">
+                <Button text="SÍ, SALIR" onAction="#handleConfirmYes" prefWidth="220" prefHeight="50" styleClass="button-danger" />
+                <Button text="NO, VOLVER" onAction="#handleConfirmNo" prefWidth="220" prefHeight="50" styleClass="button-secondary" />
+            </HBox>
+        </VBox>
+    </StackPane>
+</StackPane>

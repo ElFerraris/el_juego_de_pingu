@@ -361,3 +361,35 @@
         #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a,
         #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32;
 }
+
+/* OVERLAYS IN-GAME */
+.overlay-pane {
+    -fx-background-color: rgba(0, 0, 0, 0.45);
+    -fx-alignment: center;
+}
+
+.floating-window {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 20, 0, 0, 0);
+}
+
+.button-hamburger {
+    -fx-min-width: 60px;
+    -fx-min-height: 60px;
+    -fx-pref-width: 60px;
+    -fx-pref-height: 60px;
+    -fx-padding: 0;
+}
+
+.hamburger-line {
+    -fx-background-color: #0d47a1;
+    -fx-min-height: 4px;
+    -fx-max-height: 4px;
+    -fx-pref-width: 30px;
+}
+
+/* Estilo para etiquetas que deben resaltar sobre el tablero en las capas */
+.overlay-label {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
