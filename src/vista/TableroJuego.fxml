@@ -49,7 +49,7 @@
                     <!-- BOTÓN HAMBURGUESA -->
                     <Button fx:id="btnMenu" onAction="#handleToggleMenu" styleClass="button-hamburger">
                         <graphic>
-                            <VBox spacing="4" alignment="CENTER">
+                            <VBox spacing="4" alignment="CENTER" fillWidth="false">
                                 <Region styleClass="hamburger-line" />
                                 <Region styleClass="hamburger-line" />
                                 <Region styleClass="hamburger-line" />

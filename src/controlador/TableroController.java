@@ -4,16 +4,16 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.geometry.Pos;
 import javafx.event.ActionEvent;
-import javafx.animation.PauseTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.util.Duration;
+import javafx.scene.Node;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -511,53 +511,55 @@ public class TableroController {
 
     @FXML
     private void handleToggleMenu(ActionEvent event) {
-        overlayPane.setVisible(true);
-        menuPausa.setVisible(true);
-        optionsOverlay.setVisible(false);
-        confirmOverlay.setVisible(false);
+        util.SoundManager.playConfirm();
+        syncOptionsOverlayValues(); // Precarga opciones por si acaso
+        animateIn(menuPausa);
     }
 
     @FXML
     private void handleResume(ActionEvent event) {
-        overlayPane.setVisible(false);
+        util.SoundManager.playConfirm();
+        animateOut(menuPausa, null);
     }
 
     @FXML
     private void handleShowOptions(ActionEvent event) {
-        menuPausa.setVisible(false);
-        optionsOverlay.setVisible(true);
-        // Recargar valores por si cambiaron fuera
-        syncOptionsOverlayValues();
+        util.SoundManager.playConfirm();
+        animateOut(menuPausa, () -> {
+            syncOptionsOverlayValues();
+            animateIn(optionsOverlay);
+        });
     }
 
     @FXML
     private void handleBackFromOptions(ActionEvent event) {
-        optionsOverlay.setVisible(false);
-        menuPausa.setVisible(true);
+        util.SoundManager.playBack();
+        animateOut(optionsOverlay, () -> animateIn(menuPausa));
     }
 
     @FXML
     private void handleGoToMainMenu(ActionEvent event) {
-        saveGame();
+        util.SoundManager.playConfirm();
         pendingAction = GameContext.ActionConfirmType.LOGOUT;
         confirmTitle.setText("VOLVER AL MENÚ");
-        confirmMessage.setText("La partida se ha guardado. ¿Seguro que quieres volver al menú principal?");
-        menuPausa.setVisible(false);
-        confirmOverlay.setVisible(true);
+        confirmMessage.setText("¿Seguro que quieres volver al menú principal?");
+        
+        animateOut(menuPausa, () -> animateIn(confirmOverlay));
     }
 
     @FXML
     private void handleExitGame(ActionEvent event) {
-        saveGame();
+        util.SoundManager.playConfirm();
         pendingAction = GameContext.ActionConfirmType.QUIT;
         confirmTitle.setText("SALIR DEL JUEGO");
-        confirmMessage.setText("La partida se ha guardado. ¿Seguro que quieres cerrar el juego?");
-        menuPausa.setVisible(false);
-        confirmOverlay.setVisible(true);
+        confirmMessage.setText("¿Seguro que quieres cerrar el juego?");
+        
+        animateOut(menuPausa, () -> animateIn(confirmOverlay));
     }
 
     @FXML
     private void handleConfirmYes(ActionEvent event) {
+        util.SoundManager.playConfirm();
         if (pendingAction == GameContext.ActionConfirmType.LOGOUT) {
             NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
         } else if (pendingAction == GameContext.ActionConfirmType.QUIT) {
@@ -567,17 +569,60 @@ public class TableroController {
 
     @FXML
     private void handleConfirmNo(ActionEvent event) {
-        confirmOverlay.setVisible(false);
-        menuPausa.setVisible(true);
+        util.SoundManager.playBack();
+        animateOut(confirmOverlay, () -> animateIn(menuPausa));
     }
 
-    private void saveGame() {
-        int idPartida = tablero.getIdPartida();
-        if (idPartida > 0) {
-            juegoSimulado.setTurnoActual(turnoActual);
-            bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
-            log("Partida guardada automáticamente.");
+    // --- LÓGICA DE ANIMACIONES ---
+
+    private void animateIn(Node content) {
+        overlayPane.setVisible(true);
+        // Si el fondo ya es visible (cambio entre menús), no lo re-animamos
+        if (overlayPane.getOpacity() < 0.1) {
+            FadeTransition fadeBg = new FadeTransition(Duration.millis(300), overlayPane);
+            fadeBg.setFromValue(0);
+            fadeBg.setToValue(1);
+            fadeBg.play();
         }
+
+        content.setVisible(true);
+        content.setOpacity(0);
+        content.setTranslateY(30);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(400), content);
+        fadeIn.setToValue(1);
+
+        TranslateTransition slideUp = new TranslateTransition(Duration.millis(400), content);
+        slideUp.setToY(0);
+
+        ParallelTransition pt = new ParallelTransition(fadeIn, slideUp);
+        pt.setInterpolator(Interpolator.EASE_OUT);
+        pt.play();
+    }
+
+    private void animateOut(Node content, Runnable onFinished) {
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), content);
+        fadeOut.setToValue(0);
+
+        TranslateTransition slideDown = new TranslateTransition(Duration.millis(300), content);
+        slideDown.setToY(30);
+
+        ParallelTransition pt = new ParallelTransition(fadeOut, slideDown);
+        pt.setInterpolator(Interpolator.EASE_IN);
+        
+        pt.setOnFinished(e -> {
+            content.setVisible(false);
+            if (onFinished != null) {
+                onFinished.run();
+            } else {
+                // Si no hay siguiente acción, es que cerramos el menú completo
+                FadeTransition fadeBg = new FadeTransition(Duration.millis(300), overlayPane);
+                fadeBg.setToValue(0);
+                fadeBg.setOnFinished(ev -> overlayPane.setVisible(false));
+                fadeBg.play();
+            }
+        });
+        pt.play();
     }
 
     // --- LÓGICA DE OPCIONES INTEGRADA ---
@@ -626,6 +671,7 @@ public class TableroController {
 
     @FXML
     private void handleApplyOptionsOverlay(ActionEvent event) {
+        util.SoundManager.playConfirm();
         SettingsManager sm = SettingsManager.getInstance();
         sm.setResolution(resComboOverlay.getValue());
         sm.setFullscreen(fsCheckOverlay.isSelected());

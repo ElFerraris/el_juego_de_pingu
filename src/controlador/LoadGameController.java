@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import modelo.PartidaGuardada;
 import datos.BBDD;
@@ -16,11 +17,17 @@ public class LoadGameController {
     @FXML
     private ListView<PartidaGuardada> listaPartidas;
 
+    @FXML
+    private Button btnJugar;
+
     private BBDD bbdd = new BBDD();
 
     @FXML
     public void initialize() {
         cargarListaDeBD();
+        
+        // Deshabilitar botón jugar si no hay nada seleccionado
+        btnJugar.disableProperty().bind(listaPartidas.getSelectionModel().selectedItemProperty().isNull());
     }
 
     private void cargarListaDeBD() {
@@ -33,10 +40,7 @@ public class LoadGameController {
     private void handleJugar(ActionEvent event) {
         PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
         
-        if (seleccionada == null) {
-            mostrarAlerta("Atención", "Por favor, selecciona una partida de la lista para continuar.", Alert.AlertType.WARNING);
-            return;
-        }
+        // Ya no hace falta el check de null porque el botón se deshabilita solo
 
         System.out.println("► Intentando cargar partida ID: " + seleccionada.getIdPartida());
         

@@ -17,7 +17,7 @@
         
         <HBox spacing="30" alignment="CENTER" style="-fx-margin-top: 20px;">
             <Button text="VOLVER AL MENÚ" onAction="#handleVolver" styleClass="button-secondary" prefWidth="250" prefHeight="50" style="-fx-base: #f44336;" />
-            <Button text="JUGAR PARTIDA" onAction="#handleJugar" prefWidth="250" prefHeight="50" style="-fx-base: #4CAF50;"/>
+            <Button fx:id="btnJugar" text="JUGAR PARTIDA" onAction="#handleJugar" prefWidth="250" prefHeight="50" style="-fx-base: #4CAF50;"/>
         </HBox>
     </VBox>
 </StackPane>
