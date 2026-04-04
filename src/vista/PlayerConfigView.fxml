@@ -27,7 +27,7 @@
             
             <HBox spacing="25" alignment="CENTER">
                 <Button text="EMPEZAR PARTIDA" onAction="#showSeedSelection" styleClass="button-primary" prefWidth="350" prefHeight="60" />
-                <Button text="VOLVER AL MENÚ" onAction="#showMainMenu" prefWidth="250" prefHeight="60" />
+                <Button text="VOLVER AL MENÚ" onAction="#showMainMenu" styleClass="button-secondary" prefWidth="250" prefHeight="60" />
             </HBox>
         </VBox>
     </VBox>

@@ -16,7 +16,7 @@
         <ListView fx:id="listaPartidas" prefHeight="350" prefWidth="700" style="-fx-font-family: 'Consolas', monospace; -fx-font-size: 16px;" />
         
         <HBox spacing="30" alignment="CENTER" style="-fx-margin-top: 20px;">
-            <Button text="VOLVER AL MENÚ" onAction="#handleVolver" prefWidth="250" prefHeight="50" style="-fx-base: #f44336;" />
+            <Button text="VOLVER AL MENÚ" onAction="#handleVolver" styleClass="button-secondary" prefWidth="250" prefHeight="50" style="-fx-base: #f44336;" />
             <Button text="JUGAR PARTIDA" onAction="#handleJugar" prefWidth="250" prefHeight="50" style="-fx-base: #4CAF50;"/>
         </HBox>
     </VBox>

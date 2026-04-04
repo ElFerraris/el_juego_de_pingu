@@ -371,14 +371,29 @@ public class NavigationController {
 
     private static void attachMenuSounds(Node node) {
         node.setOnMouseClicked(e -> {
-            if (node.getStyleClass().contains("button-primary") || 
-                node.getStyleClass().contains("button-danger") ||
-                node.getStyleClass().contains("add-player-button")) {
+            String text = "";
+            if (node instanceof javafx.scene.control.Button) {
+                text = ((javafx.scene.control.Button) node).getText().toUpperCase();
+            }
+
+            // CASOS ESPECIALES POR TEXTO (Prioridad)
+            if (text.equals("SALIR") || text.contains("SÍ") || text.contains("CONFIRMAR")) {
                 util.SoundManager.playConfirm();
-            } else if (node.getStyleClass().contains("button-secondary") || 
+            } 
+            else if (text.contains("VOLVER") || text.contains("ATRÁS") || text.contains("NO")) {
+                util.SoundManager.playBack();
+            }
+            // CASOS POR CLASE CSS (Segunda opción)
+            else if (node.getStyleClass().contains("button-primary") || 
+                     node.getStyleClass().contains("button-danger") ||
+                     node.getStyleClass().contains("add-player-button")) {
+                util.SoundManager.playConfirm();
+            } 
+            else if (node.getStyleClass().contains("button-secondary") || 
                        node.getStyleClass().contains("remove-slot-button")) {
                 util.SoundManager.playBack();
-            } else {
+            } 
+            else {
                 // Sonido por defecto si no tiene clase específica
                 util.SoundManager.playConfirm();
             }

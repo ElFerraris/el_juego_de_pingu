@@ -38,7 +38,7 @@
         </VBox>
 
         <HBox spacing="40" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
-            <Button text="VOLVER" onAction="#handleBack" prefWidth="220" prefHeight="70" />
+            <Button text="VOLVER" onAction="#handleBack" styleClass="button-secondary" prefWidth="220" prefHeight="70" />
             <Button text="INICIAR PARTIDA" onAction="#handleStartGame" styleClass="button-primary" prefWidth="320" prefHeight="80" />
         </HBox>
     </VBox>
