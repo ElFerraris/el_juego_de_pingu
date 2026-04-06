@@ -128,6 +128,9 @@ public class TableroController {
         
         actualizarUI();
         
+        // OCULTAR GIF DE CARGA (Andrei Style)
+        NavigationController.hideLoading();
+        
         // Verificamos si el primer jugador está ya bloqueado (raro pero por si acaso)
         comprobarBloqueoInicioTurno();
     }

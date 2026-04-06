@@ -325,7 +325,35 @@ public class NavigationController {
 
         ensureCssLoaded(scene);
         applyGlobalEffects(root, fxmlFile);
+        
+        // APLICAR CONFIGURACIÓN GLOBAL
+        util.SettingsManager sm = util.SettingsManager.getInstance();
         stage.setFullScreen(fullScreen);
+        
+        // Listener para PERSISTIR el cambio de pantalla completa
+        if (stage.getUserData() == null || !stage.getUserData().equals("LISTENER_ADDED")) {
+            stage.fullScreenProperty().addListener((obs, wasFull, isFull) -> {
+                // Comprobación de ID segura contra nulos para evitar NPE al cerrar diálogos o cambiar escenas
+                Parent rootNode = stage.getScene() != null ? stage.getScene().getRoot() : null;
+                String rootId = (rootNode != null && rootNode.getId() != null) ? rootNode.getId() : "";
+                
+                if (!isFull && sm.isFullscreen() && !"loginPane".equals(rootId)) {
+                    sm.setFullscreen(false);
+                    sm.save();
+                }
+            });
+            stage.setUserData("LISTENER_ADDED");
+        }
+
+        if (!fullScreen) {
+            String[] dimensions = sm.getResolution().split("x");
+            try {
+                stage.setWidth(Double.parseDouble(dimensions[0]));
+                stage.setHeight(Double.parseDouble(dimensions[1]));
+                stage.centerOnScreen();
+            } catch (Exception e) {
+            }
+        }
     }
 
     /**

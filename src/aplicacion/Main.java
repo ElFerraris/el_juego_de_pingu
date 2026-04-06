@@ -3,15 +3,9 @@ package aplicacion;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Stage;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import util.SettingsManager;
 import util.SoundManager;
 
@@ -27,32 +21,22 @@ public class Main extends Application {
 		}
 
 		try {
-			// CARGAR CONFIGURACIÓN (Documentos/pingu/properties/)
+			// CARGAR CONFIGURACIÓN
 			SettingsManager sm = SettingsManager.getInstance();
 			
 			Parent root = FXMLLoader.load(getClass().getResource("/vista/Login.fxml"));
 			Scene scene = new Scene(root);
 			primaryStage.setScene(scene);
 			
-			// EL LOGIN SIEMPRE EN VENTANA Y FIJO (Andrei Style)
+			// EL LOGIN SIEMPRE A 1800x900
 			primaryStage.setResizable(false);
 			primaryStage.setFullScreen(false);
-			primaryStage.setWidth(1200);
-			primaryStage.setHeight(700);
+			primaryStage.setWidth(1800);
+			primaryStage.setHeight(900);
 			primaryStage.centerOnScreen();
-			
-			// Listener para PERSISTIR el cambio de pantalla completa (Ej: al pulsar ESC)
-			primaryStage.fullScreenProperty().addListener((obs, wasFull, isFull) -> {
-				if (!isFull && sm.isFullscreen()) {
-					System.out.println("► Detectada salida de pantalla completa. Guardando preferencia...");
-					sm.setFullscreen(false);
-					sm.save();
-				}
-			});
 			
 			primaryStage.show();
 			
-			// Ajustar volumen inicial de SFX
 			SoundManager.setVolume(sm.getSfxVolume());
 			
 		} catch (Exception e) {
