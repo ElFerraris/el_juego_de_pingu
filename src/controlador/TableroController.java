@@ -1,9 +1,11 @@
 package controlador;
 
 import javafx.fxml.FXML;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import java.util.*;
+import java.util.stream.*;
+import javafx.scene.layout.*;
+import javafx.scene.image.ImageView;
+import javafx.geometry.Point2D;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
@@ -14,9 +16,6 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.util.Duration;
 import javafx.scene.Node;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import modelo.*;
 import datos.BBDD;
@@ -30,9 +29,11 @@ import util.SoundManager;
  */
 public class TableroController {
 
-    @FXML private GridPane boardGrid;
+    @FXML private Pane boardContainer;
+    @FXML private ImageView boardBackground;
     @FXML private Label turnoLabel;
     @FXML private Label dadoResultadoLabel;
+    @FXML private Button btnDados;
     @FXML private TextArea gameLogArea;
     @FXML private VBox playersStatusContainer;
     
@@ -123,8 +124,8 @@ public class TableroController {
         }
         
         dibujarTablero();
-        crearTarjetasJugadores();
         crearFichasJugadores();
+        crearTarjetasJugadores();
         
         actualizarUI();
         
@@ -136,35 +137,67 @@ public class TableroController {
     }
 
     private void dibujarTablero() {
-        boardGrid.getChildren().clear();
+        boardContainer.getChildren().clear();
         casillaNodes.clear();
-        for (int i = 0; i < Tablero.TAMANYO_TABLERO; i++) {
-            Casilla c = tablero.getCasilla(i);
+        
+        for (int i = 1; i <= Tablero.TAMANYO_TABLERO; i++) {
+            Casilla c = tablero.getCasilla(i - 1);
             if (c == null) continue;
-            StackPane cellNode = crearNodoCasilla(c);
-            int row = 4 - (i / 10);
-            int col = i % 10;
-            if ((4 - row) % 2 != 0) col = 9 - col;
-            boardGrid.add(cellNode, col, row);
-            casillaNodes.put(i, cellNode);
+            
+            StackPane node = crearNodoCasilla(c);
+            
+            // Calculamos coordenadas absolutas
+            Point2D pos = getCoordinatesForNode(c.getPosicion());
+            node.setLayoutX(pos.getX() - 20); // Centrar (mitad de prefWidth 40)
+            node.setLayoutY(pos.getY() - 20); // Centrar
+            
+            boardContainer.getChildren().add(node);
+            casillaNodes.put(c.getPosicion(), node);
         }
+        
+        // Casillas creadas, ahora podemos poblar fichas
+    }
+
+    private Point2D getCoordinatesForNode(int index) {
+        // Coordenadas refinadas para seguir la "escalera" del iceberg
+        double x, y;
+        
+        if (index <= 10) { // Nivel 1 (Base)
+            y = 550 + (index - 1) * -2; // Ligera inclinación hacia arriba
+            x = 440 + (index - 1) * 44; 
+        } else if (index <= 20) { // Nivel 2 (Subiendo)
+            y = 530 - (index - 11) * 10;
+            x = 880 - (index - 11) * 45;
+        } else if (index <= 30) { // Nivel 3 (Girando)
+            y = 430 - (index - 21) * 8;
+            x = 430 + (index - 21) * 35;
+        } else if (index <= 40) { // Nivel 4 (Casi arriba)
+            y = 350 - (index - 31) * 12;
+            x = 780 - (index - 31) * 32;
+        } else { // Nivel 5 (Entrada Iglú)
+            y = 230 - (index - 41) * 8;
+            x = 460 + (index - 41) * 4;
+            if (index == 50) { 
+                 x = 492; y = 145; 
+            }
+        }
+        return new Point2D(x, y);
     }
 
     private StackPane crearNodoCasilla(Casilla c) {
         StackPane pane = new StackPane();
-        pane.getStyleClass().addAll("casilla-base", getStyleClassForCasilla(c.getTipo()));
-        pane.setPrefSize(80, 80);
+        pane.getStyleClass().add("casilla-base");
+        
+        // Solo mostramos círculo suave en especiales o inicio/fin
+        if (c.getPosicion() == 1 || c.getPosicion() == 50 || !c.getTipo().equals("Casilla NORMAL")) {
+            pane.getStyleClass().add("casilla-hotspot");
+        }
+        
         Label numLabel = new Label(String.valueOf(c.getPosicion()));
         numLabel.getStyleClass().add("label-num-casilla");
-        StackPane.setAlignment(numLabel, Pos.TOP_LEFT);
+        StackPane.setAlignment(numLabel, Pos.CENTER);
         
-        String nombreCasilla = c.getTipo().replace("Casilla ", "");
-        if (nombreCasilla.equals("NORMAL")) nombreCasilla = ""; // Dejar vacío si es normal
-        
-        Label textLabel = new Label(nombreCasilla);
-        textLabel.getStyleClass().add("label-nombre-casilla");
-        
-        pane.getChildren().addAll(numLabel, textLabel);
+        pane.getChildren().add(numLabel);
         return pane;
     }
 
@@ -208,8 +241,16 @@ public class TableroController {
         if (cell != null) {
             Circle token = playerTokens.get(j);
             int index = jugadores.indexOf(j);
-            token.setTranslateX(index * 6 - 8); 
-            token.setTranslateY(index * 4 - 4);
+            
+            // Staggering para el hotspot mas pequeño
+            double offsetX = (index % 2 == 0) ? -10 : 10;
+            double offsetY = (index < 2) ? -10 : 10;
+            
+            token.setTranslateX(offsetX); 
+            token.setTranslateY(offsetY);
+            
+            // Los tokens van al boardContainer, no a la celda, para que las transiciones sean mas faciles
+            // Pero aqui los mantendremos en la celda primero para no romper la logica actual de animaciones
             if (!cell.getChildren().contains(token)) {
                 cell.getChildren().add(token);
             }

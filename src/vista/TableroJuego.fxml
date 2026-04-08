@@ -4,6 +4,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import java.net.URL?>
 
 <StackPane fx:id="rootStack" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
@@ -26,13 +28,15 @@
 
         <!-- PANEL CENTRAL: El Tablero -->
         <center>
-            <StackPane>
-                <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
-                </padding>
-                <GridPane fx:id="boardGrid" hgap="5" vgap="5" alignment="CENTER" styleClass="glass-panel" style="-fx-padding: 15;">
-                    <!-- Las casillas se inyectarán dinámicamente -->
-                </GridPane>
+            <StackPane alignment="CENTER" style="-fx-background-color: #05143c;">
+                <ImageView fx:id="boardBackground" fitWidth="1000" preserveRatio="true">
+                    <image>
+                        <Image url="@../assets/imagenes/FONDO_TABLERO_ESTRUCTURADO.jpg"/>
+                    </image>
+                </ImageView>
+                <Pane fx:id="boardContainer" maxWidth="1000" maxHeight="625" style="-fx-background-color: transparent;">
+                    <!-- Las casillas asolutas se inyectarán aquí -->
+                </Pane>
             </StackPane>
         </center>
 
