@@ -23,22 +23,21 @@ public class Main extends Application {
 		try {
 			// CARGAR CONFIGURACIÓN
 			SettingsManager sm = SettingsManager.getInstance();
-			
+
 			Parent root = FXMLLoader.load(getClass().getResource("/vista/Login.fxml"));
 			Scene scene = new Scene(root);
 			primaryStage.setScene(scene);
-			
-			// EL LOGIN SIEMPRE A 1800x900
+
 			primaryStage.setResizable(false);
 			primaryStage.setFullScreen(false);
-			primaryStage.setWidth(1800);
-			primaryStage.setHeight(900);
+			primaryStage.setWidth(1200);
+			primaryStage.setHeight(700);
 			primaryStage.centerOnScreen();
-			
+
 			primaryStage.show();
-			
+
 			SoundManager.setVolume(sm.getSfxVolume());
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
