@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import java.util.*;
 import java.util.stream.*;
 import javafx.scene.layout.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.geometry.Point2D;
 import javafx.stage.Stage;
@@ -186,18 +187,50 @@ public class TableroController {
 
     private StackPane crearNodoCasilla(Casilla c) {
         StackPane pane = new StackPane();
+        pane.setPrefSize(40, 40);
         pane.getStyleClass().add("casilla-base");
         
-        // Solo mostramos círculo suave en especiales o inicio/fin
-        if (c.getPosicion() == 1 || c.getPosicion() == 50 || !c.getTipo().equals("Casilla NORMAL")) {
-            pane.getStyleClass().add("casilla-hotspot");
+        int pos = c.getPosicion();
+        String tipo = c.getTipo();
+        String imageName = "normal.png";
+
+        // Mapeo de imágenes por tipo y posición
+        if (pos == 0) { // Casilla 1 (Inicio)
+            imageName = "inicio.png";
+        } else if (pos == Tablero.TAMANYO_TABLERO - 1) { // Casilla 50 (Meta)
+            imageName = "meta.png";
+        } else {
+            switch (tipo) {
+                case "Casilla OSO": imageName = "oso.png"; break;
+                case "Casilla AGUJERO": imageName = "agujero.png"; break;
+                case "Casilla TRINEO": imageName = "trineo.png"; break;
+                case "Casilla INTERROGANTE": imageName = "interrogante.png"; break;
+                case "Casilla ROMPEDIZAS": imageName = "rompedizas.png"; break;
+                default: imageName = "normal.png"; break;
+            }
         }
-        
-        Label numLabel = new Label(String.valueOf(c.getPosicion()));
-        numLabel.getStyleClass().add("label-num-casilla");
-        StackPane.setAlignment(numLabel, Pos.CENTER);
-        
-        pane.getChildren().add(numLabel);
+
+        try {
+            String path = "/assets/imagenes/casillas/" + imageName;
+            var resource = getClass().getResource(path);
+            
+            if (resource != null) {
+                Image img = new Image(resource.toExternalForm());
+                ImageView view = new ImageView(img);
+                view.setFitWidth(40);
+                view.setFitHeight(40);
+                view.setPreserveRatio(true);
+                pane.getChildren().add(view);
+            } else {
+                // Fallback: Si no hay imagen, mantenemos el círculo visual para no perder la casilla
+                if (pos == 0 || pos == Tablero.TAMANYO_TABLERO - 1 || !tipo.equals("Casilla NORMAL")) {
+                    pane.getStyleClass().add("casilla-hotspot");
+                }
+            }
+        } catch (Exception e) {
+            // Error silencioso en carga para no romper el juego si falta un archivo
+        }
+
         return pane;
     }
 
