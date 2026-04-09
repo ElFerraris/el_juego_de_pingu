@@ -35,31 +35,51 @@ public class Intro {
         File file = new File(path);
 
         if (file.exists()) {
-            Media media = new Media(file.toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-            mediaView.setMediaPlayer(mediaPlayer);
-            mediaView.setPreserveRatio(true);
+            try {
+                Media media = new Media(file.toURI().toString());
+                mediaPlayer = new MediaPlayer(media);
+                mediaView.setMediaPlayer(mediaPlayer);
+                mediaView.setPreserveRatio(true);
 
-            // Aplicar volumen de música guardado
-            mediaPlayer.setVolume(util.SettingsManager.getInstance().getMusicVolume());
+                // Aplicar volumen de música guardado
+                mediaPlayer.setVolume(util.SettingsManager.getInstance().getMusicVolume());
 
-            // Al terminar el video, pasar al menú principal
-            mediaPlayer.setOnEndOfMedia(this::finalizarIntro);
+                // --- MANEJO DE ERRORES ---
+                mediaPlayer.setOnError(() -> {
+                    System.err.println("► ERROR Media: " + mediaPlayer.getError().getMessage());
+                    finalizarIntro();
+                });
 
-            // Asegurar que el video se reproduzca
-            mediaPlayer.setOnReady(() -> {
-                mediaPlayer.play();
-                ajustarDimensiones();
-            });
+                media.setOnError(() -> {
+                    System.err.println("► ERROR Fichero Media: " + media.getError().getMessage());
+                    finalizarIntro();
+                });
 
-            // Failsafe de reproducción
-            Platform.runLater(() -> {
-                if (mediaPlayer != null && mediaPlayer.getStatus() == MediaPlayer.Status.READY) {
+                // Al terminar el video, pasar al menú principal
+                mediaPlayer.setOnEndOfMedia(this::finalizarIntro);
+
+                // Asegurar que el video se reproduzca solo cuando esté listo
+                mediaPlayer.setOnReady(() -> {
+                    System.out.println("► Intro lista para reproducir.");
                     mediaPlayer.play();
                     ajustarDimensiones();
-                }
-            });
+                });
 
+                // Fallback: Si en 5 segundos no ha empezado, saltamos (evita pantalla en negro infinita)
+                new Thread(() -> {
+                    try { Thread.sleep(5000); } catch (InterruptedException e) {}
+                    Platform.runLater(() -> {
+                        if (mediaPlayer != null && mediaPlayer.getStatus() != MediaPlayer.Status.PLAYING) {
+                            System.out.println("► Failsafe: La intro tarda demasiado en cargar, saltando...");
+                            finalizarIntro();
+                        }
+                    });
+                }).start();
+
+            } catch (Exception e) {
+                System.err.println("Error al inicializar el MediaPlayer: " + e.getMessage());
+                finalizarIntro();
+            }
         } else {
             System.err.println("No se encontró el archivo de video en: " + path);
             cargarMenuPrincipal();

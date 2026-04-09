@@ -23,3 +23,7 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
 - [x] **7. Ajuste de Resolución en Login**
     - Fijada la resolución del Login a **1200x700** tanto en `Main.java` como en `Login.fxml`.
     - Asegurada la transición a la resolución guardada en `settings.properties` al entrar en la Intro.
+- [x] **8. Optimización de la Intro (Vídeo)**
+    - Añadido sistema de **Failsafe**: si el vídeo no carga en 5 segundos, salta automáticamente al menú.
+    - Añadido **manejo de errores** para detectar problemas de codecs y evitar pantallas en negro.
+    - Mejorada la gestión de memoria eliminando el reproductor correctamente al finalizar.
