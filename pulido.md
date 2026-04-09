@@ -20,3 +20,6 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - Implementación de `util.LoadingOverlay` para mostrar el GIF de carga en la esquina inferior derecha.
     - Integración en `LoadGameController` (al cargar lista y cargar partida), `PlayerConfigController` (al cargar nombres) y `SeedSelectionController` (al generar la partida).
     - El GIF utiliza hilos secundarios para no bloquear la interfaz y tiene animaciones de fundido suave.
+- [x] **7. Ajuste de Resolución en Login**
+    - Fijada la resolución del Login a **1200x700** tanto en `Main.java` como en `Login.fxml`.
+    - Asegurada la transición a la resolución guardada en `settings.properties` al entrar en la Intro.
