@@ -16,12 +16,13 @@ public class CasillaTrineo extends Casilla {
         return posicionSiguienteTrineo;
     }
 
-    public String activarEfecto(Jugador jugador) {
-        return avanzarSiguienteTrineo(jugador);
+    @Override
+    public void activarEfecto(Jugador jugador) {
+        avanzarSiguienteTrineo(jugador);
     }
 
-    public String avanzarSiguienteTrineo(Jugador jugador) {
+    public void avanzarSiguienteTrineo(Jugador jugador) {
+        System.out.println(jugador.getNombre() + " toma el trineo y avanza a la casilla " + posicionSiguienteTrineo + "!");
         jugador.setPosicion(posicionSiguienteTrineo);
-        return jugador.getNombre() + " toma el trineo y avanza a la casilla " + posicionSiguienteTrineo + "!";
     }
 }

@@ -18,7 +18,7 @@ public abstract class Casilla {
      * Activa el efecto de esta casilla sobre el jugador.
      * Cada subclase DEBE implementar su propia lógica.
      */
-    public abstract String activarEfecto(Jugador jugador);
+    public abstract void activarEfecto(Jugador jugador);
 
     public int getPosicion() {
         return posicion;

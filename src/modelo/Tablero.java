@@ -15,24 +15,21 @@ public class Tablero {
  
 
 
-    /**
-     * Genera una seed aleatoria válida y la devuelve como String.
+	/**
+     * Genera una seed aleatoria válida y construye el tablero.
      */
-    public static String generarSeedValida() {
+    public void generarSeedAleatoria() {
         String genSeed;
-        Tablero temp = new Tablero();
+
         do {
             genSeed = "";
             for (int i = 0; i < TAMANYO_TABLERO - 2; i++) {
                 int numseed = (int) (Math.random() * 10);
                 genSeed += numseed;
             }
-        } while (!temp.validarSeed(genSeed));
-        return genSeed;
-    }
+            System.out.println("Seed generada: " + genSeed);
+        } while (!validarSeed(genSeed));
 
-    public void generarSeedAleatoria() {
-        String genSeed = generarSeedValida();
         generarTablero(genSeed);
     }
 
@@ -151,23 +148,14 @@ public class Tablero {
     /**
      * Aplica el efecto de la casilla donde se encuentra el jugador.
      */
-    public String aplicarEfectoCasilla(Jugador jugador) {
+    public void aplicarEfectoCasilla(Jugador jugador) {
         int pos = jugador.getPosicion();
 
         if (pos >= 0 && pos < casillas.size()) {
             Casilla casillaActual = casillas.get(pos);
-            String txtTop = "--- EFECTO: " + jugador.getNombre() + " cae en " + casillaActual.getTipo().replace("Casilla ", "") + " ---";
-            
-            String efectoTxt = casillaActual.activarEfecto(jugador);
-            
-            if (efectoTxt != null && !efectoTxt.isEmpty()) {
-                System.out.println(txtTop + "\n  » " + efectoTxt);
-                return txtTop + "\n  » " + efectoTxt;
-            } else {
-                return ""; // Si es normal, no ensuciamos el log visual
-            }
+            System.out.println("--- EFECTO: " + jugador.getNombre() + " ha caído en " + casillaActual.getTipo() + " ---");
+            casillaActual.activarEfecto(jugador);
         }
-        return "";
     }
 
     /**

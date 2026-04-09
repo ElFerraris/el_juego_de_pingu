@@ -16,11 +16,11 @@ public class CasillaInterrogante extends Casilla {
         this.tablero = tablero;
     }
 
-    public String activarEfecto(Jugador jugador) {
+    @Override
+    public void activarEfecto(Jugador jugador) {
         Evento evento = generarEventoAleatorio();
-        String result = evento.aplicarEfecto(jugador, tablero);
+        evento.aplicarEfecto(jugador, tablero);
         eventosOcurridos.add(evento);
-        return result;
     }
 
     private Evento generarEventoAleatorio() {

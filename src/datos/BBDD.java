@@ -11,7 +11,6 @@ import modelo.Jugador;
  * Clase para gestionar la conexión y operaciones con la Base de Datos.
  */
 public class BBDD {
-    // Gestor de conexión principal para el juego de pingüinos
 
     /**
      * Establece conexión con la Base de Datos Oracle.
@@ -342,56 +341,6 @@ public class BBDD {
         }
     }
     
-    public boolean guardarEstadoCompleto(int idPartida, Juego juego) {
-        String sqlPartida = "{call actualizar_partida(?, ?, ?)}";
-        String sqlJugador = "{call actualizar_participacion(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-        
-        try (Connection con = conectarBD()) {
-            if (con == null) return false;
-            
-            // Iniciamos transacción para evitar guardados a medias
-            con.setAutoCommit(false);
-            
-            // 1. Guardar la Partida
-            try (CallableStatement cstmtP = con.prepareCall(sqlPartida)) {
-                cstmtP.setInt(1, idPartida);
-                cstmtP.setInt(2, juego.getTurnoActual());
-                if (juego.getGanador() != null) {
-                    cstmtP.setInt(3, juego.getGanador().getId());
-                } else {
-                    cstmtP.setNull(3, java.sql.Types.INTEGER);
-                }
-                cstmtP.execute();
-            }
-            
-            // 2. Guardar a todos los Jugadores
-            try (CallableStatement cstmtJ = con.prepareCall(sqlJugador)) {
-                for (Jugador j : juego.getJugadores()) {
-                    cstmtJ.setInt(1, idPartida);
-                    cstmtJ.setInt(2, j.getId());
-                    cstmtJ.setInt(3, j.getPosicion());
-                    cstmtJ.setString(4, j.getColor());
-                    cstmtJ.setInt(5, j.getInventario().getCantidad("Pez"));
-                    cstmtJ.setInt(6, j.getInventario().getCantidad("BolaNieve"));
-                    cstmtJ.setInt(7, j.getInventario().getCantidad("DadoLento"));
-                    cstmtJ.setInt(8, j.getInventario().getCantidad("DadoRapido"));
-                    cstmtJ.setInt(9, j.getTurnosBloqueados());
-                    
-                    cstmtJ.execute();
-                }
-            }
-            
-            con.commit();
-            // Restaurar a true (aunque la conexión se cierra justo abajo)
-            con.setAutoCommit(true);
-            return true;
-            
-        } catch (SQLException e) {
-            System.out.println("► ERROR al guardar estado completo: " + e.getMessage());
-            return false;
-        }
-    }
-    
     public boolean cargarDatosPartida(int idPartida, Juego juego) {
         String sqlPartida = "SELECT seed, torn_actual FROM partida WHERE num_partida = ?";
         String sqlJugadores = "SELECT j.id_jugador, j.nickname, j.es_cpu, p.posicion_actual, p.color, " +
@@ -487,28 +436,6 @@ public class BBDD {
         } catch (SQLException e) {
             System.out.println("► ERROR al listar partidas: " + e.getMessage());
         }
-    }
-    
-    public ArrayList<modelo.PartidaGuardada> obtenerPartidasPendientes() {
-        ArrayList<modelo.PartidaGuardada> lista = new ArrayList<>();
-        String sql = "SELECT num_partida, seed, TO_CHAR(hora_partida, 'DD/MM/YYYY HH24:MI') as hora_partida FROM partida WHERE ganador IS NULL ORDER BY hora_partida DESC";
-
-        try (Connection con = conectarBD();
-             PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                lista.add(new modelo.PartidaGuardada(
-                    rs.getInt("num_partida"),
-                    rs.getString("seed"),
-                    rs.getString("hora_partida")
-                ));
-            }
-
-        } catch (SQLException e) {
-            System.out.println("► ERROR al obtener lista partidas pendientes: " + e.getMessage());
-        }
-        return lista;
     }
     
     public void mostrarRankingMasPartidas() {
@@ -681,19 +608,6 @@ public class BBDD {
     
     
 
-    public ArrayList<String> obtenerTodosLosJugadores() {
-        ArrayList<String> jugadores = new ArrayList<>();
-        String sql = "SELECT nickname FROM jugador WHERE es_cpu = 0 ORDER BY nickname";
-        try (Connection con = conectarBD();
-                PreparedStatement pstmt = con.prepareStatement(sql);
-                ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                jugadores.add(rs.getString("nickname"));
-            }
-        } catch (SQLException e) {
-            System.out.println("► ERROR al listar jugadores: " + e.getMessage());
-        }
-        return jugadores;
-    }
-
+        
+    
 }
