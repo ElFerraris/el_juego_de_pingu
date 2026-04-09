@@ -27,3 +27,8 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - Añadido sistema de **Failsafe**: si el vídeo no carga en 5 segundos, salta automáticamente al menú.
     - Añadido **manejo de errores** para detectar problemas de codecs y evitar pantallas en negro.
     - Mejorada la gestión de memoria eliminando el reproductor correctamente al finalizar.
+- [x] **9. Carga Asíncrona del Tablero**
+    - Implementado `navigateToBoardAsync` en `NavigationController` para evitar el congelamiento de la UI.
+    - La carga del FXML y la inicialización pesada (BD Oracle) se ejecutan ahora en un hilo secundario (`Task`).
+    - El GIF de carga se renderiza antes de empezar la carga pesada, asegurando que se vea la animación fluida.
+    - Integrado en los flujos de "Nueva Partida" y "Cargar Partida".

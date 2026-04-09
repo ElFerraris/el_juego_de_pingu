@@ -103,13 +103,6 @@ public class SeedSelectionController {
         GameContext.getInstance().setSeed(seed.trim());
         System.out.println("► Semilla Validada: " + seed);
 
-        // Mostramos el GIF de carga antes de la transición
-        NavigationController.showLoading(seedField.getScene());
-
-        // Usamos runLater para dar tiempo al GIF a renderizarse antes de la carga pesada del FXML
-        javafx.application.Platform.runLater(() -> {
-            // Navegamos al tablero con la nueva transición especial (Menú cae, Tablero funde)
-            NavigationController.navigateTo(event, "TableroJuego.fxml", NavigationController.Direction.TO_BOARD);
-        });
+        NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
     }
 }

@@ -107,6 +107,48 @@ public class NavigationController {
         }
     }
 
+    /**
+     * Carga el tablero de forma asíncrona para evitar que el GIF se congele.
+     */
+    public static void navigateToBoardAsync(ActionEvent event, String fxmlFile) {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        showLoading(stage.getScene());
+
+        // Usamos un retraso mínimo para permitir que el GIF empiece a animarse
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.millis(150));
+        pause.setOnFinished(e -> {
+            javafx.concurrent.Task<Parent> loadTask = new javafx.concurrent.Task<>() {
+                @Override
+                protected Parent call() throws Exception {
+                    String fullPath = VISTA_PATH + fxmlFile;
+                    FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
+                    return loader.load();
+                }
+            };
+
+            loadTask.setOnSucceeded(workerEvent -> {
+                Parent root = loadTask.getValue();
+                Scene scene = stage.getScene();
+                scene.setRoot(root);
+                ensureCssLoaded(scene);
+                applyGlobalEffects(root, fxmlFile);
+                
+                // Aplicar FS si está en opciones
+                stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
+                System.out.println("► Tablero cargado asíncronamente.");
+            });
+
+            loadTask.setOnFailed(workerEvent -> {
+                hideLoading();
+                System.err.println("► Error en carga asíncrona: " + loadTask.getException().getMessage());
+                loadTask.getException().printStackTrace();
+            });
+
+            new Thread(loadTask).start();
+        });
+        pause.play();
+    }
+
     private static void loadAndSetWithTransition(Stage stage, String fxmlFile, Direction dir) throws IOException {
         if (dir == Direction.NONE) {
             loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
