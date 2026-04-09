@@ -106,11 +106,15 @@ public class Juego {
                     colorElegido = sc.nextLine();
 
                     String colorEncontrado = null;
-                    for (String c : coloresDisponibles) {
+                    int index = 0;
+
+                    // Recorremos mientras no hayamos encontrado nada y queden elementos
+                    while (colorEncontrado == null && index < coloresDisponibles.size()) {
+                        String c = coloresDisponibles.get(index);
                         if (c.equalsIgnoreCase(colorElegido)) {
                             colorEncontrado = c;
-                            break;
                         }
+                        index++;
                     }
 
                     if (colorEncontrado != null) {
