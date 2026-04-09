@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import java.net.URL?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.PlayerConfigController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+    <Region style="-fx-background-color: rgba(5,20,60,0.2);"/>
+    <VBox spacing="35" alignment="CENTER" maxWidth="1100" maxHeight="680" styleClass="glass-panel">
+        <Label text="CONFIGURACIÓN DE PERSONAJES" styleClass="title-text" />
+        
+        <HBox fx:id="playerSlotsContainer" spacing="30" alignment="CENTER" minHeight="280">
+            <!-- Cards and "+" buttons injected here -->
+        </HBox>
+
+        <VBox spacing="30" alignment="CENTER">
+            <CheckBox fx:id="focaCheckbox" text="AÑADIR FOCA LOCA (CPU)" styleClass="premium-checkbox"/>
+            
+            <Label fx:id="errorLabel" styleClass="error-text" wrapText="true" textAlignment="CENTER" />
+            
+            <HBox spacing="25" alignment="CENTER">
+                <Button text="EMPEZAR PARTIDA" onAction="#showSeedSelection" styleClass="button-primary" prefWidth="350" prefHeight="60" />
+                <Button text="VOLVER AL MENÚ" onAction="#showMainMenu" styleClass="button-secondary" prefWidth="250" prefHeight="60" />
+            </HBox>
+        </VBox>
+    </VBox>
+</StackPane>

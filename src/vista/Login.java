@@ -1,22 +1,21 @@
 package vista;
 
-import java.io.IOException;
-
 import datos.BBDD;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import javafx.scene.media.AudioClip;
+import controlador.GameContext;
+import controlador.NavigationController;
+import modelo.Jugador;
+import java.sql.Connection;
 
 public class Login {
+	// Controlador principal de la vista de acceso
 
 	@FXML
 	private Button btn_login;
@@ -31,20 +30,51 @@ public class Login {
 
 	private boolean modoRegistro = false;
 
+	// Sonidos
+	private AudioClip soundButton;
+	private AudioClip soundCorrect;
+	private AudioClip soundError;
+
 	@FXML
 	public void initialize() {
 		limpiarErrores();
+		cargarSonidos();
+	}
+
+	private void cargarSonidos() {
+		try {
+			double sfxVol = util.SettingsManager.getInstance().getSfxVolume();
+			
+			soundButton = new AudioClip(getClass().getResource("/assets/login/login_button.wav").toExternalForm());
+			soundCorrect = new AudioClip(getClass().getResource("/assets/login/login_correct.wav").toExternalForm());
+			soundError = new AudioClip(getClass().getResource("/assets/login/login_error.wav").toExternalForm());
+			
+			// Aplicar volumen actual
+			soundButton.setVolume(sfxVol);
+			soundCorrect.setVolume(sfxVol);
+			soundError.setVolume(sfxVol);
+			
+		} catch (Exception e) {
+			System.err.println("No se pudieron cargar los sonidos de login: " + e.getMessage());
+		}
+	}
+
+	private void reproducir(AudioClip clip) {
+		if (clip != null) {
+			clip.play();
+		}
 	}
 
 	@FXML
 	void handleLogin(ActionEvent event) {
+		reproducir(soundButton);
 		limpiarErrores();
 
 		String user = text_user.getText().trim();
 		String pswd = text_pswd.getText().trim();
 
-		// Validación común: campos vacíos
 		if (user.isEmpty() || pswd.isEmpty()) {
+			reproducir(soundError);
 			if (user.isEmpty() && pswd.isEmpty()) {
 				mostrarError("Faltan usuario y contraseña", true, true);
 			} else if (user.isEmpty()) {
@@ -64,8 +94,10 @@ public class Login {
 
 	private void iniciarSesion(String user, String pswd, ActionEvent event) {
 		if (BBDD.loginJugador(user, pswd)) {
+			reproducir(soundCorrect);
 			abrirIntro(event);
 		} else {
+			reproducir(soundError);
 			mostrarError("Usuario o contraseña incorrectos", true, true);
 		}
 	}
@@ -73,10 +105,12 @@ public class Login {
 	private void registrarUsuario(String user, String pswd, ActionEvent event) {
 		int resultado = BBDD.registrarNuevoJugador(user, pswd, false);
 		if (resultado != -1) {
+			reproducir(soundCorrect);
 			alternarModo(null);
 			text_error.setText("¡Registro completado! Ya puedes entrar.");
 			text_error.getStyleClass().add("success-label");
 		} else {
+			reproducir(soundError);
 			mostrarError("El nombre '" + user + "' ya está ocupado.", true, false);
 		}
 	}
@@ -115,17 +149,23 @@ public class Login {
 
 	private void abrirIntro(ActionEvent event) {
 		try {
-			Parent root = FXMLLoader.load(getClass().getResource("/vista/Intro.fxml"));
-			Scene scene = new Scene(root);
-			Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-			stage.setScene(scene);
-			stage.centerOnScreen();
-			stage.setFullScreen(true); // Activar pantalla completa para el vídeo
-			stage.setFullScreenExitHint(""); // Quitar el mensaje de "Presione ESC para salir"
-			stage.show();
-		} catch (IOException e) {
+			// 1. Obtenemos los datos del jugador de la BD para la sesión
+			String username = text_user.getText().trim();
+			Connection con = BBDD.conectarBD();
+			int id = BBDD.obtenerIdJugador(con, username);
+			if (con != null) con.close();
+
+			// 2. Guardamos en el contexto global (Andrei Style)
+			Jugador jugadorActual = new Jugador(id, username, "Azul"); // Azul por defecto
+			GameContext.getInstance().setCurrentUser(jugadorActual);
+			System.out.println("► Sesión iniciada para: " + username + " (ID: " + id + ")");
+
+			// 3. Navegamos a la intro respetando el modo pantalla completa de las opciones (Andrei Style)
+			NavigationController.navigateTo(event, "Intro.fxml", util.SettingsManager.getInstance().isFullscreen());
+			
+		} catch (Exception e) {
 			e.printStackTrace();
-			text_error.setText("Error al cargar la introducción");
+			text_error.setText("Error al iniciar la sesión/intro");
 		}
 	}
 }

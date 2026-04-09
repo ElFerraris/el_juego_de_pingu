@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -23,7 +24,7 @@ public class Intro {
     private MediaView mediaView;
 
     @FXML
-    private AnchorPane rootPane;
+    private StackPane rootPane;
 
     private MediaPlayer mediaPlayer;
 
@@ -34,28 +35,51 @@ public class Intro {
         File file = new File(path);
 
         if (file.exists()) {
-            Media media = new Media(file.toURI().toString());
-            mediaPlayer = new MediaPlayer(media);
-            mediaView.setMediaPlayer(mediaPlayer);
-            mediaView.setPreserveRatio(true);
+            try {
+                Media media = new Media(file.toURI().toString());
+                mediaPlayer = new MediaPlayer(media);
+                mediaView.setMediaPlayer(mediaPlayer);
+                mediaView.setPreserveRatio(true);
 
-            // Al terminar el video, pasar al menú principal
-            mediaPlayer.setOnEndOfMedia(this::finalizarIntro);
+                // Aplicar volumen de música guardado
+                mediaPlayer.setVolume(util.SettingsManager.getInstance().getMusicVolume());
 
-            // Asegurar que el video se reproduzca
-            mediaPlayer.setOnReady(() -> {
-                mediaPlayer.play();
-                ajustarDimensiones();
-            });
+                // --- MANEJO DE ERRORES ---
+                mediaPlayer.setOnError(() -> {
+                    System.err.println("► ERROR Media: " + mediaPlayer.getError().getMessage());
+                    finalizarIntro();
+                });
 
-            // Failsafe de reproducción
-            Platform.runLater(() -> {
-                if (mediaPlayer != null && mediaPlayer.getStatus() == MediaPlayer.Status.READY) {
+                media.setOnError(() -> {
+                    System.err.println("► ERROR Fichero Media: " + media.getError().getMessage());
+                    finalizarIntro();
+                });
+
+                // Al terminar el video, pasar al menú principal
+                mediaPlayer.setOnEndOfMedia(this::finalizarIntro);
+
+                // Asegurar que el video se reproduzca solo cuando esté listo
+                mediaPlayer.setOnReady(() -> {
+                    System.out.println("► Intro lista para reproducir.");
                     mediaPlayer.play();
                     ajustarDimensiones();
-                }
-            });
+                });
 
+                // Fallback: Si en 5 segundos no ha empezado, saltamos (evita pantalla en negro infinita)
+                new Thread(() -> {
+                    try { Thread.sleep(5000); } catch (InterruptedException e) {}
+                    Platform.runLater(() -> {
+                        if (mediaPlayer != null && mediaPlayer.getStatus() != MediaPlayer.Status.PLAYING) {
+                            System.out.println("► Failsafe: La intro tarda demasiado en cargar, saltando...");
+                            finalizarIntro();
+                        }
+                    });
+                }).start();
+
+            } catch (Exception e) {
+                System.err.println("Error al inicializar el MediaPlayer: " + e.getMessage());
+                finalizarIntro();
+            }
         } else {
             System.err.println("No se encontró el archivo de video en: " + path);
             cargarMenuPrincipal();
@@ -118,18 +142,14 @@ public class Intro {
 
     private void cargarMenuPrincipal() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/vista/MenuPrincipal.fxml"));
-            Scene scene = new Scene(root);
             Stage stage = (Stage) rootPane.getScene().getWindow();
-
             if (stage != null) {
-                stage.setFullScreen(false);
-                stage.setFullScreenExitHint("");
-                stage.setScene(scene);
-                stage.centerOnScreen();
-                stage.show();
+                // Usamos nuestro controlador de navegación respetando los ajustes guardados (Andrei Style)
+                boolean fs = util.SettingsManager.getInstance().isFullscreen();
+                controlador.NavigationController.navigateTo(stage, "MainMenuView.fxml", fs);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.err.println("Error al cargar el Menú Principal desde la Intro.");
             e.printStackTrace();
         }
     }

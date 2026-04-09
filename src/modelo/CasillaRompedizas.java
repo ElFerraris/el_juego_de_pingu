@@ -13,21 +13,21 @@ public class CasillaRompedizas extends Casilla {
     }
 
     @Override
-    public void activarEfecto(Jugador jugador) {
-        calcularPenalizacion(jugador);
+    public String activarEfecto(Jugador jugador) {
+        return calcularPenalizacion(jugador);
     }
 
-    private void calcularPenalizacion(Jugador jugador) {
+    private String calcularPenalizacion(Jugador jugador) {
         int total = jugador.getInventario().getCantidad("Total");
 
         if (total == 0) {
-            System.out.println(jugador.getNombre() + " pasa sin penalización.");
+            return jugador.getNombre() + " pasa sin penalización por las casillas rompedizas.";
         } else if (total <= 5) {
             jugador.setTurnosBloqueados(jugador.getTurnosBloqueados() + 1);
-            System.out.println(jugador.getNombre() + " pierde un turno.");
+            return "El hielo cruje por el peso... " + jugador.getNombre() + " pierde un turno equilibrándose.";
         } else {
             jugador.setPosicion(0);
-            System.out.println(jugador.getNombre() + " ha caído y se va al principio.");
+            return "¡CRACK! Demasiado peso. El hielo se rompe y " + jugador.getNombre() + " se cae al agua volviendo al inicio.";
         }
     }
 }
