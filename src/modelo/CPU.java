@@ -16,6 +16,7 @@ public class CPU extends Jugador {
      * La foca decide qué dado usar automáticamente.
      * Prioriza el dado rápido para avanzar lo máximo posible.
      */
+    
     public void decidirAccion() {
         System.out.println(this.getNombre() + " está decidiendo qué dado usar...");
 

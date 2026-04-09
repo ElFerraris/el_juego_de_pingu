@@ -285,6 +285,7 @@ public class Juego {
     /**
      * Lógica del turno de un jugador humano.
      */
+    
     private void ejecutarTurnoHumano(Jugador jugador, Scanner sc) {
         System.out.println("Presiona ENTER para tirar el dado...");
         String variable ="";
