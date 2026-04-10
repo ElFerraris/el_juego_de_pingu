@@ -13,6 +13,8 @@ import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.layout.StackPane;
 import util.LoadingOverlay;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 /**
  * NavigationController
@@ -25,6 +27,8 @@ public class NavigationController {
     // Rutas base para las vistas y el estilo
     private static final String VISTA_PATH = "/vista/";
     private static final String CSS_PATH = "/vista/style.css";
+    private static long lastToggleTime = 0;
+    private static final long TOGGLE_COOLDOWN = 300; // ms
 
     /**
      * Cierra la sesión, limpia el contexto y reinicia la aplicación desde el Login.
@@ -135,6 +139,7 @@ public class NavigationController {
                 
                 // Aplicar FS si está en opciones
                 stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
+                setupGlobalHotkeys(scene);
                 System.out.println("► Tablero cargado asíncronamente.");
             });
 
@@ -368,6 +373,9 @@ public class NavigationController {
         ensureCssLoaded(scene);
         applyGlobalEffects(root, fxmlFile);
         
+        // CONFIGURAR HOTKEYS GLOBALES (F / F11 para Fullscreen)
+        setupGlobalHotkeys(scene);
+        
         // APLICAR CONFIGURACIÓN GLOBAL
         util.SettingsManager sm = util.SettingsManager.getInstance();
         stage.setFullScreen(fullScreen);
@@ -375,26 +383,68 @@ public class NavigationController {
         // Listener para PERSISTIR el cambio de pantalla completa
         if (stage.getUserData() == null || !stage.getUserData().equals("LISTENER_ADDED")) {
             stage.fullScreenProperty().addListener((obs, wasFull, isFull) -> {
-                // Comprobación de ID segura contra nulos para evitar NPE al cerrar diálogos o cambiar escenas
-                Parent rootNode = stage.getScene() != null ? stage.getScene().getRoot() : null;
-                String rootId = (rootNode != null && rootNode.getId() != null) ? rootNode.getId() : "";
-                
-                if (!isFull && sm.isFullscreen() && !"loginPane".equals(rootId)) {
-                    sm.setFullscreen(false);
+                // Sincronizar siempre el manager con el estado real del Stage
+                if (sm.isFullscreen() != isFull) {
+                    sm.setFullscreen(isFull);
                     sm.save();
+                    System.out.println("► Fullscreen persistido automáticamente: " + isFull);
                 }
             });
             stage.setUserData("LISTENER_ADDED");
         }
 
-        if (!fullScreen) {
-            String[] dimensions = sm.getResolution().split("x");
-            try {
-                stage.setWidth(Double.parseDouble(dimensions[0]));
-                stage.setHeight(Double.parseDouble(dimensions[1]));
-                stage.centerOnScreen();
-            } catch (Exception e) {
+        if (!isFullWindowed(stage)) {
+            applyResolution(stage, sm);
+        }
+    }
+
+    /**
+     * Alterna el modo pantalla completa del Stage y lo guarda en preferencias.
+     */
+    public static void toggleFullscreen(Stage stage) {
+        if (stage == null) return;
+        boolean newState = !stage.isFullScreen();
+        stage.setFullScreen(newState);
+        
+        // El listener añadido en loadAndSet se encargará de guardar en SettingsManager
+    }
+
+    /**
+     * Configura los atajos de teclado globales para una escena.
+     * Evita duplicados comprobando una propiedad personalizada en la escena.
+     */
+    public static void setupGlobalHotkeys(Scene scene) {
+        if (scene == null) return;
+        
+        // Evitar añadir múltiples veces el mismo filtro si se reutiliza la Scene
+        if (scene.getProperties().containsKey("HOTKEYS_ADDED")) return;
+        
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.F || event.getCode() == KeyCode.F11) {
+                long now = System.currentTimeMillis();
+                if (now - lastToggleTime > TOGGLE_COOLDOWN) {
+                    lastToggleTime = now;
+                    Stage stage = (Stage) scene.getWindow();
+                    toggleFullscreen(stage);
+                }
+                event.consume();
             }
+        });
+        
+        scene.getProperties().put("HOTKEYS_ADDED", true);
+    }
+
+    private static boolean isFullWindowed(Stage stage) {
+        return stage.isFullScreen();
+    }
+
+    private static void applyResolution(Stage stage, util.SettingsManager sm) {
+        String[] dimensions = sm.getResolution().split("x");
+        try {
+            stage.setWidth(Double.parseDouble(dimensions[0]));
+            stage.setHeight(Double.parseDouble(dimensions[1]));
+            stage.centerOnScreen();
+        } catch (Exception e) {
         }
     }
 

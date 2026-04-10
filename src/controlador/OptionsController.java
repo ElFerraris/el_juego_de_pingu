@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import util.SettingsManager;
 import util.SoundManager;
+import javafx.application.Platform;
 
 /**
  * OptionsController
@@ -59,6 +60,20 @@ public class OptionsController {
         fullscreenCheck.selectedProperty().addListener((obs, oldVal, newVal) -> checkChanges());
         musicSlider.valueProperty().addListener((obs, oldVal, newVal) -> checkChanges());
         sfxSlider.valueProperty().addListener((obs, oldVal, newVal) -> checkChanges());
+
+        // Sincronización en tiempo real si el estado cambia externamente (tecla F o Esc)
+        Platform.runLater(() -> {
+            if (applyButton.getScene() != null && applyButton.getScene().getWindow() instanceof Stage) {
+                Stage stage = (Stage) applyButton.getScene().getWindow();
+                stage.fullScreenProperty().addListener((obs, oldVal, isNowFull) -> {
+                    if (fullscreenCheck.isSelected() != isNowFull) {
+                        fullscreenCheck.setSelected(isNowFull);
+                        initialFullscreen = isNowFull; // Sincronizamos el estado inicial para evitar marcar cambios falsos
+                        checkChanges();
+                    }
+                });
+            }
+        });
     }
 
     private void checkChanges() {
