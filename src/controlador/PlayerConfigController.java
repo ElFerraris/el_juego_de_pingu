@@ -188,18 +188,20 @@ public class PlayerConfigController {
             } else if (mandatory && slots.size() == 1) {
                 selectedColor = "Rojo";
             } else {
-                selectedColor = "Verde"; // Fallback
-                for (String cName : COLORS) {
-                    boolean taken = false;
-                    for (Slot existingSlot : slots) {
+                boolean taken = false;
+                for (int j = 0; j < COLORS.length && !taken; j++) {
+                    String cName = COLORS[j];
+                    for (int k = 0; k < slots.size() && !taken; k++) {
+                        Slot existingSlot = slots.get(k);
                         if (cName.equals(existingSlot.getColor())) {
                             taken = true;
-                            break;
                         }
                     }
                     if (!taken) {
                         selectedColor = cName;
-                        break;
+                        taken = true; // Forzamos salida del bucle exterior
+                    } else {
+                        taken = false; // Reset para probar el siguiente color
                     }
                 }
             }
@@ -257,10 +259,10 @@ public class PlayerConfigController {
                 } else {
                     setText(item);
                     boolean alreadySelected = false;
-                    for (Slot s : slots) {
+                    for (int j = 0; j < slots.size() && !alreadySelected; j++) {
+                        Slot s = slots.get(j);
                         if (s != Slot.this && item.equals(s.getName())) {
                             alreadySelected = true;
-                            break;
                         }
                     }
                     if (alreadySelected) {
@@ -295,9 +297,10 @@ public class PlayerConfigController {
                 Circle c = new Circle(15, color);
                 
                 boolean taken = false;
-                for (Slot s : slots) {
+                for (int j = 0; j < slots.size() && !taken; j++) {
+                    Slot s = slots.get(j);
                     if (s != this && cName.equals(s.getColor())) {
-                        taken = true; break;
+                        taken = true;
                     }
                 }
 

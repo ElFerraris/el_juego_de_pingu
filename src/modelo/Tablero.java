@@ -109,14 +109,19 @@ public class Tablero {
         // Determinar siguiente casilla de cada trineo
         for (int i = 1; i < TAMANYO_TABLERO - 1; i++) {
             if (casillas.get(i).getTipo().equals("Casilla TRINEO")) {
-                for (int y = i + 1; y < TAMANYO_TABLERO - 1; y++) {
+                
+                int y = i + 1;
+                boolean siguienteEncontrado = false;
+
+                while (y < TAMANYO_TABLERO - 1 && !siguienteEncontrado) {
                     if (casillas.get(y).getTipo().equals("Casilla TRINEO")) {
                         casillas.set(i, new CasillaTrineo(i, "Casilla TRINEO", y));
-                        break;
+                        siguienteEncontrado = true;
                     }
+                    y++;
                 }
             }
-            // Si el trineo no tiene siguiente, apunta a sí mismo
+
             if (casillas.get(i).getTipo().equals("Casilla TRINEO")
                 && ((CasillaTrineo) casillas.get(i)).getPosicionSiguienteTrineo() == 0) {
                 casillas.set(i, new CasillaTrineo(i, "Casilla TRINEO", i));
@@ -126,11 +131,16 @@ public class Tablero {
         // Determinar agujero anterior de cada agujero
         for (int i = TAMANYO_TABLERO - 1; i > 0; i--) {
             if (casillas.get(i).getTipo().equals("Casilla AGUJERO")) {
-                for (int y = i - 1; y > 0; y--) {
+                
+                int y = i - 1;
+                boolean encontrado = false;
+
+                while (y > 0 && !encontrado) {
                     if (casillas.get(y).getTipo().equals("Casilla AGUJERO")) {
                         casillas.set(i, new CasillaAgujero(i, "Casilla AGUJERO", y));
-                        break;
+                        encontrado = true; 
                     }
+                    y--;
                 }
             }
         }
