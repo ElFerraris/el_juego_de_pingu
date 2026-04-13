@@ -32,3 +32,11 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - La carga del FXML y la inicialización pesada (BD Oracle) se ejecutan ahora en un hilo secundario (`Task`).
     - El GIF de carga se renderiza antes de empezar la carga pesada, asegurando que se vea la animación fluida.
     - Integrado en los flujos de "Nueva Partida" y "Cargar Partida".
+- [x] **10. Eliminación de Sentencias `break` y `return` en Bucles**
+    - Refactorizados todos los bucles en `Tablero`, `Inventario`, `TableroController`, `PlayerConfigController`, `NavigationController` y `Juego` para eliminar el uso de `break` (excepto en bloques `switch`).
+    - Uso de banderas booleanas y condiciones compuestas para controlar el flujo de los bucles de búsqueda y validación.
+- [x] **11. Jerarquía de Clases: Separación de Pinguino y Foca**
+    - Convertida la clase `Jugador` en una clase abstracta base.
+    - Creadas las subclases `Pinguino` (jugador humano) y `Foca` (CPU, anteriormente llamada `CPU`).
+    - Actualizada toda la lógica de instanciación, guardado y carga en base de datos para manejar correctamente los nuevos tipos específicos.
+    - La foca mantiene su color gris por defecto y lógica de ataque personalizada.

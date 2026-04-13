@@ -12,6 +12,7 @@ import javafx.scene.media.AudioClip;
 import controlador.GameContext;
 import controlador.NavigationController;
 import modelo.Jugador;
+import modelo.Pinguino;
 import java.sql.Connection;
 
 public class Login {
@@ -156,7 +157,7 @@ public class Login {
 			if (con != null) con.close();
 
 			// 2. Guardamos en el contexto global (Andrei Style)
-			Jugador jugadorActual = new Jugador(id, username, "Azul"); // Azul por defecto
+			Pinguino jugadorActual = new Pinguino(id, username, "Azul"); // Azul por defecto
 			GameContext.getInstance().setCurrentUser(jugadorActual);
 			System.out.println("► Sesión iniciada para: " + username + " (ID: " + id + ")");
 

@@ -15,7 +15,8 @@ import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
 import modelo.Jugador;
-import modelo.CPU;
+import modelo.Foca;
+import modelo.Pinguino;
 import datos.BBDD;
 
 /**
@@ -128,11 +129,11 @@ public class PlayerConfigController {
                 return;
             }
             // Color por defecto en el constructor, se actualizará según el Slot
-            configured.add(new Jugador(-1, name, s.getColor()));
+            configured.add(new Pinguino(-1, name, s.getColor()));
         }
         
         if (focaCheckbox.isSelected()) {
-            configured.add(new CPU(-1, "Foca Loca"));
+            configured.add(new Foca(-1, "Foca Loca"));
         }
 
         if (configured.size() < 2) {

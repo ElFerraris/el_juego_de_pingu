@@ -342,13 +342,13 @@ public class TableroController {
     }
 
     private void resolverCombate(Jugador atacante, Jugador defensor) {
-        boolean esFoca = (atacante instanceof CPU || defensor instanceof CPU);
+        boolean esFoca = (atacante instanceof Foca || defensor instanceof Foca);
         String titulo = esFoca ? "¡Ataque de la Foca Loca!" : "¡Guerra de Bolas de Nieve!";
         StringBuilder mensaje = new StringBuilder();
 
         if (esFoca) {
-            Jugador humano = (atacante instanceof CPU) ? defensor : atacante;
-            CPU foca = (CPU) ((atacante instanceof CPU) ? atacante : defensor);
+            Jugador humano = (atacante instanceof Foca) ? defensor : atacante;
+            Foca foca = (Foca) ((atacante instanceof Foca) ? atacante : defensor);
             
             mensaje.append("¡La Foca Loca choca con ").append(humano.getNombre()).append("!\n\n");
             

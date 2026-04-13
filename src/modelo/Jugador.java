@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Representa un jugador del juego (un pingüino).
+ * Representa un jugador del juego (base para pingüinos y la foca).
  */
-public class Jugador {
+public abstract class Jugador {
 
     private int id;
     private String nombre;

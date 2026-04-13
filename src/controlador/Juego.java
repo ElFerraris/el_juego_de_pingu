@@ -126,7 +126,7 @@ public class Juego {
                     }
                 }
 
-                agregarJugador(new Jugador(1 + i, nombre, colorElegido));
+                agregarJugador(new Pinguino(1 + i, nombre, colorElegido));
             }
         
         
@@ -189,13 +189,13 @@ public class Juego {
             }
 
             // Agregamos al jugador con su color único asegurado
-            agregarJugador(new Jugador(1 + i, nombre, colorElegido));
+            agregarJugador(new Pinguino(1 + i, nombre, colorElegido));
         }
         */
         
 
         // Añadir la Foca CPU
-        CPU foca = new CPU(0, "Foca Loca");
+        Foca foca = new Foca(0, "Foca Loca");
         agregarJugador(foca);
     }
 
@@ -250,8 +250,8 @@ public class Juego {
             int posAntes = jugadorActual.getPosicion();
             System.out.println("Posición actual: " + jugadorActual.getPosicion());
 
-            if (jugadorActual instanceof CPU) {
-                ejecutarTurnoCPU((CPU) jugadorActual, posAntes);
+            if (jugadorActual instanceof Foca) {
+                ejecutarTurnoCPU((Foca) jugadorActual, posAntes);
             } else {
                 ejecutarTurnoHumano(jugadorActual, sc);
             }
@@ -270,7 +270,7 @@ public class Juego {
     /**
      * Lógica del turno de la CPU (Foca).
      */
-    private void ejecutarTurnoCPU(CPU foca, int posAntes) {
+    private void ejecutarTurnoCPU(Foca foca, int posAntes) {
         System.out.println("La foca está pensando su movimiento...");
         foca.decidirAccion();
 
@@ -278,7 +278,7 @@ public class Juego {
 
         // Comprobar si la foca ha adelantado a algún jugador humano
         for (Jugador p : jugadores) {
-            if (!(p instanceof CPU)) {
+            if (!(p instanceof Foca)) {
                 if (p.getPosicion() > posAntes && p.getPosicion() < posDespues) {
                     foca.atacarJugador(p);
                 }
@@ -397,8 +397,8 @@ public class Juego {
 
                 System.out.println("\n¡COINCIDENCIA EN CASILLA " + jugadorActual.getPosicion() + "!");
 
-                if (jugadorActual instanceof CPU || oponente instanceof CPU) {
-                    Jugador humano = (jugadorActual instanceof CPU) ? oponente : jugadorActual;
+                if (jugadorActual instanceof Foca || oponente instanceof Foca) {
+                    Jugador humano = (jugadorActual instanceof Foca) ? oponente : jugadorActual;
 
                     System.out.println("¡La Foca te ha visto!");
 
@@ -406,7 +406,7 @@ public class Juego {
                         System.out.println(humano.getNombre() + " usa un Pez para distraer a la foca. ¡Foca bloqueada 2 turnos!");
                         humano.getInventario().usarObjeto("Pez", humano);
 
-                        if (jugadorActual instanceof CPU) jugadorActual.setTurnosBloqueados(2);
+                        if (jugadorActual instanceof Foca) jugadorActual.setTurnosBloqueados(2);
                         else oponente.setTurnosBloqueados(2);
 
                     } else {
@@ -522,8 +522,8 @@ public class Juego {
                 String pass = sc.nextLine();
 
                 if (this.baseDatos.loginJugador(user, pass)) {
-                    int id = this.baseDatos.registrarJugadorSiNoExiste(new Jugador(0, user, "")); // Pillamos el ID
-                    return new Jugador(id, user, ""); // Éxito
+                    int id = this.baseDatos.registrarJugadorSiNoExiste(new Pinguino(0, user, "")); // Pillamos el ID
+                    return new Pinguino(id, user, ""); // Éxito
                 }
 
             } else if (opcion.equals("2")) {
@@ -537,7 +537,7 @@ public class Juego {
                 
                 if (nuevoId != -1) {
                     System.out.println("¡Registro completado! Ya puedes jugar.");
-                    return new Jugador(nuevoId, user, ""); 
+                    return new Pinguino(nuevoId, user, ""); 
                 } else {
                     System.out.println("Ese nombre ya existe. Prueba con otro.");
                 }

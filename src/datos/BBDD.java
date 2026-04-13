@@ -4,7 +4,8 @@ import java.sql.*;
 import java.util.ArrayList;
 
 import controlador.Juego;
-import modelo.CPU;
+import modelo.Foca;
+import modelo.Pinguino;
 import modelo.Jugador;
 
 /**
@@ -99,8 +100,8 @@ public class BBDD {
             // 2. Contraseña (usamos una por defecto si el modelo no tiene)
             cstmt.setString(2, "pingu123"); 
             
-            // 3. Es_CPU (Comprobamos si es instancia de la clase CPU)
-            int esCpu = (j instanceof CPU) ? 1 : 0;
+            // 3. Es_CPU (Comprobamos si es instancia de la clase Foca)
+            int esCpu = (j instanceof Foca) ? 1 : 0;
             cstmt.setInt(3, esCpu);
             
             cstmt.execute();
@@ -162,7 +163,7 @@ public class BBDD {
                 try (CallableStatement cstmt = con.prepareCall(sqlInsert)) {
                     cstmt.setString(1, j.getNombre());
                     cstmt.setString(2, "pingu123");
-                    cstmt.setInt(3, (j instanceof CPU) ? 1 : 0);
+                    cstmt.setInt(3, (j instanceof Foca) ? 1 : 0);
                     cstmt.execute();
                     
                     // 3. PASO: Una vez insertado, volvemos a consultar para obtener el ID generado
@@ -431,9 +432,9 @@ public class BBDD {
                         String color = rs.getString("color");
                         
                         if (rs.getInt("es_cpu") == 1) {
-                            nuevo = new CPU(id, nombre);
+                            nuevo = new Foca(id, nombre);
                         } else {
-                            nuevo = new Jugador(id, nombre, color);
+                            nuevo = new Pinguino(id, nombre, color);
                         }
 
                         // Restaurar estado físico e inventario

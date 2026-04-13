@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 /**
  * Representa la Foca (CPU) que juega automáticamente.
- * Hereda de Jugador porque la foca ES un tipo de jugador.
+ * Extiende de Jugador para diferenciar su jugabilidad del pingüino.
  */
-public class CPU extends Jugador {
+public class Foca extends Jugador {
 
-    public CPU(int id, String nombre) {
+    public Foca(int id, String nombre) {
         super(id, nombre, "Gris");
     }
 
@@ -16,7 +16,6 @@ public class CPU extends Jugador {
      * La foca decide qué dado usar automáticamente.
      * Prioriza el dado rápido para avanzar lo máximo posible.
      */
-    
     public void decidirAccion() {
         System.out.println(this.getNombre() + " está decidiendo qué dado usar...");
 
@@ -47,7 +46,7 @@ public class CPU extends Jugador {
         int maxPosicion = -1;
 
         for (Jugador j : jugadores) {
-            if (!(j instanceof CPU) && j.getPosicion() > maxPosicion) {
+            if (!(j instanceof Foca) && j.getPosicion() > maxPosicion) {
                 maxPosicion = j.getPosicion();
                 objetivo = j;
             }
