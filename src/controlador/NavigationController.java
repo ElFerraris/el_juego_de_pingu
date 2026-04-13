@@ -198,9 +198,8 @@ public class NavigationController {
             // Buscamos el contenido viejo para deslizarlo
             Node oldContentToSlide = null;
             for (Node n : currentRoot.getChildren()) {
-                if (n.getStyleClass().contains("glass-panel")) {
+                if (oldContentToSlide == null && n.getStyleClass().contains("glass-panel")) {
                     oldContentToSlide = n;
-                    break;
                 }
             }
             
@@ -234,17 +233,15 @@ public class NavigationController {
         // Buscamos el panel de contenido ("glass-panel")
         Node oldContent = null;
         for (Node n : currentRoot.getChildren()) {
-            if (n.getStyleClass().contains("glass-panel")) {
+            if (oldContent == null && n.getStyleClass().contains("glass-panel")) {
                 oldContent = n;
-                break;
             }
         }
 
         Node newContent = null;
         for (Node n : nextRoot.getChildren()) {
-            if (n.getStyleClass().contains("glass-panel")) {
+            if (newContent == null && n.getStyleClass().contains("glass-panel")) {
                 newContent = n;
-                break;
             }
         }
 

@@ -328,9 +328,8 @@ public class TableroController {
 
         Jugador oponente = null;
         for (Jugador p : jugadores) {
-            if (p != jActual && p.getPosicion() == jActual.getPosicion()) {
+            if (oponente == null && p != jActual && p.getPosicion() == jActual.getPosicion()) {
                 oponente = p;
-                break;
             }
         }
 
@@ -363,10 +362,9 @@ public class TableroController {
                 mensaje.append("¡ZAS! Recibe un aletazo implacable.\n");
                 
                 int casillaAgujero = -1;
-                for (int i = humano.getPosicion() - 1; i >= 0; i--) {
+                for (int i = humano.getPosicion() - 1; i >= 0 && casillaAgujero == -1; i--) {
                     if (tablero.getCasilla(i) != null && tablero.getCasilla(i).getTipo().equals("Casilla AGUJERO")) {
                         casillaAgujero = i;
-                        break;
                     }
                 }
                 

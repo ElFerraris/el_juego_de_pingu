@@ -189,17 +189,18 @@ public class PlayerConfigController {
                 selectedColor = "Rojo";
             } else {
                 selectedColor = "Verde"; // Fallback
-                for (String cName : COLORS) {
+                boolean colorEncontrado = false;
+                for (int i = 0; i < COLORS.length && !colorEncontrado; i++) {
+                    String cName = COLORS[i];
                     boolean taken = false;
                     for (Slot existingSlot : slots) {
-                        if (cName.equals(existingSlot.getColor())) {
+                        if (!taken && cName.equals(existingSlot.getColor())) {
                             taken = true;
-                            break;
                         }
                     }
                     if (!taken) {
                         selectedColor = cName;
-                        break;
+                        colorEncontrado = true;
                     }
                 }
             }
@@ -258,9 +259,8 @@ public class PlayerConfigController {
                     setText(item);
                     boolean alreadySelected = false;
                     for (Slot s : slots) {
-                        if (s != Slot.this && item.equals(s.getName())) {
+                        if (!alreadySelected && s != Slot.this && item.equals(s.getName())) {
                             alreadySelected = true;
-                            break;
                         }
                     }
                     if (alreadySelected) {
@@ -296,8 +296,8 @@ public class PlayerConfigController {
                 
                 boolean taken = false;
                 for (Slot s : slots) {
-                    if (s != this && cName.equals(s.getColor())) {
-                        taken = true; break;
+                    if (!taken && s != this && cName.equals(s.getColor())) {
+                        taken = true;
                     }
                 }
 

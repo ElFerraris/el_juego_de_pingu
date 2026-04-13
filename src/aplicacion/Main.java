@@ -29,7 +29,7 @@ public class Main extends Application {
 			primaryStage.setScene(scene);
 
 			primaryStage.setResizable(false);
-			primaryStage.setFullScreen(sm.isFullscreen());
+			primaryStage.setFullScreen(false);
 			// primaryStage.setWidth(1200);
 			// primaryStage.setHeight(700);
 			primaryStage.centerOnScreen();

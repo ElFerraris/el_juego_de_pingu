@@ -171,10 +171,10 @@ public class Juego {
 
                 // Buscamos si el color existe en la lista (ignorando mayúsculas)
                 String colorEncontrado = null;
-                for (String c : coloresDisponibles) {
+                for (int j = 0; j < coloresDisponibles.size() && colorEncontrado == null; j++) {
+                    String c = coloresDisponibles.get(j);
                     if (c.equalsIgnoreCase(colorElegido)) {
                         colorEncontrado = c;
-                        break;
                     }
                 }
 
