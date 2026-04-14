@@ -22,4 +22,9 @@ public class CasillaAgujero extends Casilla {
         jugador.setPosicion(posicionAgujeroAnterior);
         return jugador.getNombre() + " cae en un agujero y retrocede a la casilla " + posicionAgujeroAnterior + ".";
     }
+
+    @Override
+    public String getSpritePath() {
+        return "/assets/tablero/casillas/CasillaAgujero.png";
+    }
 }

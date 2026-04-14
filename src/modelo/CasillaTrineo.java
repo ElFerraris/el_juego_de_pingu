@@ -16,6 +16,7 @@ public class CasillaTrineo extends Casilla {
         return posicionSiguienteTrineo;
     }
 
+    @Override
     public String activarEfecto(Jugador jugador) {
         return avanzarSiguienteTrineo(jugador);
     }
@@ -23,5 +24,10 @@ public class CasillaTrineo extends Casilla {
     public String avanzarSiguienteTrineo(Jugador jugador) {
         jugador.setPosicion(posicionSiguienteTrineo);
         return jugador.getNombre() + " toma el trineo y avanza a la casilla " + posicionSiguienteTrineo + "!";
+    }
+
+    @Override
+    public String getSpritePath() {
+        return "/assets/tablero/casillas/CasillaTrineo.png";
     }
 }

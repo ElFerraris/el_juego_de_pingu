@@ -13,4 +13,9 @@ public class CasillaNormal extends Casilla {
     public String activarEfecto(Jugador jugador) {
         return "";
     }
+
+    @Override
+    public String getSpritePath() {
+        return "/assets/tablero/casillas/CasillaNormal.png";
+    }
 }

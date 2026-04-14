@@ -30,4 +30,9 @@ public class CasillaRompedizas extends Casilla {
             return "¡CRACK! Demasiado peso. El hielo se rompe y " + jugador.getNombre() + " se cae al agua volviendo al inicio.";
         }
     }
+
+    @Override
+    public String getSpritePath() {
+        return "/assets/tablero/casillas/CasillaRompediza.png";
+    }
 }

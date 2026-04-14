@@ -30,7 +30,8 @@
                 <padding>
                     <Insets top="20" right="20" bottom="20" left="20"/>
                 </padding>
-                <GridPane fx:id="boardGrid" hgap="5" vgap="5" alignment="CENTER" styleClass="glass-panel" style="-fx-padding: 15;">
+                <!-- TRANSPARENTE: Eliminado glass-panel -->
+                <GridPane fx:id="boardGrid" hgap="5" vgap="5" alignment="CENTER" style="-fx-padding: 15;">
                     <!-- Las casillas se inyectarán dinámicamente -->
                 </GridPane>
             </StackPane>
@@ -46,7 +47,6 @@
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="PINGÜINOS" style="-fx-font-size: 24px; -fx-font-weight: bold;" HBox.hgrow="ALWAYS" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <!-- BOTÓN HAMBURGUESA -->
                     <Button fx:id="btnMenu" onAction="#handleToggleMenu" styleClass="button-hamburger">
                         <graphic>
                             <VBox spacing="4" alignment="CENTER" fillWidth="false">
@@ -60,10 +60,9 @@
                 
                 <Separator />
                 <VBox fx:id="playersStatusContainer" spacing="10" VBox.vgrow="ALWAYS">
-                    <!-- Tarjetas de estado -->
+                    <!-- Tarjeta de estado -->
                 </VBox>
                 <Separator />
-                <!-- El botón de Menú Principal ha sido movido al menú hamburguesa -->
             </VBox>
         </right>
 

@@ -27,4 +27,9 @@ public abstract class Casilla {
     public String getTipo() {
         return tipo;
     }
+
+    /**
+     * Devuelve la ruta del recurso de imagen para esta casilla.
+     */
+    public abstract String getSpritePath();
 }

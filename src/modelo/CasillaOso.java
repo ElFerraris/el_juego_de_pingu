@@ -19,4 +19,9 @@ public class CasillaOso extends Casilla {
             return "¡Un Oso salvaje! " + jugador.getNombre() + " no tiene peces y huye asustado al inicio.";
         }
     }
+
+    @Override
+    public String getSpritePath() {
+        return "/assets/tablero/casillas/CasillaOso.png";
+    }
 }

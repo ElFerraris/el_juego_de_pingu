@@ -14,6 +14,8 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.util.Duration;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,13 +140,31 @@ public class TableroController {
     private void dibujarTablero() {
         boardGrid.getChildren().clear();
         casillaNodes.clear();
+        
         for (int i = 0; i < Tablero.TAMANYO_TABLERO; i++) {
             Casilla c = tablero.getCasilla(i);
             if (c == null) continue;
+            
             StackPane cellNode = crearNodoCasilla(c);
-            int row = 4 - (i / 10);
-            int col = i % 10;
-            if ((4 - row) % 2 != 0) col = 9 - col;
+            
+            // Layout "Sendero Ártico" (Serpenteante con huecos)
+            int row, col;
+            int section = i / 10; // 0, 1, 2, 3, 4
+            int offset = i % 10;
+            
+            row = section * 2; // Filas 0, 2, 4, 6, 8
+            if (section % 2 == 0) {
+                col = offset; // Izquierda a Derecha
+            } else {
+                col = 9 - offset; // Derecha a Izquierda
+            }
+            
+            // Ajuste para las casillas de transición (las que bajan de fila)
+            // No necesitamos lógica extra si el zig-zag es simple, 
+            // pero para que parezca un camino continuo, el último de una fila 
+            // y el primero de la siguiente deben estar conectados.
+            // En un zig-zag estándar de grid, (0,9) está cerca de (1,9).
+            
             boardGrid.add(cellNode, col, row);
             casillaNodes.put(i, cellNode);
         }
@@ -152,19 +172,28 @@ public class TableroController {
 
     private StackPane crearNodoCasilla(Casilla c) {
         StackPane pane = new StackPane();
-        pane.getStyleClass().addAll("casilla-base", getStyleClassForCasilla(c.getTipo()));
-        pane.setPrefSize(80, 80);
+        pane.getStyleClass().add("casilla-base");
+        pane.setPrefSize(64, 64);
+        
+        // Cargar Sprite (Fondo de la casilla)
+        try {
+            Image img = new Image(getClass().getResourceAsStream(c.getSpritePath()));
+            ImageView view = new ImageView(img);
+            view.setFitWidth(64);
+            view.setFitHeight(64);
+            view.setPreserveRatio(true);
+            pane.getChildren().add(view);
+        } catch (Exception e) {
+            System.err.println("Error cargando sprite para " + c.getTipo() + ": " + e.getMessage());
+            pane.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #ccc;"); // Fallback
+        }
+        
+        // Número de casilla
         Label numLabel = new Label(String.valueOf(c.getPosicion()));
         numLabel.getStyleClass().add("label-num-casilla");
         StackPane.setAlignment(numLabel, Pos.TOP_LEFT);
         
-        String nombreCasilla = c.getTipo().replace("Casilla ", "");
-        if (nombreCasilla.equals("NORMAL")) nombreCasilla = ""; // Dejar vacío si es normal
-        
-        Label textLabel = new Label(nombreCasilla);
-        textLabel.getStyleClass().add("label-nombre-casilla");
-        
-        pane.getChildren().addAll(numLabel, textLabel);
+        pane.getChildren().add(numLabel);
         return pane;
     }
 
@@ -276,10 +305,6 @@ public class TableroController {
         
         // Actualización Visual
         StackPane cellAntigua = casillaNodes.get(posAntigua);
-        StackPane cellNueva = casillaNodes.get(posNueva);
-        
-        if (cellAntigua != null) cellAntigua.getStyleClass().remove("casilla-active");
-        if (cellNueva != null) cellNueva.getStyleClass().add("casilla-active");
         
         cellAntigua.getChildren().remove(playerTokens.get(j));
         posicionarToken(j);
@@ -288,9 +313,6 @@ public class TableroController {
         // Pequeña pausa antes del siguiente paso
         PauseTransition pause = new PauseTransition(Duration.millis(300));
         pause.setOnFinished(e -> {
-            if (pasosRestantes <= 1 || posNueva >= Tablero.TAMANYO_TABLERO - 1) {
-                if (cellNueva != null) cellNueva.getStyleClass().remove("casilla-active");
-            }
             moverJugadorAnimado(j, pasosRestantes - 1, onComplete);
         });
         pause.play();
@@ -500,12 +522,21 @@ public class TableroController {
     }
 
     private void mostrarAlertaVictoria(String nombre) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("¡Fin de la Partida!");
-        alert.setHeaderText(null);
-        alert.setContentText("¡Enhorabuena " + nombre + ", has llegado a la meta!");
-        alert.showAndWait();
-        handleBack(null);
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("¡Fin de la Partida!");
+            alert.setHeaderText(null);
+            alert.setContentText("¡Enhorabuena " + nombre + ", has llegado a la meta!");
+            
+            // Estilo para la alerta
+            try {
+                alert.getDialogPane().getStylesheets().add(getClass().getResource("/vista/style.css").toExternalForm());
+                alert.getDialogPane().getStyleClass().add("glass-panel");
+            } catch (Exception e) {}
+            
+            alert.showAndWait();
+            handleBack(null);
+        });
     }
 
     // --- GESTIÓN DE MENÚS Y OVERLAYS ---
@@ -704,16 +735,7 @@ public class TableroController {
 
     // --- Helpers ---
 
-    private String getStyleClassForCasilla(String tipo) {
-        switch (tipo) {
-            case "Casilla OSO": return "casilla-oso";
-            case "Casilla AGUJERO": return "casilla-agujero";
-            case "Casilla TRINEO": return "casilla-trineo";
-            case "Casilla INTERROGANTE": return "casilla-interrogante";
-            case "Casilla ROMPEDIZAS": return "casilla-rompediza";
-            default: return "casilla-normal";
-        }
-    }
+
 
 
     private Color getColorFromString(String colorRef) {

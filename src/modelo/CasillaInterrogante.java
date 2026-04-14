@@ -38,4 +38,9 @@ public class CasillaInterrogante extends Casilla {
             return new Evento("DadoLento");    // 20% (0.80 a 1.00)
         }
     }
+
+    @Override
+    public String getSpritePath() {
+        return "/assets/tablero/casillas/CasillaInterrogante.png";
+    }
 }

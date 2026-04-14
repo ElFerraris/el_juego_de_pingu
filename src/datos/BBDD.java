@@ -31,7 +31,7 @@ public class BBDD {
             Connection con = DriverManager.getConnection(url, usr, pwd);
 
             if (con.isValid(5)) {
-                System.out.println("►Conexión establecida con BBDD!");
+                // System.out.println("►Conexión establecida con BBDD!");
             } else {
                 System.out.println("►Conexión perdida (timeout 5s)");
             }
