@@ -130,6 +130,10 @@ public class TableroController {
     private double zoomFactor = 1.0;
     private static final double MIN_ZOOM = 0.4;
     private static final double MAX_ZOOM = 3.0;
+    
+    // CONTROL AUTOMÁTICO DE CÁMARA
+    private boolean cameraAutoMode = true;
+    private TranslateTransition cameraTransition;
 
     private BBDD bbdd = new BBDD();
     private Juego juegoSimulado = new Juego();
@@ -148,8 +152,14 @@ public class TableroController {
             if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
         });
         
-        // Ejecutar un centrado inicial forzado por si acaso
-        Platform.runLater(this::centrarTablero);
+        // Centrar en el primer jugador al inicio
+        Platform.runLater(() -> {
+            if (!jugadores.isEmpty()) {
+                smoothCenterOnPlayer(jugadores.get(0), 1.0);
+            } else {
+                centrarTablero();
+            }
+        });
         
         // Esconder panel de log al inicio directamente (320 es el prefWidth de logContentBox)
         logPanelContainer.setTranslateX(-320);
@@ -471,6 +481,11 @@ public class TableroController {
         posicionarToken(j);
         actualizarTarjetaJugador(j);
 
+        // Seguimiento de cámara si está en modo automático
+        if (cameraAutoMode) {
+            smoothCenterOnPlayer(j, 0.4);
+        }
+
         // Pequeña pausa antes del siguiente paso
         PauseTransition pause = new PauseTransition(Duration.millis(300));
         pause.setOnFinished(e -> {
@@ -630,6 +645,11 @@ public class TableroController {
         turnoActual = (turnoActual + 1) % jugadores.size();
         actualizarUI();
         setControlesBloqueados(false);
+        
+        // Al cambiar de turno, centramos en el nuevo jugador si estamos en modo auto
+        if (cameraAutoMode) {
+            smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
+        }
         
         comprobarBloqueoInicioTurno();
     }
@@ -932,6 +952,8 @@ public class TableroController {
 
         cameraViewport.setOnMouseDragged(event -> {
             if (event.isPrimaryButtonDown()) {
+                cameraAutoMode = false; // El usuario toma el control manual
+                if (cameraTransition != null) cameraTransition.stop();
                 boardPane.setTranslateX(translateAnchorX + (event.getSceneX() - mouseAnchorX));
                 boardPane.setTranslateY(translateAnchorY + (event.getSceneY() - mouseAnchorY));
             }
@@ -945,7 +967,42 @@ public class TableroController {
     @FXML
     private void handleResetCamera() {
         util.SoundManager.playConfirm();
-        centrarTablero();
+        cameraAutoMode = true; // Reactivar modo automático
+        smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
+    }
+
+    /**
+     * Centra la cámara suavemente sobre un jugador específico.
+     */
+    private void smoothCenterOnPlayer(Jugador j, double durationSeconds) {
+        if (boardPane == null || cameraViewport == null || j == null) return;
+        
+        StackPane cell = casillaNodes.get(j.getPosicion());
+        if (cell == null) return;
+
+        double viewWidth = cameraViewport.getWidth();
+        double viewHeight = cameraViewport.getHeight();
+        if (viewWidth <= 0) viewWidth = 1280;
+        if (viewHeight <= 0) viewHeight = 720;
+
+        // Calculamos el centro visual (restando los 300px del panel derecho)
+        double visualCenterX = (viewWidth - 300) / 2.0;
+        double visualCenterY = viewHeight / 2.0;
+
+        // Centro de la casilla en coordenadas del boardPane
+        double targetX = cell.getLayoutX() + (cell.getPrefWidth() / 2.0);
+        double targetY = cell.getLayoutY() + (cell.getPrefHeight() / 2.0);
+
+        double newTX = visualCenterX - targetX;
+        double newTY = visualCenterY - targetY;
+
+        if (cameraTransition != null) cameraTransition.stop();
+
+        cameraTransition = new TranslateTransition(Duration.seconds(durationSeconds), boardPane);
+        cameraTransition.setToX(newTX);
+        cameraTransition.setToY(newTY);
+        cameraTransition.setInterpolator(Interpolator.EASE_BOTH);
+        cameraTransition.play();
     }
 
     private void mostrarEventoDialogo(String titulo, String mensaje, Runnable onContinue, Jugador... involucrados) {
