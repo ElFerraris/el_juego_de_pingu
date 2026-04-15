@@ -230,6 +230,49 @@
     -fx-border-color: transparent;
 }
 
+.inventory-container {
+    -fx-padding: 10;
+    -fx-background-color: rgba(0, 0, 0, 0.05);
+    -fx-background-radius: 10;
+}
+
+.inventory-item {
+    -fx-background-color: rgba(255, 255, 255, 0.95);
+    -fx-background-radius: 4;
+    -fx-padding: 8 15;
+    -fx-min-width: 250;
+    -fx-max-width: 250;
+    -fx-min-height: 50;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 2;
+}
+
+.inventory-item:hover {
+    -fx-background-color: #e3f2fd;
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+    -fx-effect: dropshadow(three-pass-box, #0d47a1, 10, 0.2, 0, 0);
+}
+
+.inventory-item-name {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1a237e;
+}
+
+.inventory-item-count-text {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0d47a1;
+}
+
+.inventory-item-pez { -fx-border-color: #2196f3; }
+.inventory-item-bola { -fx-border-color: #cfd8dc; }
+.inventory-item-rapido { -fx-border-color: #4caf50; }
+.inventory-item-lento { -fx-border-color: #ff9800; }
+
 .player-active-card {
     -fx-background-color: rgba(187, 222, 251, 0.6);
     -fx-effect: dropshadow(three-pass-box, rgba(13, 71, 161, 0.3), 10, 0, 0, 0);

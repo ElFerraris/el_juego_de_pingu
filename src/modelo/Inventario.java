@@ -73,6 +73,8 @@ public class Inventario {
             case "Pez": return peces >= 1;
             case "BolaNieve": return bolasNieve >= 1;
             case "Dados": return dados.size() >= 1;
+            case "DadoRapido": return tieneObjetoEspecifico("Rapido");
+            case "DadoLento": return tieneObjetoEspecifico("Lento");
             default: return false;
         }
     }

@@ -2,17 +2,21 @@ package controlador;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.event.ActionEvent;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import javafx.scene.Node;
@@ -63,6 +67,15 @@ public class TableroController {
     @FXML private Slider musicSliderOverlay;
     @FXML private Slider sfxSliderOverlay;
     @FXML private Button btnApplyOverlay;
+    
+    // Controles de Confirmación de Objetos
+    @FXML private VBox itemConfirmOverlay;
+    @FXML private Label itemConfirmTitle;
+    @FXML private Label itemConfirmMessage;
+    @FXML private Label itemConfirmSubMessage;
+    @FXML private Button btnItemConfirmYes;
+
+    private String selectedItemType = null;
     
     // Controles de Confirmación
     @FXML private Label confirmTitle;
@@ -603,29 +616,124 @@ public class TableroController {
             ((Label)card.getChildren().get(1)).setText("Posición: " + j.getPosicion());
             
             Inventario inv = j.getInventario();
-            StringBuilder sb = new StringBuilder("Objetos:\n");
-            int peces = inv.getCantidad("Pez");
-            int bolas = inv.getCantidad("BolaNieve");
-            int rapidos = inv.getCantidad("DadoRapido");
-            int lentos = inv.getCantidad("DadoLento");
             
-            if (peces == 0 && bolas == 0 && rapidos == 0 && lentos == 0) {
-                sb.append("- Nada (Vacío)");
-            } else {
-                if (peces > 0) sb.append("- ").append(peces).append("x Pez\n");
-                if (bolas > 0) sb.append("- ").append(bolas).append("x Bola de Nieve\n");
-                if (rapidos > 0) sb.append("- ").append(rapidos).append("x Dado Rápido\n");
-                if (lentos > 0) sb.append("- ").append(lentos).append("x Dado Lento\n");
+            // Reemplazamos el Label de texto por un FlowPane de objetos interactivos
+            FlowPane inventoryBox = new FlowPane();
+            inventoryBox.setHgap(8);
+            inventoryBox.setVgap(8);
+            inventoryBox.getStyleClass().add("inventory-container");
+            inventoryBox.setPrefWrapLength(250);
+
+            agregarIconoObjeto(inventoryBox, "Pez", inv.getCantidad("Pez"), "PEZ", "inventory-item-pez");
+            agregarIconoObjeto(inventoryBox, "BolaNieve", inv.getCantidad("BolaNieve"), "BOLA NIEVE", "inventory-item-bola");
+            agregarIconoObjeto(inventoryBox, "DadoRapido", inv.getCantidad("DadoRapido"), "DADO RÁPIDO", "inventory-item-rapido");
+            agregarIconoObjeto(inventoryBox, "DadoLento", inv.getCantidad("DadoLento"), "DADO LENTO", "inventory-item-lento");
+
+            // Si el inventario está vacío, añadimos un mensaje
+            if (inv.getCantidad("Total") == 0) {
+                Label emptyLabel = new Label("Inventario vacío");
+                emptyLabel.setStyle("-fx-font-size: 14px; -fx-opacity: 0.5;");
+                inventoryBox.getChildren().add(emptyLabel);
             }
-            
-            ((Label)card.getChildren().get(2)).setText(sb.toString().trim());
+
+            // El índice 2 es donde estaba el anterior Label de objetos
+            if (card.getChildren().size() > 2) {
+                card.getChildren().set(2, inventoryBox);
+            } else {
+                card.getChildren().add(inventoryBox);
+            }
         }
     }
 
+    private void agregarIconoObjeto(FlowPane container, String tipo, int cantidad, String nombre, String styleClass) {
+        if (cantidad <= 0) return;
+
+        HBox itemNode = new HBox();
+        itemNode.setAlignment(Pos.CENTER_LEFT);
+        itemNode.setSpacing(10);
+        itemNode.setPadding(new Insets(5, 10, 5, 10));
+        itemNode.getStyleClass().addAll("inventory-item", styleClass);
+        itemNode.setPrefWidth(240); // Ajustar para que quepa en el panel lateral
+        
+        Label nameLabel = new Label(nombre);
+        nameLabel.getStyleClass().add("inventory-item-name");
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        
+        Label countLabel = new Label("x" + cantidad);
+        countLabel.getStyleClass().add("inventory-item-count-text");
+        
+        itemNode.getChildren().addAll(nameLabel, spacer, countLabel);
+        
+        itemNode.setOnMouseClicked(e -> prepararUsoObjeto(tipo));
+        
+        container.getChildren().add(itemNode);
+    }
+
+    private void prepararUsoObjeto(String tipo) {
+        if (animacionEnCurso) return;
+        
+        this.selectedItemType = tipo;
+        util.SoundManager.playConfirm();
+        
+        String nombreMsg = tipo;
+        boolean esDado = tipo.startsWith("Dado");
+        
+        switch(tipo) {
+            case "Pez": nombreMsg = "un PEZ"; break;
+            case "BolaNieve": nombreMsg = "una BOLA DE NIEVE"; break;
+            case "DadoRapido": nombreMsg = "un DADO RÁPIDO"; break;
+            case "DadoLento": nombreMsg = "un DADO LENTO"; break;
+        }
+
+        itemConfirmTitle.setText("USAR " + tipo.toUpperCase());
+        itemConfirmMessage.setText("¿Quieres usar " + nombreMsg + "?");
+        
+        if (!esDado) {
+            itemConfirmSubMessage.setText("Este objeto se usa automáticamente en eventos.");
+            itemConfirmSubMessage.setVisible(true);
+            btnItemConfirmYes.setDisable(true); // No se puede usar manualmente
+            btnItemConfirmYes.setOpacity(0.5);
+        } else {
+            itemConfirmSubMessage.setVisible(false);
+            btnItemConfirmYes.setDisable(false);
+            btnItemConfirmYes.setOpacity(1.0);
+        }
+        
+        animateIn(itemConfirmOverlay);
+    }
+
+    @FXML
+    private void handleItemConfirmYes(ActionEvent event) {
+        if (selectedItemType == null) return;
+        
+        util.SoundManager.playConfirm();
+        String tipo = selectedItemType;
+        animateOut(itemConfirmOverlay, () -> {
+            // Cerramos también el fondo oscuro si no hay otro panel abriéndose
+            FadeTransition fadeBg = new FadeTransition(Duration.millis(300), overlayPane);
+            fadeBg.setToValue(0);
+            fadeBg.setOnFinished(ev -> overlayPane.setVisible(false));
+            fadeBg.play();
+
+            if (tipo.equals("DadoRapido")) {
+                handleUseDadoRapido(null);
+            } else if (tipo.equals("DadoLento")) {
+                handleUseDadoLento(null);
+            }
+        });
+    }
+
+    @FXML
+    private void handleItemConfirmNo(ActionEvent event) {
+        util.SoundManager.playBack();
+        animateOut(itemConfirmOverlay, null);
+    }
+
     private void setControlesBloqueados(boolean status) {
-        btnDado.setDisable(status);
-        btnDadoLento.setDisable(status);
-        btnDadoRapido.setDisable(status);
+        if (btnDado != null) btnDado.setDisable(status);
+        // Los botones de dado lento/rápido han sido eliminados de la UI
     }
 
     private void log(String msg) {
@@ -736,6 +844,12 @@ public class TableroController {
     // --- LÓGICA DE ANIMACIONES ---
 
     private void animateIn(Node content) {
+        // Ocultar otros posibles overlays activos para evitar superposiciones
+        if (menuPausa != null && menuPausa != content) menuPausa.setVisible(false);
+        if (optionsOverlay != null && optionsOverlay != content) optionsOverlay.setVisible(false);
+        if (confirmOverlay != null && confirmOverlay != content) confirmOverlay.setVisible(false);
+        if (itemConfirmOverlay != null && itemConfirmOverlay != content) itemConfirmOverlay.setVisible(false);
+
         overlayPane.setVisible(true);
         // Si el fondo ya es visible (cambio entre menús), no lo re-animamos
         if (overlayPane.getOpacity() < 0.1) {
