@@ -47,7 +47,10 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - Crear una secuencia visual con esferas del color de cada jugador.
     - Las esferas estarán conectadas por flechas indicando el flujo del turno.
     - El jugador activo tendrá su esfera iluminada o con un efecto brillante para resaltar su turno.
-- [ ] **13. Panel lateral retráctil para el Log de Partida**
+- [x] **13. Panel lateral retráctil para el Log de Partida**
     - Mover el cuadro de "Log de partida" de la parte inferior a un panel lateral izquierdo.
     - El panel debe poder expandirse y contraerse mediante un botón con una flecha (▶/◀).
     - Cuando se presiona, el panel se desliza con animación y la flecha cambia de dirección al cerrarse.
+- [x] **14. Optimización visual de Tarjetas de Jugador**
+    - En el panel derecho ("Pingüinos"), mostrar únicamente la tarjeta del jugador cuyo turno está en curso.
+    - Cambiar el contador total de inventario por un listado detallado ("1x Pez", "2x Bola de Nieve", etc.).

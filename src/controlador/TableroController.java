@@ -588,17 +588,37 @@ public class TableroController {
             }
         });
         
-        playerStatusCards.forEach((j, card) -> {
-            card.getStyleClass().remove("player-active-card");
-            if (j == jActual) card.getStyleClass().add("player-active-card");
-        });
+        playersStatusContainer.getChildren().clear();
+        VBox activeCard = playerStatusCards.get(jActual);
+        if (activeCard != null) {
+            // Asegurarse de que esté actualizada para este turno
+            actualizarTarjetaJugador(jActual);
+            playersStatusContainer.getChildren().add(activeCard);
+        }
     }
 
     private void actualizarTarjetaJugador(Jugador j) {
         VBox card = playerStatusCards.get(j);
         if (card != null) {
             ((Label)card.getChildren().get(1)).setText("Posición: " + j.getPosicion());
-            ((Label)card.getChildren().get(2)).setText("Objetos: " + j.getInventario().getCantidad("Total"));
+            
+            Inventario inv = j.getInventario();
+            StringBuilder sb = new StringBuilder("Objetos:\n");
+            int peces = inv.getCantidad("Pez");
+            int bolas = inv.getCantidad("BolaNieve");
+            int rapidos = inv.getCantidad("DadoRapido");
+            int lentos = inv.getCantidad("DadoLento");
+            
+            if (peces == 0 && bolas == 0 && rapidos == 0 && lentos == 0) {
+                sb.append("- Nada (Vacío)");
+            } else {
+                if (peces > 0) sb.append("- ").append(peces).append("x Pez\n");
+                if (bolas > 0) sb.append("- ").append(bolas).append("x Bola de Nieve\n");
+                if (rapidos > 0) sb.append("- ").append(rapidos).append("x Dado Rápido\n");
+                if (lentos > 0) sb.append("- ").append(lentos).append("x Dado Lento\n");
+            }
+            
+            ((Label)card.getChildren().get(2)).setText(sb.toString().trim());
         }
     }
 
