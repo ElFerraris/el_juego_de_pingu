@@ -375,7 +375,7 @@ public class Juego {
      */
     public Jugador comprobarGanador() {
         for (Jugador j : jugadores) {
-            if (j.getPosicion() >= Tablero.TAMANYO_TABLERO) {
+            if (j.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
                 System.out.println("¡Victoria! El ganador es: " + j.getNombre());
                 partidaFinalizada = true;
                 ganador = j;
