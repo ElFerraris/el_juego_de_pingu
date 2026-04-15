@@ -58,6 +58,14 @@ public class TableroController {
     private boolean isLogOpen = false;
 
     @FXML private Button btnDado;
+    
+    // CAPA DE EVENTOS
+    @FXML private StackPane eventOverlay;
+    @FXML private Pane eventDimmer;
+    @FXML private Pane highlightLayer;
+    @FXML private VBox eventDialogueBox;
+    @FXML private Label eventTitleLabel;
+    @FXML private Label eventMessageLabel;
     @FXML private Button btnDadoLento;
     @FXML private Button btnDadoRapido;
 
@@ -106,6 +114,10 @@ public class TableroController {
     private Map<Jugador, Circle> playerTokens = new HashMap<>(); // Fichas en el tablero
     private Map<Jugador, Circle> turnCircles = new HashMap<>();  // Círculos del indicador superior
     private Map<Jugador, VBox> playerStatusCards = new HashMap<>();
+    
+    // ESTADO DE EVENTOS
+    private Map<Jugador, Pane> highlightingBackups = new HashMap<>();
+    private Runnable onEventContinue;
     
     // ESTADO DE CÁMARA
     private double mouseAnchorX;
@@ -537,20 +549,12 @@ public class TableroController {
         actualizarTarjetaJugador(atacante);
         actualizarTarjetaJugador(defensor);
         
+        actualizarTarjetaJugador(atacante);
+        actualizarTarjetaJugador(defensor);
+        
         log(mensaje.toString().replace("\n", "  |  "));
         
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(titulo);
-            alert.setHeaderText(null);
-            alert.setContentText(mensaje.toString());
-            try {
-                alert.getDialogPane().getStylesheets().add(getClass().getResource("/vista/style.css").toExternalForm());
-            } catch (Exception e) {}
-            alert.showAndWait();
-            
-            finalizarTurno();
-        });
+        mostrarEventoDialogo(titulo, mensaje.toString(), this::finalizarTurno, atacante, defensor);
     }
     
     private void moverFichaDirecta(Jugador j, int desde, int hasta) {
@@ -762,21 +766,8 @@ public class TableroController {
     }
 
     private void mostrarAlertaVictoria(String nombre) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("¡Fin de la Partida!");
-            alert.setHeaderText(null);
-            alert.setContentText("¡Enhorabuena " + nombre + ", has llegado a la meta!");
-            
-            // Estilo para la alerta
-            try {
-                alert.getDialogPane().getStylesheets().add(getClass().getResource("/vista/style.css").toExternalForm());
-                alert.getDialogPane().getStyleClass().add("glass-panel");
-            } catch (Exception e) {}
-            
-            alert.showAndWait();
-            handleBack(null);
-        });
+        String mensaje = "¡Enhorabuena " + nombre + ", has llegado a la meta!";
+        mostrarEventoDialogo("¡Fin de la Partida!", mensaje, () -> handleBack(null));
     }
 
     // --- GESTIÓN DE MENÚS, OVERLAYS Y PANELES ---
@@ -910,6 +901,81 @@ public class TableroController {
         centrarTablero();
     }
 
+    private void mostrarEventoDialogo(String titulo, String mensaje, Runnable onContinue, Jugador... involucrados) {
+        Platform.runLater(new java.lang.Runnable() {
+            @Override
+            public void run() {
+                eventTitleLabel.setText(titulo);
+                eventMessageLabel.setText(mensaje);
+                onEventContinue = onContinue;
+                
+                highlightingBackups.clear();
+                highlightLayer.getChildren().clear();
+                
+                for (Jugador j : involucrados) {
+                    Circle token = playerTokens.get(j);
+                    if (token != null) {
+                        // Cast explícito a Pane para evitar que el compilador se queje de visibilidad
+                        Pane originalParent = (Pane) token.getParent();
+                        highlightingBackups.put(j, originalParent);
+                        
+                        // Coordenadas globales
+                        javafx.geometry.Bounds bounds = token.localToScene(token.getBoundsInLocal());
+                        
+                        // Mover ficha de capa
+                        originalParent.getChildren().remove(token);
+                        highlightLayer.getChildren().add(token);
+                        
+                        // Reposicionar visualmente
+                        javafx.geometry.Point2D localP = highlightLayer.sceneToLocal(bounds.getMinX(), bounds.getMinY());
+                        token.setTranslateX(localP.getX() + token.getRadius());
+                        token.setTranslateY(localP.getY() + token.getRadius());
+                        
+                        token.setEffect(new DropShadow(25, Color.WHITE));
+                    }
+                }
+                // Limpiar interferencias de otras capas
+                overlayPane.setVisible(false);
+                
+                eventOverlay.setVisible(true);
+                FadeTransition ft = new FadeTransition(Duration.millis(300), eventOverlay);
+                ft.setFromValue(0);
+                ft.setToValue(1);
+                ft.play();
+                
+                animateIn(eventDialogueBox);
+            }
+        });
+    }
+
+    @FXML
+    private void handleCloseEvent() {
+        util.SoundManager.playBack();
+        
+        // Restaurar fichas
+        for (Map.Entry<Jugador, Pane> entry : highlightingBackups.entrySet()) {
+            Jugador j = entry.getKey();
+            Pane originalParent = entry.getValue();
+            Circle token = playerTokens.get(j);
+            
+            highlightLayer.getChildren().remove(token);
+            token.setEffect(null);
+            originalParent.getChildren().add(token);
+            posicionarToken(j);
+        }
+        
+        FadeTransition ft = new FadeTransition(Duration.millis(300), eventOverlay);
+        ft.setFromValue(1);
+        ft.setToValue(0);
+        ft.setOnFinished(e -> {
+            eventOverlay.setVisible(false);
+            if (onEventContinue != null) onEventContinue.run();
+        });
+        ft.play();
+        
+        animateOut(eventDialogueBox, null);
+    }
+
     private void centrarTablero() {
         if (boardPane == null || cameraViewport == null) return;
         
@@ -941,6 +1007,9 @@ public class TableroController {
         if (optionsOverlay != null && optionsOverlay != content) optionsOverlay.setVisible(false);
         if (confirmOverlay != null && confirmOverlay != content) confirmOverlay.setVisible(false);
         if (itemConfirmOverlay != null && itemConfirmOverlay != content) itemConfirmOverlay.setVisible(false);
+        
+        // Si mostramos un menú de sistema, ocultamos la capa de eventos
+        if (content != eventDialogueBox) eventOverlay.setVisible(false);
 
         overlayPane.setVisible(true);
         // Si el fondo ya es visible (cambio entre menús), no lo re-animamos

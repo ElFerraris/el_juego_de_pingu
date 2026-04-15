@@ -27,6 +27,7 @@ public class Intro {
     private StackPane rootPane;
 
     private MediaPlayer mediaPlayer;
+    private boolean yaFinalizado = false;
 
     @FXML
     public void initialize() {
@@ -132,6 +133,9 @@ public class Intro {
     }
 
     private void finalizarIntro() {
+        if (yaFinalizado) return;
+        yaFinalizado = true;
+        
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.dispose();

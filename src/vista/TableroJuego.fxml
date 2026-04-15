@@ -100,7 +100,8 @@
                 style="-fx-background-radius: 0 10 10 0; -fx-font-size: 22px; -fx-padding: 20 10; -fx-min-width: 40px;"/>
     </HBox>
 
-    <!-- CAPA 1: OVERLAY CONTENEDOR (Fondo Oscurecido) -->
+
+    <!-- CAPA 3: OVERLAY CONTENEDOR (Fondo Oscurecido) -->
     <StackPane fx:id="overlayPane" visible="false" styleClass="overlay-pane">
         
         <!-- PANEL DE PAUSA (HAMBURGUESA) -->
@@ -180,6 +181,27 @@
                 <Button fx:id="btnItemConfirmYes" text="SÍ, USAR" onAction="#handleItemConfirmYes" prefWidth="220" prefHeight="50" styleClass="button-primary" />
                 <Button text="NO, VOLVER" onAction="#handleItemConfirmNo" prefWidth="220" prefHeight="50" styleClass="button-secondary" />
             </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- CAPA 4: EVENTOS (OCURRENCIAS EN EL MUNDO) - CAPA SUPERIOR ABSOLUTA -->
+    <StackPane fx:id="eventOverlay" visible="false">
+        <!-- Fondo oscurecido -->
+        <Pane fx:id="eventDimmer" style="-fx-background-color: rgba(0,0,0,0.6);" />
+        
+        <!-- Capa para resaltar fichas (Transparente) -->
+        <Pane fx:id="highlightLayer" pickOnBounds="false" />
+        
+        <!-- Caja de Diálogo (Bottom) -->
+        <VBox alignment="BOTTOM_CENTER" pickOnBounds="false">
+            <padding><Insets bottom="50"/></padding>
+            <VBox fx:id="eventDialogueBox" alignment="CENTER" spacing="15" maxWidth="700" 
+                  styleClass="glass-panel, floating-window" style="-fx-padding: 30; -fx-border-width: 3;">
+                <Label fx:id="eventTitleLabel" text="EVENTO" styleClass="title-text" style="-fx-font-size: 34px;" />
+                <Label fx:id="eventMessageLabel" text="Descripción del evento..." 
+                       style="-fx-font-size: 22px; -fx-text-fill: #0d47a1; -fx-text-alignment: center;" wrapText="true" />
+                <Button onAction="#handleCloseEvent" text="CONTINUAR ▶" prefWidth="220" prefHeight="50" styleClass="button-primary" />
+            </VBox>
         </VBox>
     </StackPane>
 </StackPane>
