@@ -47,6 +47,10 @@ public class TableroController {
     @FXML private Pane cameraViewport;
     @FXML private Group zoomGroup;
     @FXML private HBox turnIndicatorBox;
+    @FXML
+    private Button btnDado;
+    @FXML
+    private Button btnRecolectar;
     @FXML private Label dadoResultadoLabel;
     @FXML private TextArea gameLogArea;
     @FXML private VBox playersStatusContainer;
@@ -57,7 +61,6 @@ public class TableroController {
     @FXML private Button btnToggleLog;
     private boolean isLogOpen = false;
 
-    @FXML private Button btnDado;
     
     // CAPA DE EVENTOS
     @FXML private StackPane eventOverlay;
@@ -374,6 +377,40 @@ public class TableroController {
     @FXML
     private void handleRollDice(ActionEvent event) {
         ejecutarTurno((int)(Math.random() * 6) + 1);
+    }
+
+    @FXML
+    private void handleCollectSnowballs(ActionEvent event) {
+        if (animacionEnCurso) return;
+        
+        Jugador jActual = jugadores.get(turnoActual);
+        int actuales = jActual.getInventario().getCantidad("BolaNieve");
+        
+        if (actuales >= Inventario.MAX_BOLAS_NIEVE) {
+            log(jActual.getNombre() + " ya tiene el máximo de bolas de nieve (" + Inventario.MAX_BOLAS_NIEVE + ").");
+            return;
+        }
+        
+        int cantidadAIntentar = (int)(Math.random() * 3) + 1; // 1 a 3
+        int recolectadas = 0;
+        
+        for (int i = 0; i < cantidadAIntentar; i++) {
+            if (jActual.getInventario().agregarObjeto("BolaNieve")) {
+                recolectadas++;
+            }
+        }
+        
+        if (recolectadas > 0) {
+            log(jActual.getNombre() + " se queda quieto y recolecta " + recolectadas + " bolas de nieve ❄");
+            util.SoundManager.playConfirm();
+            actualizarTarjetaJugador(jActual);
+            
+            // Pausa breve para que el jugador vea el cambio antes de pasar turno
+            setControlesBloqueados(true);
+            PauseTransition pause = new PauseTransition(Duration.seconds(1));
+            pause.setOnFinished(e -> finalizarTurno());
+            pause.play();
+        }
     }
 
     @FXML
@@ -764,8 +801,10 @@ public class TableroController {
         animateOut(itemConfirmOverlay, null);
     }
 
-    private void setControlesBloqueados(boolean status) {
-        if (btnDado != null) btnDado.setDisable(status);
+    private void setControlesBloqueados(boolean bloqueado) {
+        btnDado.setDisable(bloqueado);
+        btnRecolectar.setDisable(bloqueado);
+        logContentBox.setDisable(bloqueado);
         // Los botones de dado lento/rápido han sido eliminados de la UI
     }
 
