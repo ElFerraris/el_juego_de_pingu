@@ -39,14 +39,6 @@
     -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.2), 0, 0, 4, 4);
 }
 
-/* 
-   =================================================
-   TRUE CIRCULAR PIXEL ART CORNERS (14-layer, 2px steps, 2px border)
-   Outer: 0 12, 2 8, 4 6, 6 4, 8 2, 10 2, 12 0
-   Inner: 2 14, 4 10, 6 8, 8 6, 10 4, 12 4, 14 2
-   =================================================
- */
-
 .button {
     -fx-background-radius: 0;
     -fx-background-color:
@@ -80,13 +72,15 @@
     -fx-effect: dropshadow(one-pass-box, rgba(13, 71, 161, 0.5), 0, 0, 0, 6);
 }
 
-.button:pressed,
-.button-selected {
+/* BOTÓN DINÁMICO (Mantiene el efecto pixelado con color variable) */
+.button-dynamic {
+    -fx-player-color: #0d47a1;
+    -fx-player-color-light: #1e88e5;
+    
     -fx-background-color:
-        #0a3478, #0a3478, #0a3478, #0a3478, #0a3478, #0a3478, #0a3478,
-        #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee, #b8d0ee;
-    -fx-translate-y: 2;
-    -fx-effect: dropshadow(one-pass-box, rgba(13, 71, 161, 0.5), 0, 0, 0, 0);
+        -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color,
+        -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light;
+    -fx-text-fill: white;
 }
 
 .button-primary {
@@ -96,34 +90,6 @@
     -fx-text-fill: white;
 }
 
-.button-primary:hover {
-    -fx-background-color:
-        #023a80, #023a80, #023a80, #023a80, #023a80, #023a80, #023a80,
-        #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0;
-}
-
-.button-primary:pressed {
-    -fx-background-color:
-        #01205a, #01205a, #01205a, #01205a, #01205a, #01205a, #01205a,
-        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1;
-}
-
-.button-large {
-    -fx-background-color:
-        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
-        #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5, #1e88e5;
-    -fx-text-fill: white;
-    -fx-font-size: 30px;
-    -fx-padding: 16 42;
-}
-
-.button-large:hover {
-    -fx-background-color:
-        #023a80, #023a80, #023a80, #023a80, #023a80, #023a80, #023a80,
-        #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0;
-    -fx-translate-y: -3;
-}
-
 .button-secondary {
     -fx-background-color:
         #37474f, #37474f, #37474f, #37474f, #37474f, #37474f, #37474f,
@@ -131,29 +97,11 @@
     -fx-text-fill: white;
 }
 
-.button-secondary:hover {
-    -fx-background-color:
-        #263238, #263238, #263238, #263238, #263238, #263238, #263238,
-        #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a, #546e7a;
-}
-
 .button-danger {
     -fx-background-color:
         #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
         #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350;
     -fx-text-fill: white;
-}
-
-.button-danger:hover {
-    -fx-background-color:
-        #7f0000, #7f0000, #7f0000, #7f0000, #7f0000, #7f0000, #7f0000,
-        #d32f2f, #d32f2f, #d32f2f, #d32f2f, #d32f2f, #d32f2f, #d32f2f;
-}
-
-.button-danger:pressed {
-    -fx-background-color:
-        #4b0000, #4b0000, #4b0000, #4b0000, #4b0000, #4b0000, #4b0000,
-        #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c;
 }
 
 /* TRUE CIRCULAR GLASS PANEL */
@@ -184,19 +132,11 @@
 }
 
 .casilla-active {
-    -fx-effect: dropshadow(three-pass-box, #0d47a1, 15, 0.5, 0, 0);
-    -fx-border-color: white;
-    -fx-border-width: 2px;
-}
-
-.casilla-active {
     -fx-background-color: rgba(255, 255, 255, 0.9);
     -fx-effect: dropshadow(three-pass-box, #0d47a1, 15, 0.5, 0, 0);
     -fx-border-color: white;
     -fx-border-width: 2px;
 }
-
-/* Rojo */
 
 .label-num-casilla {
     -fx-font-size: 16px;
@@ -215,11 +155,6 @@
     -fx-padding: 2px 4px;
 }
 
-/* FICHAS DE JUGADOR */
-.player-token {
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 5, 0, 0, 0);
-}
-
 /* CARDS DE JUGADOR (Panel lateral) */
 .player-status-card {
     -fx-background-color: rgba(255, 255, 255, 0.4);
@@ -227,13 +162,6 @@
     -fx-background-radius: 8;
     -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.05), 0, 0, 2, 2);
     -fx-border-width: 0 0 0 4;
-    -fx-border-color: transparent;
-}
-
-.inventory-container {
-    -fx-padding: 10;
-    -fx-background-color: rgba(0, 0, 0, 0.05);
-    -fx-background-radius: 10;
 }
 
 .inventory-item {
@@ -273,18 +201,6 @@
 .inventory-item-rapido { -fx-border-color: #4caf50; }
 .inventory-item-lento { -fx-border-color: #ff9800; }
 
-.player-active-card {
-    -fx-background-color: rgba(187, 222, 251, 0.6);
-    -fx-effect: dropshadow(three-pass-box, rgba(13, 71, 161, 0.3), 10, 0, 0, 0);
-    -fx-translate-x: -5;
-    -fx-border-color: #0d47a1;
-}
-
-.text-field:disabled {
-    -fx-opacity: 0.6;
-    -fx-background-color: rgba(0, 0, 0, 0.1);
-}
-
 /* OPCIONES: SLIDERS Y COMBOBOX */
 .progress-bar > .track,
 .slider > .track {
@@ -306,37 +222,7 @@
     -fx-padding: 5;
 }
 
-.combo-box .list-cell {
-    -fx-text-fill: #0d47a1;
-}
-
-.premium-checkbox {
-    -fx-text-fill: #0d47a1;
-    -fx-font-size: 20px;
-    -fx-cursor: hand;
-}
-
-.premium-checkbox .box {
-    -fx-background-color: white;
-    -fx-border-color: #0d47a1;
-    -fx-border-width: 2;
-    -fx-background-radius: 0;
-}
-
-.premium-checkbox:selected .mark {
-    -fx-background-color: #0d47a1;
-}
-
 /* TABPANE PREMIUM (OPCIONES) */
-.tab-pane .tab-header-area {
-    -fx-padding: 0 0 10 0;
-}
-
-.tab-pane .divider {
-    -fx-background-color: rgba(13, 71, 161, 0.4);
-    -fx-pref-height: 2;
-}
-
 .tab-pane .tab {
     -fx-background-color: rgba(255, 255, 255, 0.1);
     -fx-padding: 10 30;
@@ -346,35 +232,6 @@
 
 .tab-pane .tab:selected {
     -fx-background-color: #0d47a1;
-    -fx-border-color: transparent;
-}
-
-.tab-pane .tab .tab-label {
-    -fx-text-fill: white;
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-}
-
-.tab-pane .tab:selected .tab-label {
-    -fx-text-fill: white;
-}
-
-.tab-pane .tab-content-area {
-    -fx-background-color: transparent;
-}
-
-/* DIRTY STATE FOR APPLY BUTTON (GREEN) */
-.button-dirty {
-    -fx-background-color:
-        #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20, #1b5e20,
-        #4caf50, #4caf50, #4caf50, #4caf50, #4caf50, #4caf50, #4caf50;
-    -fx-text-fill: white;
-}
-
-.button-dirty:hover {
-    -fx-background-color:
-        #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a, #0a3d0a,
-        #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32, #2e7d32;
 }
 
 /* OVERLAYS IN-GAME */
@@ -387,22 +244,77 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 20, 0, 0, 0);
 }
 
+/* BOTÓN HAMBURGUESA (MÁS GRANDE Y FUERTE) */
 .button-hamburger {
-    -fx-min-width: 60px;
-    -fx-min-height: 60px;
-    -fx-pref-width: 60px;
-    -fx-pref-height: 60px;
+    -fx-min-width: 65px;
+    -fx-min-height: 65px;
+    -fx-max-width: 65px;
+    -fx-max-height: 65px;
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+    -fx-background-radius: 10;
     -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.2), 0, 0, 4, 4);
+}
+
+.button-hamburger:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+    -fx-translate-y: -2;
 }
 
 .hamburger-line {
     -fx-background-color: #0d47a1;
-    -fx-min-height: 8px;
-    -fx-max-height: 8px;
-    -fx-pref-width: 28px;
-    -fx-min-width: 28px;
-    -fx-max-width: 28px;
-    -fx-background-radius: 4px;
+    -fx-min-height: 6px;
+    -fx-max-height: 6px;
+    -fx-pref-width: 35px;
+    -fx-min-width: 35px;
+    -fx-max-width: 35px;
+    -fx-background-radius: 3px;
+}
+
+/* INVENTARIO FLOTANTE (BACKPACK STYLE) */
+.inventory-floating-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 20 20 0 0;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 30, 0, 0, -10);
+    -fx-border-width: 8 0 0 0;
+}
+
+.button-back-small {
+    -fx-background-radius: 50%;
+    -fx-min-width: 45px;
+    -fx-min-height: 45px;
+    -fx-padding: 0;
+    -fx-font-size: 22px;
+    -fx-background-color: #eee;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+}
+
+.button-back-small:hover {
+    -fx-background-color: #ff5252;
+    -fx-text-fill: white;
+}
+
+/* DINÁMICA DE JUGADORES EN EL LOG */
+.secondary-player-card {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-padding: 8 12;
+    -fx-background-radius: 5;
+    -fx-border-width: 0 0 0 6;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.05), 0, 1, 1, 1);
+}
+
+.secondary-player-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.secondary-player-info {
+    -fx-font-size: 14px;
+    -fx-text-fill: #666;
 }
 
 /* Estilo para etiquetas que deben resaltar sobre el tablero en las capas */

@@ -47,19 +47,26 @@ public class TableroController {
     @FXML private Pane cameraViewport;
     @FXML private Group zoomGroup;
     @FXML private HBox turnIndicatorBox;
-    @FXML
-    private Button btnDado;
-    @FXML
-    private Button btnRecolectar;
+    @FXML private Button btnDado;
+    @FXML private Button btnRecolectar;
+    @FXML private Button btnInventario;
+    @FXML private Button btnMenu;
     @FXML private Label dadoResultadoLabel;
     @FXML private TextArea gameLogArea;
-    @FXML private VBox playersStatusContainer;
     
     // Panel lateral de Log
     @FXML private HBox logPanelContainer;
     @FXML private VBox logContentBox;
     @FXML private Button btnToggleLog;
     private boolean isLogOpen = false;
+
+    // PANEL DE ESTADO SECUNDARIO (En el Log)
+    @FXML private VBox secondaryStatusContainer;
+
+    // INVENTARIO FLOTANTE
+    @FXML private VBox inventoryOverlayPanel;
+    @FXML private FlowPane inventoryFlowPane;
+    private boolean isInventoryOpen = false;
 
     
     // CAPA DE EVENTOS
@@ -116,7 +123,6 @@ public class TableroController {
     private Map<Integer, StackPane> casillaNodes = new HashMap<>();
     private Map<Jugador, Circle> playerTokens = new HashMap<>(); // Fichas en el tablero
     private Map<Jugador, Circle> turnCircles = new HashMap<>();  // Círculos del indicador superior
-    private Map<Jugador, VBox> playerStatusCards = new HashMap<>();
     
     // ESTADO DE EVENTOS
     private Map<Jugador, Pane> highlightingBackups = new HashMap<>();
@@ -144,23 +150,6 @@ public class TableroController {
         initOptionsOverlay();
         initCamera();
         
-        // Centrar tablero automáticamente cuando se conozcan las dimensiones
-        cameraViewport.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
-        });
-        cameraViewport.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
-        });
-        
-        // Centrar en el primer jugador al inicio
-        Platform.runLater(() -> {
-            if (!jugadores.isEmpty()) {
-                smoothCenterOnPlayer(jugadores.get(0), 1.0);
-            } else {
-                centrarTablero();
-            }
-        });
-        
         // Esconder panel de log al inicio directamente (320 es el prefWidth de logContentBox)
         logPanelContainer.setTranslateX(-320);
         
@@ -169,6 +158,23 @@ public class TableroController {
         tablero.introducirSeed(seed);
         
         this.jugadores = GameContext.getInstance().getConfiguredPlayers();
+        
+        // Centrar en el primer jugador al inicio (ahora que sabemos quiénes son)
+        Platform.runLater(() -> {
+            if (jugadores != null && !jugadores.isEmpty()) {
+                smoothCenterOnPlayer(jugadores.get(0), 1.0);
+            } else {
+                centrarTablero();
+            }
+        });
+
+        // Centrar tablero automáticamente cuando se conozcan las dimensiones reales
+        cameraViewport.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
+        });
+        cameraViewport.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
+        });
         
         juegoSimulado.setTablero(this.tablero);
         juegoSimulado.getJugadores().addAll(this.jugadores);
@@ -203,7 +209,6 @@ public class TableroController {
         }
         
         dibujarTablero();
-        crearTarjetasJugadores();
         crearFichasJugadores();
         crearIndicadorTurnos();
         
@@ -306,29 +311,6 @@ public class TableroController {
         return pane;
     }
 
-    private void crearTarjetasJugadores() {
-        playersStatusContainer.getChildren().clear();
-        playerStatusCards.clear();
-        for (Jugador j : jugadores) {
-            VBox card = new VBox(5);
-            card.getStyleClass().add("player-status-card");
-            
-            Color colorBorde = getColorFromString(j.getColor());
-            String hexColor = String.format("#%02X%02X%02X",
-                (int)(colorBorde.getRed() * 255),
-                (int)(colorBorde.getGreen() * 255),
-                (int)(colorBorde.getBlue() * 255));
-                
-            card.setStyle("-fx-border-color: " + hexColor + "; -fx-border-width: 0 0 0 5;");
-            Label nameLabel = new Label(j.getNombre());
-            nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
-            Label posLabel = new Label("Posición: " + j.getPosicion());
-            Label invLabel = new Label("Objetos: " + j.getInventario().getCantidad("Total"));
-            card.getChildren().addAll(nameLabel, posLabel, invLabel);
-            playersStatusContainer.getChildren().add(card);
-            playerStatusCards.put(j, card);
-        }
-    }
 
     private void crearFichasJugadores() {
         for (Jugador j : jugadores) {
@@ -413,7 +395,7 @@ public class TableroController {
         if (recolectadas > 0) {
             log(jActual.getNombre() + " se queda quieto y recolecta " + recolectadas + " bolas de nieve ❄");
             util.SoundManager.playConfirm();
-            actualizarTarjetaJugador(jActual);
+            actualizarUI();
             
             // Pausa breve para que el jugador vea el cambio antes de pasar turno
             setControlesBloqueados(true);
@@ -479,7 +461,6 @@ public class TableroController {
         
         cellAntigua.getChildren().remove(playerTokens.get(j));
         posicionarToken(j);
-        actualizarTarjetaJugador(j);
 
         // Seguimiento de cámara si está en modo automático
         if (cameraAutoMode) {
@@ -606,11 +587,6 @@ public class TableroController {
             while (defensor.getInventario().getCantidad("BolaNieve") > 0) defensor.getInventario().eliminarObjeto("BolaNieve");
         }
         
-        actualizarTarjetaJugador(atacante);
-        actualizarTarjetaJugador(defensor);
-        
-        actualizarTarjetaJugador(atacante);
-        actualizarTarjetaJugador(defensor);
         
         log(mensaje.toString().replace("\n", "  |  "));
         
@@ -620,7 +596,6 @@ public class TableroController {
     private void moverFichaDirecta(Jugador j, int desde, int hasta) {
         casillaNodes.get(desde).getChildren().remove(playerTokens.get(j));
         posicionarToken(j);
-        actualizarTarjetaJugador(j);
     }
 
     private void finalizarTurno() {
@@ -691,47 +666,82 @@ public class TableroController {
             }
         });
         
-        playersStatusContainer.getChildren().clear();
-        VBox activeCard = playerStatusCards.get(jActual);
-        if (activeCard != null) {
-            // Asegurarse de que esté actualizada para este turno
-            actualizarTarjetaJugador(jActual);
-            playersStatusContainer.getChildren().add(activeCard);
+        
+        secondaryStatusContainer.getChildren().clear();
+        
+        // 1. Panel Principal de Inventario (Flotante)
+        actualizarInventarioFlotante(jActual);
+        
+        // 2. Colores Dinámicos
+        aplicarEstiloPorJugador(jActual);
+        
+        // 3. Panel de Estado Secundario (Todos los jugadores en el Log)
+        for (Jugador p : jugadores) {
+            VBox secondaryCard = crearTarjetaEstadoSecundaria(p);
+            secondaryStatusContainer.getChildren().add(secondaryCard);
         }
     }
 
-    private void actualizarTarjetaJugador(Jugador j) {
-        VBox card = playerStatusCards.get(j);
-        if (card != null) {
-            ((Label)card.getChildren().get(1)).setText("Posición: " + j.getPosicion());
+    private void aplicarEstiloPorJugador(Jugador j) {
+        Color c = getColorFromString(j.getColor());
+        // Color más brillante para la capa interna del botón pixelado
+        Color light = c.deriveColor(0, 1.0, 1.25, 1.0);
+        
+        String hex = String.format("#%02X%02X%02X",
+            (int)(c.getRed() * 255),
+            (int)(c.getGreen() * 255),
+            (int)(c.getBlue() * 255));
             
-            Inventario inv = j.getInventario();
+        String hexLight = String.format("#%02X%02X%02X",
+            (int)(light.getRed() * 255),
+            (int)(light.getGreen() * 255),
+            (int)(light.getBlue() * 255));
+        
+        // Usamos variables CSS para no machacar el estilo del borde pixelado
+        String style = "-fx-player-color: " + hex + "; -fx-player-color-light: " + hexLight + ";";
+        
+        btnDado.setStyle(style);
+        btnRecolectar.setStyle(style);
+        btnInventario.setStyle(style);
+        
+        // Borde del panel de inventario
+        inventoryOverlayPanel.lookup(".inventory-floating-panel")
+                            .setStyle("-fx-border-color: " + hex + "; -fx-border-width: 8 0 0 0;");
+    }
+
+    private VBox crearTarjetaEstadoSecundaria(Jugador j) {
+        VBox card = new VBox(2);
+        card.getStyleClass().add("secondary-player-card");
+        
+        Color c = getColorFromString(j.getColor());
+        String hex = String.format("#%02X%02X%02X",
+            (int)(c.getRed() * 255),
+            (int)(c.getGreen() * 255),
+            (int)(c.getBlue() * 255));
             
-            // Reemplazamos el Label de texto por un FlowPane de objetos interactivos
-            FlowPane inventoryBox = new FlowPane();
-            inventoryBox.setHgap(8);
-            inventoryBox.setVgap(8);
-            inventoryBox.getStyleClass().add("inventory-container");
-            inventoryBox.setPrefWrapLength(250);
+        card.setStyle("-fx-border-color: " + hex + ";");
+        
+        Label nameLabel = new Label(j.getNombre());
+        nameLabel.getStyleClass().add("secondary-player-name");
+        
+        Label infoLabel = new Label("Pos: " + j.getPosicion() + " | Obj: " + j.getInventario().getCantidad("Total"));
+        infoLabel.getStyleClass().add("secondary-player-info");
+        
+        card.getChildren().addAll(nameLabel, infoLabel);
+        return card;
+    }
 
-            agregarIconoObjeto(inventoryBox, "Pez", inv.getCantidad("Pez"), "PEZ", "inventory-item-pez");
-            agregarIconoObjeto(inventoryBox, "BolaNieve", inv.getCantidad("BolaNieve"), "BOLA NIEVE", "inventory-item-bola");
-            agregarIconoObjeto(inventoryBox, "DadoRapido", inv.getCantidad("DadoRapido"), "DADO RÁPIDO", "inventory-item-rapido");
-            agregarIconoObjeto(inventoryBox, "DadoLento", inv.getCantidad("DadoLento"), "DADO LENTO", "inventory-item-lento");
+    private void actualizarInventarioFlotante(Jugador j) {
+        inventoryFlowPane.getChildren().clear();
+        Inventario inv = j.getInventario();
+        
+        agregarIconoObjeto(inventoryFlowPane, "Pez", inv.getCantidad("Pez"), "PEZ", "inventory-item-pez");
+        agregarIconoObjeto(inventoryFlowPane, "BolaNieve", inv.getCantidad("BolaNieve"), "BOLA NIEVE", "inventory-item-bola");
+        agregarIconoObjeto(inventoryFlowPane, "DadoRapido", inv.getCantidad("DadoRapido"), "DADO RÁPIDO", "inventory-item-rapido");
+        agregarIconoObjeto(inventoryFlowPane, "DadoLento", inv.getCantidad("DadoLento"), "DADO LENTO", "inventory-item-lento");
 
-            // Si el inventario está vacío, añadimos un mensaje
-            if (inv.getCantidad("Total") == 0) {
-                Label emptyLabel = new Label("Inventario vacío");
-                emptyLabel.setStyle("-fx-font-size: 14px; -fx-opacity: 0.5;");
-                inventoryBox.getChildren().add(emptyLabel);
-            }
-
-            // El índice 2 es donde estaba el anterior Label de objetos
-            if (card.getChildren().size() > 2) {
-                card.getChildren().set(2, inventoryBox);
-            } else {
-                card.getChildren().add(inventoryBox);
-            }
+        if (inv.getCantidad("Total") == 0) {
+            inventoryFlowPane.getChildren().add(new Label("La mochila está vacía..."));
         }
     }
 
@@ -801,6 +811,9 @@ public class TableroController {
         util.SoundManager.playConfirm();
         String tipo = selectedItemType;
         animateOut(itemConfirmOverlay, () -> {
+            // Si estábamos usando un objeto, cerramos el inventario
+            if (isInventoryOpen) handleCloseInventory();
+            
             // Cerramos también el fondo oscuro si no hay otro panel abriéndose
             FadeTransition fadeBg = new FadeTransition(Duration.millis(300), overlayPane);
             fadeBg.setToValue(0);
@@ -824,8 +837,8 @@ public class TableroController {
     private void setControlesBloqueados(boolean bloqueado) {
         btnDado.setDisable(bloqueado);
         btnRecolectar.setDisable(bloqueado);
+        btnInventario.setDisable(bloqueado);
         logContentBox.setDisable(bloqueado);
-        // Los botones de dado lento/rápido han sido eliminados de la UI
     }
 
     private void log(String msg) {
@@ -1094,8 +1107,8 @@ public class TableroController {
         zoomGroup.setScaleX(1.0);
         zoomGroup.setScaleY(1.0);
         
-        // Calculamos el centro visual (restando los 300px del panel derecho)
-        double visualCenterX = (viewWidth - 300) / 2.0;
+        // Calculamos el centro visual (ventana completa, ya no hay panel derecho)
+        double visualCenterX = viewWidth / 2.0;
         double visualCenterY = viewHeight / 2.0;
         
         // El punto de dibujo central es (1200, 1100), pero el isométrico 
@@ -1258,5 +1271,51 @@ public class TableroController {
                 try { return Color.web(colorRef); } 
                 catch (Exception e) { return Color.DARKBLUE; }
         }
+    }
+    @FXML
+    private void handleOpenInventory() {
+        if (isInventoryOpen) return;
+        
+        util.SoundManager.playConfirm();
+        isInventoryOpen = true;
+        
+        inventoryOverlayPanel.setVisible(true);
+        inventoryOverlayPanel.setTranslateY(400); // Empezamos desde abajo (fuera de vista)
+        inventoryOverlayPanel.setOpacity(0);
+        
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(350), inventoryOverlayPanel);
+        fadeIn.setToValue(1);
+        
+        TranslateTransition slideUp = new TranslateTransition(Duration.millis(350), inventoryOverlayPanel);
+        slideUp.setToY(0);
+        
+        ParallelTransition pt = new ParallelTransition(fadeIn, slideUp);
+        pt.setInterpolator(Interpolator.EASE_OUT);
+        pt.setOnFinished(e -> setControlesBloqueados(true)); // Bloqueamos los de abajo para que no se pisen
+        pt.play();
+        
+        // Pero el botón de inventario en sí mismo ya está bloqueado por setControlesBloqueados
+        // Aunque el panel flotante TIENE su propio botón de cerrar (X)
+    }
+
+    @FXML
+    private void handleCloseInventory() {
+        if (!isInventoryOpen) return;
+        
+        util.SoundManager.playBack();
+        isInventoryOpen = false;
+        
+        setControlesBloqueados(false); // Desbloqueamos antes de la animación para mejor respuesta
+        
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), inventoryOverlayPanel);
+        fadeOut.setToValue(0);
+        
+        TranslateTransition slideDown = new TranslateTransition(Duration.millis(300), inventoryOverlayPanel);
+        slideDown.setToY(400);
+        
+        ParallelTransition pt = new ParallelTransition(fadeOut, slideDown);
+        pt.setInterpolator(Interpolator.EASE_IN);
+        pt.setOnFinished(e -> inventoryOverlayPanel.setVisible(false));
+        pt.play();
     }
 }
