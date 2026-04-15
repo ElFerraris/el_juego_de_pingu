@@ -40,3 +40,14 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - Creadas las subclases `Pinguino` (jugador humano) y `Foca` (CPU, anteriormente llamada `CPU`).
     - Actualizada toda la lógica de instanciación, guardado y carga en base de datos para manejar correctamente los nuevos tipos específicos.
     - La foca mantiene su color gris por defecto y lógica de ataque personalizada.
+
+### Pulir el Tablero
+- [x] **12. Cambio visual del indicador de turnos**
+    - Sustituir los textos simples "Turno de..." por una representación visual en la barra superior.
+    - Crear una secuencia visual con esferas del color de cada jugador.
+    - Las esferas estarán conectadas por flechas indicando el flujo del turno.
+    - El jugador activo tendrá su esfera iluminada o con un efecto brillante para resaltar su turno.
+- [ ] **13. Panel lateral retráctil para el Log de Partida**
+    - Mover el cuadro de "Log de partida" de la parte inferior a un panel lateral izquierdo.
+    - El panel debe poder expandirse y contraerse mediante un botón con una flecha (▶/◀).
+    - Cuando se presiona, el panel se desliza con animación y la flecha cambia de dirección al cerrarse.

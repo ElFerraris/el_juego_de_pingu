@@ -1,7 +1,7 @@
 package controlador;
 
 import javafx.fxml.FXML;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -12,6 +12,8 @@ import javafx.geometry.Pos;
 import javafx.event.ActionEvent;
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
@@ -32,12 +34,18 @@ import util.SoundManager;
  */
 public class TableroController {
 
-    @FXML private GridPane boardGrid;
-    @FXML private Label turnoLabel;
+    @FXML private Pane boardPane;
+    @FXML private HBox turnIndicatorBox;
     @FXML private Label dadoResultadoLabel;
     @FXML private TextArea gameLogArea;
     @FXML private VBox playersStatusContainer;
     
+    // Panel lateral de Log
+    @FXML private HBox logPanelContainer;
+    @FXML private VBox logContentBox;
+    @FXML private Button btnToggleLog;
+    private boolean isLogOpen = false;
+
     @FXML private Button btnDado;
     @FXML private Button btnDadoLento;
     @FXML private Button btnDadoRapido;
@@ -75,7 +83,8 @@ public class TableroController {
     private boolean animacionEnCurso = false;
     
     private Map<Integer, StackPane> casillaNodes = new HashMap<>();
-    private Map<Jugador, Circle> playerTokens = new HashMap<>();
+    private Map<Jugador, Circle> playerTokens = new HashMap<>(); // Fichas en el tablero
+    private Map<Jugador, Circle> turnCircles = new HashMap<>();  // Círculos del indicador superior
     private Map<Jugador, VBox> playerStatusCards = new HashMap<>();
 
     private BBDD bbdd = new BBDD();
@@ -85,6 +94,11 @@ public class TableroController {
     public void initialize() {
         // Inicialización de Opciones Overlay
         initOptionsOverlay();
+        
+        // Esconder panel de log al inicio
+        Platform.runLater(() -> {
+            logPanelContainer.setTranslateX(-logContentBox.getWidth());
+        });
         
         this.tablero = new Tablero();
         String seed = GameContext.getInstance().getSeed();
@@ -127,6 +141,7 @@ public class TableroController {
         dibujarTablero();
         crearTarjetasJugadores();
         crearFichasJugadores();
+        crearIndicadorTurnos();
         
         actualizarUI();
         
@@ -138,8 +153,17 @@ public class TableroController {
     }
 
     private void dibujarTablero() {
-        boardGrid.getChildren().clear();
+        boardPane.getChildren().clear();
         casillaNodes.clear();
+        
+        List<StackPane> sortedNodes = new java.util.ArrayList<>();
+        
+        double centerX = 470.0; // Centro horizontal ajustado
+        double bottomY = 460.0; // Subimos el tablero para evitar cortes por debajo
+        
+        // Espacios reducidos proporcionalmente al nuevo tamaño (50px) para que quepa en la pantalla
+        double xOffset = 56.0; 
+        double yOffset = 31.0; 
         
         for (int i = 0; i < Tablero.TAMANYO_TABLERO; i++) {
             Casilla c = tablero.getCasilla(i);
@@ -147,40 +171,60 @@ public class TableroController {
             
             StackPane cellNode = crearNodoCasilla(c);
             
-            // Layout "Sendero Ártico" (Serpenteante con huecos)
-            int row, col;
-            int section = i / 10; // 0, 1, 2, 3, 4
-            int offset = i % 10;
+            double layoutX, layoutY;
+            int zOrder;
             
-            row = section * 2; // Filas 0, 2, 4, 6, 8
-            if (section % 2 == 0) {
-                col = offset; // Izquierda a Derecha
+            if (i < 49) {
+                // Patrón Boustrophedon 7x7 (Isométrico)
+                int gy = i / 7;
+                int gx;
+                if (gy % 2 == 0) {
+                    gx = i % 7; // Izquierda a derecha
+                } else {
+                    gx = 6 - (i % 7); // Derecha a izquierda
+                }
+                
+                zOrder = gx + gy;
+                
+                // Calcular posiciones absolutas en isométrico adaptado al tamaño de 50px
+                layoutX = centerX + (gx - gy) * xOffset - 25;
+                layoutY = bottomY - (gx + gy) * yOffset - 25;
             } else {
-                col = 9 - offset; // Derecha a Izquierda
+                // Casilla 49 o 50 (La Meta / Igloo)
+                zOrder = 7 + 7;
+                layoutX = centerX + (7 - 7) * xOffset - 25;
+                // Ajustada para que no pase de la parte superior del todo
+                layoutY = bottomY - (7 + 7) * yOffset - 25 - 12;
             }
             
-            // Ajuste para las casillas de transición (las que bajan de fila)
-            // No necesitamos lógica extra si el zig-zag es simple, 
-            // pero para que parezca un camino continuo, el último de una fila 
-            // y el primero de la siguiente deben estar conectados.
-            // En un zig-zag estándar de grid, (0,9) está cerca de (1,9).
+            cellNode.setUserData(-zOrder); // Guardar Z-Order negativo para fácil ordenación
             
-            boardGrid.add(cellNode, col, row);
+            cellNode.setLayoutX(layoutX);
+            cellNode.setLayoutY(layoutY);
+            
             casillaNodes.put(i, cellNode);
+            sortedNodes.add(cellNode);
         }
+        
+        // Ordenar nodos. El menor zOrder negativo significa mayor Z (más atrás), 
+        // así que los que están más atrás tienen un valor numérico menor aquí y van primero
+        sortedNodes.sort((a, b) -> Integer.compare((int) a.getUserData(), (int) b.getUserData()));
+        
+        boardPane.getChildren().addAll(sortedNodes);
     }
 
     private StackPane crearNodoCasilla(Casilla c) {
         StackPane pane = new StackPane();
         pane.getStyleClass().add("casilla-base");
-        pane.setPrefSize(64, 64);
+        // Hemos reducido el bloque de 64 a 50 para que el rombo quepa entero en pantalla
+        pane.setPrefSize(50, 50);
         
         // Cargar Sprite (Fondo de la casilla)
         try {
             Image img = new Image(getClass().getResourceAsStream(c.getSpritePath()));
             ImageView view = new ImageView(img);
-            view.setFitWidth(64);
-            view.setFitHeight(64);
+            view.setFitWidth(50);
+            view.setFitHeight(50);
             view.setPreserveRatio(true);
             pane.getChildren().add(view);
         } catch (Exception e) {
@@ -241,6 +285,34 @@ public class TableroController {
             token.setTranslateY(index * 4 - 4);
             if (!cell.getChildren().contains(token)) {
                 cell.getChildren().add(token);
+            }
+        }
+    }
+
+    private void crearIndicadorTurnos() {
+        turnIndicatorBox.getChildren().clear();
+        turnCircles.clear();
+        
+        for (int i = 0; i < jugadores.size(); i++) {
+            Jugador j = jugadores.get(i);
+            
+            Circle circle = new Circle(18);
+            circle.setFill(getColorFromString(j.getColor()));
+            circle.setStroke(Color.WHITE);
+            circle.setStrokeWidth(2);
+            
+            DropShadow ds = new DropShadow();
+            ds.setRadius(5);
+            ds.setColor(Color.BLACK);
+            circle.setEffect(ds);
+            
+            turnCircles.put(j, circle);
+            turnIndicatorBox.getChildren().add(circle);
+            
+            if (i < jugadores.size() - 1) {
+                Label arrow = new Label("→");
+                arrow.setStyle("-fx-font-size: 24px; -fx-text-fill: white; -fx-font-weight: bold;");
+                turnIndicatorBox.getChildren().add(arrow);
             }
         }
     }
@@ -495,7 +567,28 @@ public class TableroController {
 
     private void actualizarUI() {
         Jugador jActual = jugadores.get(turnoActual);
-        turnoLabel.setText("TURNO DE: " + jActual.getNombre().toUpperCase());
+        
+        turnCircles.forEach((j, circle) -> {
+            if (j == jActual) {
+                // Iluminar para el turno actual
+                circle.setStroke(Color.YELLOW);
+                circle.setStrokeWidth(4);
+                
+                DropShadow glow = new DropShadow();
+                glow.setRadius(20);
+                glow.setColor(Color.YELLOW);
+                circle.setEffect(glow);
+            } else {
+                // Estado normal
+                circle.setStroke(Color.WHITE);
+                circle.setStrokeWidth(2);
+                
+                DropShadow ds = new DropShadow();
+                ds.setRadius(5);
+                ds.setColor(Color.BLACK);
+                circle.setEffect(ds);
+            }
+        });
         
         playerStatusCards.forEach((j, card) -> {
             card.getStyleClass().remove("player-active-card");
@@ -539,7 +632,24 @@ public class TableroController {
         });
     }
 
-    // --- GESTIÓN DE MENÚS Y OVERLAYS ---
+    // --- GESTIÓN DE MENÚS, OVERLAYS Y PANELES ---
+
+    @FXML
+    private void handleToggleLog(ActionEvent event) {
+        util.SoundManager.playConfirm();
+        TranslateTransition tt = new TranslateTransition(Duration.millis(300), logPanelContainer);
+        if (isLogOpen) {
+            tt.setToX(-logContentBox.getWidth());
+            btnToggleLog.setText("▶");
+            isLogOpen = false;
+        } else {
+            tt.setToX(0);
+            btnToggleLog.setText("◀");
+            isLogOpen = true;
+        }
+        tt.setInterpolator(Interpolator.EASE_BOTH);
+        tt.play();
+    }
 
     @FXML
     private void handleToggleMenu(ActionEvent event) {

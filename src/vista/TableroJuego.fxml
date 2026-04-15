@@ -18,7 +18,7 @@
         <!-- PANEL SUPERIOR: Información de Turno -->
         <top>
             <HBox alignment="CENTER" spacing="20" style="-fx-background-color: rgba(13,71,161,0.7); -fx-padding: 10;">
-                <Label fx:id="turnoLabel" text="TURNO DE: JUGADOR 1" style="-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;" />
+                <HBox fx:id="turnIndicatorBox" spacing="15" alignment="CENTER" />
                 <Separator orientation="VERTICAL" />
                 <Label fx:id="dadoResultadoLabel" text="Último dado: -" style="-fx-text-fill: #e3f2fd; -fx-font-size: 22px;" />
             </HBox>
@@ -31,9 +31,9 @@
                     <Insets top="20" right="20" bottom="20" left="20"/>
                 </padding>
                 <!-- TRANSPARENTE: Eliminado glass-panel -->
-                <GridPane fx:id="boardGrid" hgap="5" vgap="5" alignment="CENTER" style="-fx-padding: 15;">
-                    <!-- Las casillas se inyectarán dinámicamente -->
-                </GridPane>
+                <Pane fx:id="boardPane" style="-fx-padding: 15; -fx-min-width: 800; -fx-min-height: 600;">
+                    <!-- Las casillas se inyectarán dinámicamente con coordenadas isométricas -->
+                </Pane>
             </StackPane>
         </center>
 
@@ -69,12 +69,7 @@
         <!-- PANEL INFERIOR: Acciones -->
         <bottom>
             <HBox spacing="30" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 20;">
-                <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" maxWidth="600">
-                    <Label text="LOG DE PARTIDA" style="-fx-font-size: 14px; -fx-opacity: 0.7;"/>
-                    <TextArea fx:id="gameLogArea" editable="false" prefHeight="80" 
-                              style="-fx-control-inner-background: rgba(0,0,0,0.1); -fx-text-fill: #0d47a1; -fx-font-size: 16px;" 
-                              wrapText="true" />
-                </VBox>
+                <!-- Se eliminó el VBox del log de partida de aquí -->
                 
                 <VBox spacing="10" alignment="CENTER">
                     <HBox spacing="15" alignment="CENTER">
@@ -87,6 +82,19 @@
             </HBox>
         </bottom>
     </BorderPane>
+
+    <!-- CAPA FLOTANTE: LOG LATERAL -->
+    <HBox fx:id="logPanelContainer" alignment="CENTER_LEFT" pickOnBounds="false" maxWidth="-Infinity" StackPane.alignment="CENTER_LEFT">
+        <VBox fx:id="logContentBox" prefWidth="320" styleClass="glass-panel" style="-fx-background-radius: 0 10 10 0; -fx-padding: 15;">
+            <Label text="LOG DE PARTIDA" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0d47a1;" />
+            <Separator style="-fx-padding: 10 0;" />
+            <TextArea fx:id="gameLogArea" editable="false" prefHeight="400" VBox.vgrow="ALWAYS"
+                      style="-fx-control-inner-background: rgba(255,255,255,0.7); -fx-text-fill: #0d47a1; -fx-font-size: 14px; -fx-background-radius: 5;" 
+                      wrapText="true" />
+        </VBox>
+        <Button fx:id="btnToggleLog" text="▶" onAction="#handleToggleLog" styleClass="button-secondary" 
+                style="-fx-background-radius: 0 10 10 0; -fx-font-size: 22px; -fx-padding: 20 10; -fx-min-width: 40px;"/>
+    </HBox>
 
     <!-- CAPA 1: OVERLAY CONTENEDOR (Fondo Oscurecido) -->
     <StackPane fx:id="overlayPane" visible="false" styleClass="overlay-pane">
