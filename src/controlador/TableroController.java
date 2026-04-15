@@ -95,10 +95,8 @@ public class TableroController {
         // Inicialización de Opciones Overlay
         initOptionsOverlay();
         
-        // Esconder panel de log al inicio
-        Platform.runLater(() -> {
-            logPanelContainer.setTranslateX(-logContentBox.getWidth());
-        });
+        // Esconder panel de log al inicio directamente (320 es el prefWidth de logContentBox)
+        logPanelContainer.setTranslateX(-320);
         
         this.tablero = new Tablero();
         String seed = GameContext.getInstance().getSeed();
