@@ -137,7 +137,15 @@ public class TableroController {
         initOptionsOverlay();
         initCamera();
         
-        // Centrar tablero al inicio (usamos runLater para esperar a que el layout esté listo)
+        // Centrar tablero automáticamente cuando se conozcan las dimensiones
+        cameraViewport.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
+        });
+        cameraViewport.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
+        });
+        
+        // Ejecutar un centrado inicial forzado por si acaso
         Platform.runLater(this::centrarTablero);
         
         // Esconder panel de log al inicio directamente (320 es el prefWidth de logContentBox)

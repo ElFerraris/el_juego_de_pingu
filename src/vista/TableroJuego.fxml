@@ -79,7 +79,7 @@
                 
                 <!-- Botón de centrado movido aquí para que esté en la capa UI -->
                 <Region HBox.hgrow="ALWAYS" />
-                <Button onAction="#handleResetCamera" text="⌂" prefWidth="50" prefHeight="50" 
+                <Button onAction="#handleResetCamera" text="⌂" prefWidth="65" prefHeight="50" minWidth="65"
                         styleClass="button-secondary">
                     <tooltip><Tooltip text="Centrar Cámara" /></tooltip>
                 </Button>

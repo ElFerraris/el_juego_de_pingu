@@ -28,6 +28,7 @@ public class Intro {
 
     private MediaPlayer mediaPlayer;
     private boolean yaFinalizado = false;
+    private javafx.event.EventHandler<KeyEvent> skipFilter;
 
     @FXML
     public void initialize() {
@@ -95,14 +96,15 @@ public class Intro {
     }
 
     private void configurarEscena(Scene scene) {
-        // 1. Detección de teclado (EventFilter es más robusto)
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+        // 1. Detección de teclado
+        this.skipFilter = event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 System.out.println("► Skip detectado (ENTER)");
                 finalizarIntro();
                 event.consume();
             }
-        });
+        };
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, skipFilter);
 
         // 2. Quitar el mensaje de ESC (con seguridad de Window)
         if (scene.getWindow() != null) {
@@ -135,6 +137,11 @@ public class Intro {
     private void finalizarIntro() {
         if (yaFinalizado) return;
         yaFinalizado = true;
+        
+        // Limpiamos el filtro de la escena para que no persista en el menú
+        if (rootPane != null && rootPane.getScene() != null && skipFilter != null) {
+            rootPane.getScene().removeEventFilter(KeyEvent.KEY_PRESSED, skipFilter);
+        }
         
         if (mediaPlayer != null) {
             mediaPlayer.stop();
