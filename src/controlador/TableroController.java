@@ -12,6 +12,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Group;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.shape.Rectangle;
 import javafx.event.ActionEvent;
 import javafx.animation.*;
 import javafx.application.Platform;
@@ -39,6 +44,8 @@ import util.SoundManager;
 public class TableroController {
 
     @FXML private Pane boardPane;
+    @FXML private Pane cameraViewport;
+    @FXML private Group zoomGroup;
     @FXML private HBox turnIndicatorBox;
     @FXML private Label dadoResultadoLabel;
     @FXML private TextArea gameLogArea;
@@ -99,6 +106,15 @@ public class TableroController {
     private Map<Jugador, Circle> playerTokens = new HashMap<>(); // Fichas en el tablero
     private Map<Jugador, Circle> turnCircles = new HashMap<>();  // Círculos del indicador superior
     private Map<Jugador, VBox> playerStatusCards = new HashMap<>();
+    
+    // ESTADO DE CÁMARA
+    private double mouseAnchorX;
+    private double mouseAnchorY;
+    private double translateAnchorX;
+    private double translateAnchorY;
+    private double zoomFactor = 1.0;
+    private static final double MIN_ZOOM = 0.4;
+    private static final double MAX_ZOOM = 3.0;
 
     private BBDD bbdd = new BBDD();
     private Juego juegoSimulado = new Juego();
@@ -107,6 +123,10 @@ public class TableroController {
     public void initialize() {
         // Inicialización de Opciones Overlay
         initOptionsOverlay();
+        initCamera();
+        
+        // Centrar tablero al inicio (usamos runLater para esperar a que el layout esté listo)
+        Platform.runLater(this::centrarTablero);
         
         // Esconder panel de log al inicio directamente (320 es el prefWidth de logContentBox)
         logPanelContainer.setTranslateX(-320);
@@ -169,8 +189,9 @@ public class TableroController {
         
         List<StackPane> sortedNodes = new java.util.ArrayList<>();
         
-        double centerX = 470.0; // Centro horizontal ajustado
-        double bottomY = 460.0; // Subimos el tablero para evitar cortes por debajo
+        // El boardPane ahora es de 2400x2000. Usamos el centro (1200, 1000)
+        double centerX = 1200.0; 
+        double bottomY = 1100.0; // Un poco más abajo del centro para que el rombo suba
         
         // Espacios reducidos proporcionalmente al nuevo tamaño (50px) para que quepa en la pantalla
         double xOffset = 56.0; 
@@ -842,6 +863,77 @@ public class TableroController {
     }
 
     // --- LÓGICA DE ANIMACIONES ---
+    
+    private void initCamera() {
+        // Hemos eliminado el clipping rígido para que el tablero se pueda ver por debajo de la interfaz
+        
+        // Zoom suave con Scroll
+        cameraViewport.addEventFilter(ScrollEvent.SCROLL, event -> {
+            double delta = event.getDeltaY();
+            double zoomStep = (delta > 0) ? 1.1 : 0.9;
+            
+            double nextZoom = zoomFactor * zoomStep;
+            if (nextZoom >= MIN_ZOOM && nextZoom <= MAX_ZOOM) {
+                zoomFactor = nextZoom;
+                zoomGroup.setScaleX(zoomFactor);
+                zoomGroup.setScaleY(zoomFactor);
+            }
+            event.consume();
+        });
+
+        // Desplazamiento (Pan) con Arrastre
+        cameraViewport.setOnMousePressed(event -> {
+            if (event.isPrimaryButtonDown()) {
+                mouseAnchorX = event.getSceneX();
+                mouseAnchorY = event.getSceneY();
+                translateAnchorX = boardPane.getTranslateX();
+                translateAnchorY = boardPane.getTranslateY();
+                cameraViewport.setCursor(javafx.scene.Cursor.MOVE);
+            }
+        });
+
+        cameraViewport.setOnMouseDragged(event -> {
+            if (event.isPrimaryButtonDown()) {
+                boardPane.setTranslateX(translateAnchorX + (event.getSceneX() - mouseAnchorX));
+                boardPane.setTranslateY(translateAnchorY + (event.getSceneY() - mouseAnchorY));
+            }
+        });
+
+        cameraViewport.setOnMouseReleased(event -> {
+            cameraViewport.setCursor(javafx.scene.Cursor.DEFAULT);
+        });
+    }
+
+    @FXML
+    private void handleResetCamera() {
+        util.SoundManager.playConfirm();
+        centrarTablero();
+    }
+
+    private void centrarTablero() {
+        if (boardPane == null || cameraViewport == null) return;
+        
+        double viewWidth = cameraViewport.getWidth();
+        double viewHeight = cameraViewport.getHeight();
+        
+        if (viewWidth <= 0) viewWidth = 1280;
+        if (viewHeight <= 0) viewHeight = 720;
+        
+        // Reseteamos zoom
+        zoomFactor = 1.0;
+        zoomGroup.setScaleX(1.0);
+        zoomGroup.setScaleY(1.0);
+        
+        // Calculamos el centro visual (restando los 300px del panel derecho)
+        double visualCenterX = (viewWidth - 300) / 2.0;
+        double visualCenterY = viewHeight / 2.0;
+        
+        // El punto de dibujo central es (1200, 1100), pero el isométrico 
+        // desplaza el "centro visual" del rombo un poco hacia arriba.
+        // Ajustamos para que se vea perfectamente centrado.
+        boardPane.setTranslateX(visualCenterX - 1200);
+        boardPane.setTranslateY(visualCenterY - 950);
+    }
 
     private void animateIn(Node content) {
         // Ocultar otros posibles overlays activos para evitar superposiciones

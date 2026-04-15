@@ -53,4 +53,16 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - Cuando se presiona, el panel se desliza con animación y la flecha cambia de dirección al cerrarse.
 - [x] **14. Optimización visual de Tarjetas de Jugador**
     - En el panel derecho ("Pingüinos"), mostrar únicamente la tarjeta del jugador cuyo turno está en curso.
-    - Cambiar el contador total de inventario por un listado detallado ("1x Pez", "2x Bola de Nieve", etc.).
+    - Cambiar el contador total de inventario por un listado detallado e interactivo.
+- [x] **15. Inventario Interactivo con Confirmación**
+    - Los objetos en el panel lateral ahora son botones rectangulares (Estilo: Nombre | xCantidad).
+    - Al hacer clic en un objeto, se abre un diálogo de confirmación animado.
+    - Se ha mejorado la lógica para que los dados especiales se usen desde este menú.
+- [x] **16. Sistema de Cámara (Zoom y Pan)**
+    - Implementado un "Viewport" central que permite libertad total de movimiento.
+    - **Zoom**: Controlado con la rueda del ratón (0.4x a 3.0x).
+    - **Desplazamiento**: Mantener pulsado y arrastrar para mover el tablero.
+    - **Reset**: Botón flotante `⌂` para centrar y resetear la vista instantáneamente.
+- [x] **17. Corrección de Superposición y Errores Críticos**
+    - Solucionado error `NullPointerException` al intentar cerrar la partida.
+    - Asegurado que solo se muestre un menú overlay a la vez (evitando el Menú de Pausa detrás de las alertas).

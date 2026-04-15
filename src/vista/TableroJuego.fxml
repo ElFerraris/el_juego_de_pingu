@@ -4,17 +4,26 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.Group?>
 <?import java.net.URL?>
 
-<StackPane fx:id="rootStack" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+<StackPane fx:id="rootStack" styleClass="root-plain-bg" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
            fx:controller="controlador.TableroController" prefHeight="720.0" prefWidth="1280.0">
     
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
 
-    <!-- CAPA 0: EL JUEGO -->
-    <BorderPane fx:id="gamePane" styleClass="root-plain-bg">
+    <!-- CAPA 0: EL MUNDO (CÁMARA/TABLERO) -->
+    <Pane fx:id="cameraViewport" mouseTransparent="false" pickOnBounds="true">
+        <Group fx:id="zoomGroup">
+            <!-- boardPane grande para permitir mucho margen de desplazamiento -->
+            <Pane fx:id="boardPane" prefWidth="2400" prefHeight="2000" />
+        </Group>
+    </Pane>
+
+    <!-- CAPA 1: LA INTERFAZ -->
+    <BorderPane fx:id="gamePane" pickOnBounds="false">
         <!-- PANEL SUPERIOR: Información de Turno -->
         <top>
             <HBox alignment="CENTER" spacing="20" style="-fx-background-color: rgba(13,71,161,0.7); -fx-padding: 10;">
@@ -24,17 +33,10 @@
             </HBox>
         </top>
 
-        <!-- PANEL CENTRAL: El Tablero -->
+        <!-- El centro debe dejarse libre y pickOnBounds="false" en el padre 
+             permitirá que los clics lleguen al tablero de fondo. -->
         <center>
-            <StackPane>
-                <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
-                </padding>
-                <!-- TRANSPARENTE: Eliminado glass-panel -->
-                <Pane fx:id="boardPane" style="-fx-padding: 15; -fx-min-width: 800; -fx-min-height: 600;">
-                    <!-- Las casillas se inyectarán dinámicamente con coordenadas isométricas -->
-                </Pane>
-            </StackPane>
+             <Region pickOnBounds="false" />
         </center>
 
         <!-- PANEL DERECHO: Inventario y Menú -->
@@ -69,13 +71,18 @@
         <!-- PANEL INFERIOR: Acciones -->
         <bottom>
             <HBox spacing="30" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 20;">
-                <!-- Se eliminó el VBox del log de partida de aquí -->
-                
                 <VBox spacing="10" alignment="CENTER">
                     <HBox spacing="15" alignment="CENTER">
                         <Button fx:id="btnDado" text="TIRAR DADO" onAction="#handleRollDice" prefWidth="220" prefHeight="60" styleClass="button-primary" />
                     </HBox>
                 </VBox>
+                
+                <!-- Botón de centrado movido aquí para que esté en la capa UI -->
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#handleResetCamera" text="⌂" prefWidth="50" prefHeight="50" 
+                        styleClass="button-secondary">
+                    <tooltip><Tooltip text="Centrar Cámara" /></tooltip>
+                </Button>
             </HBox>
         </bottom>
     </BorderPane>
