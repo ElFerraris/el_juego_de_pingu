@@ -2,6 +2,7 @@ package util;
 
 import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 /**
@@ -9,6 +10,23 @@ import javafx.util.Duration;
  * Contiene animaciones y efectos para que el juego se sienta más dinámico.
  */
 public class UIUtils {
+
+    /**
+     * Convierte un nombre de color (String) al objeto Color de JavaFX.
+     */
+    public static Color colorDesdeNombre(String nombre) {
+        if (nombre == null) return Color.GRAY;
+        switch (nombre.toLowerCase()) {
+            case "rojo":     return Color.RED;
+            case "azul":     return Color.BLUE;
+            case "verde":    return Color.GREEN;
+            case "amarillo": return Color.YELLOW;
+            case "naranja":  return Color.ORANGE;
+            case "morado":   return Color.PURPLE;
+            case "rosa":     return Color.PINK;
+            default:         return Color.GRAY;
+        }
+    }
 
     /**
      * Añade una animación suave de escalado cuando el ratón pasa por encima.

@@ -2,6 +2,10 @@ package datos;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import controlador.Juego;
 import modelo.Foca;
@@ -495,25 +499,47 @@ public class BBDD {
     }
     
     public ArrayList<modelo.PartidaGuardada> obtenerPartidasPendientes() {
-        ArrayList<modelo.PartidaGuardada> lista = new ArrayList<>();
-        String sql = "SELECT num_partida, seed, TO_CHAR(hora_partida, 'DD/MM/YYYY HH24:MI') as hora_partida FROM partida WHERE ganador IS NULL ORDER BY hora_partida DESC";
+        // Usamos LinkedHashMap para mantener el orden de la consulta (ORDER BY hora_partida DESC)
+        Map<Integer, modelo.PartidaGuardada> mapa = new LinkedHashMap<>();
+        
+        String sql = "SELECT p.num_partida, p.seed, p.nombre, " +
+                     "TO_CHAR(p.hora_partida, 'DD/MM/YYYY HH24:MI') as hora_partida, " +
+                     "pj.color " +
+                     "FROM partida p " +
+                     "LEFT JOIN participacion_jugadores pj ON p.num_partida = pj.id_partida " +
+                     "WHERE p.ganador IS NULL " +
+                     "ORDER BY p.hora_partida DESC";
 
         try (Connection con = conectarBD();
              PreparedStatement pstmt = con.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                lista.add(new modelo.PartidaGuardada(
-                    rs.getInt("num_partida"),
-                    rs.getString("seed"),
-                    rs.getString("hora_partida")
-                ));
+                int id = rs.getInt("num_partida");
+                String color = rs.getString("color");
+                
+                if (!mapa.containsKey(id)) {
+                    List<String> colores = new ArrayList<>();
+                    if (color != null) colores.add(color);
+                    
+                    mapa.put(id, new modelo.PartidaGuardada(
+                        id,
+                        rs.getString("seed"),
+                        rs.getString("hora_partida"),
+                        rs.getString("nombre"),
+                        colores
+                    ));
+                } else {
+                    if (color != null) {
+                        mapa.get(id).getColoresJugadores().add(color);
+                    }
+                }
             }
 
         } catch (SQLException e) {
             System.out.println("► ERROR al obtener lista partidas pendientes: " + e.getMessage());
         }
-        return lista;
+        return new ArrayList<>(mapa.values());
     }
     
     public void mostrarRankingMasPartidas() {

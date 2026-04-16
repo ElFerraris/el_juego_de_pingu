@@ -18,6 +18,22 @@
         <HBox spacing="30" alignment="CENTER" style="-fx-margin-top: 20px;">
             <Button text="VOLVER AL MENÚ" onAction="#handleVolver" styleClass="button-secondary" prefWidth="250" prefHeight="50" style="-fx-base: #f44336;" />
             <Button fx:id="btnJugar" text="JUGAR PARTIDA" onAction="#handleJugar" prefWidth="250" prefHeight="50" style="-fx-base: #4CAF50;"/>
+            <Button fx:id="btnEliminar" text="🗑️" onAction="#handleEliminar" prefWidth="70" prefHeight="50" style="-fx-font-size: 20px; -fx-base: #ff5252;" styleClass="button-danger"/>
         </HBox>
     </VBox>
+
+    <!-- Overlay de Confirmación de Borrado -->
+    <StackPane fx:id="deleteConfirmOverlay" visible="false">
+        <Region style="-fx-background-color: rgba(0,0,0,0.7);" />
+        <VBox spacing="30" alignment="CENTER" maxWidth="500" maxHeight="300" styleClass="glass-panel">
+            <Label text="ELIMINAR PARTIDA" styleClass="title-text" style="-fx-text-fill: #ff5252;" />
+            <Label text="¿Estás seguro de que quieres borrar&#10;esta partida para siempre?" 
+                   style="-fx-font-size: 22px; -fx-text-fill: white; -fx-text-alignment: center;" wrapText="true" />
+            <HBox spacing="30" alignment="CENTER" style="-fx-margin-top: 20px;">
+                <Button text="CANCELAR" onAction="#handleCancelarEliminar" prefWidth="200" prefHeight="50" styleClass="button-secondary" />
+                <Button text="SÍ, ELIMINAR" onAction="#handleConfirmarEliminar" prefWidth="200" prefHeight="50" style="-fx-base: #ff5252;" styleClass="button-danger" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
 </StackPane>

@@ -8,10 +8,18 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.application.Platform;
+import javafx.scene.layout.*;
+import javafx.scene.control.*;
+import javafx.scene.shape.Circle;
+import javafx.scene.paint.Color;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import modelo.PartidaGuardada;
 import datos.BBDD;
+import util.UIUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 public class LoadGameController {
 
@@ -21,6 +29,12 @@ public class LoadGameController {
     @FXML
     private Button btnJugar;
 
+    @FXML
+    private Button btnEliminar;
+
+    @FXML
+    private StackPane deleteConfirmOverlay;
+
     private BBDD bbdd = new BBDD();
 
     @FXML
@@ -28,9 +42,89 @@ public class LoadGameController {
         if (btnJugar != null) btnJugar.setDisable(true);
         cargarListaDeBD();
         
-        // Deshabilitar botón jugar si no hay nada seleccionado (binding posterior)
+        // Personalizar la apariencia de cada fila
+        listaPartidas.setCellFactory(lv -> new PartidaCell());
+        
+        // Deshabilitar botón jugar si no hay nada seleccionado
         if (btnJugar != null) {
             btnJugar.disableProperty().bind(listaPartidas.getSelectionModel().selectedItemProperty().isNull());
+        }
+        if (btnEliminar != null) {
+            btnEliminar.disableProperty().bind(listaPartidas.getSelectionModel().selectedItemProperty().isNull());
+        }
+    }
+
+    /**
+     * Celda personalizada para mostrar la partida de forma visual y moderna.
+     */
+    private class PartidaCell extends ListCell<PartidaGuardada> {
+        private HBox content;
+        private VBox leftBox;
+        private Label nameLabel;
+        private Label dateLabel;
+        private HBox playerIcons;
+
+        public PartidaCell() {
+            super();
+            nameLabel = new Label();
+            nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;");
+            
+            dateLabel = new Label();
+            dateLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #7f8c8d;");
+            
+            leftBox = new VBox(5, nameLabel, dateLabel);
+            
+            playerIcons = new HBox(8);
+            playerIcons.setAlignment(Pos.CENTER_RIGHT);
+            
+            content = new HBox(leftBox);
+            HBox.setHgrow(leftBox, Priority.ALWAYS);
+            content.getChildren().add(playerIcons);
+            content.setAlignment(Pos.CENTER_LEFT);
+            content.setPadding(new Insets(10, 15, 10, 15));
+            
+            // Estilo para la celda cuando se selecciona
+            this.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    content.setStyle("-fx-background-color: #1e88e5; -fx-background-radius: 5;");
+                    nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: white;");
+                    dateLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #e0e0e0;");
+                } else {
+                    content.setStyle("-fx-background-color: transparent;");
+                    nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #2c3e50;");
+                    dateLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #7f8c8d;");
+                }
+            });
+        }
+
+        @Override
+        protected void updateItem(PartidaGuardada item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+                setText(null);
+            } else {
+                String nombre = item.getNombrePartida();
+                if (nombre == null || nombre.isEmpty()) {
+                    nombre = "Partida #" + item.getIdPartida();
+                }
+                nameLabel.setText(nombre.toUpperCase());
+                dateLabel.setText("Jugada el: " + item.getHoraPartida());
+                
+                playerIcons.getChildren().clear();
+                if (item.getColoresJugadores() != null) {
+                    for (String colorName : item.getColoresJugadores()) {
+                        Circle c = new Circle(8);
+                        c.setFill(UIUtils.colorDesdeNombre(colorName));
+                        c.setStroke(Color.WHITE);
+                        c.setStrokeWidth(1.5);
+                        playerIcons.getChildren().add(c);
+                    }
+                }
+                
+                setGraphic(content);
+                setText(null);
+            }
         }
     }
 
@@ -92,6 +186,35 @@ public class LoadGameController {
     private void handleVolver(ActionEvent event) {
         // Volvemos al menú principal con transición hacia atrás (baja)
         NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
+    }
+    
+    @FXML
+    private void handleEliminar(ActionEvent event) {
+        PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) return;
+        
+        deleteConfirmOverlay.toFront();
+        deleteConfirmOverlay.setVisible(true);
+    }
+    
+    @FXML
+    private void handleCancelarEliminar(ActionEvent event) {
+        deleteConfirmOverlay.setVisible(false);
+    }
+    
+    @FXML
+    private void handleConfirmarEliminar(ActionEvent event) {
+        deleteConfirmOverlay.setVisible(false);
+        PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) return;
+        
+        boolean exito = bbdd.eliminarPartida(seleccionada.getIdPartida());
+        if (exito) {
+            // Refrescamos la lista
+            cargarListaDeBD();
+        } else {
+            mostrarAlerta("Error", "No se pudo eliminar la partida.", Alert.AlertType.ERROR);
+        }
     }
     
     private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {
