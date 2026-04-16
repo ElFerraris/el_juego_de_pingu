@@ -140,8 +140,10 @@ public class TableroController {
     // CONTROL AUTOMÁTICO DE CÁMARA
     private boolean cameraAutoMode = true;
     private TranslateTransition cameraTransition;
-
-    private BBDD bbdd = new BBDD();
+    @FXML private StackPane eventNotificationContainer;
+    @FXML private Label eventNotificationLabel;
+    
+    private final BBDD bbdd = new BBDD();
     private Juego juegoSimulado = new Juego();
 
     @FXML
@@ -393,7 +395,9 @@ public class TableroController {
         }
         
         if (recolectadas > 0) {
+            String msg = "¡+" + recolectadas + " BOLAS NIEVE!";
             log(jActual.getNombre() + " se queda quieto y recolecta " + recolectadas + " bolas de nieve ❄");
+            mostrarNotificacionEvento(msg, jActual);
             util.SoundManager.playConfirm();
             actualizarUI();
             
@@ -486,6 +490,9 @@ public class TableroController {
         int posDespues = j.getPosicion();
 
         if (posAntes != posDespues) {
+            String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
+            mostrarNotificacionEvento("¡" + tipo + "!", j);
+            
             log("¡Efecto! " + j.getNombre() + " se mueve a la casilla " + posDespues);
             // Animación secundaria rápida para el efecto (trineo/agujero)
             moverFichaDirecta(j, posAntes, posDespues);
@@ -514,6 +521,7 @@ public class TableroController {
 
         if (oponente != null) {
             log("¡COLISIÓN en casilla " + jActual.getPosicion() + "!");
+            mostrarNotificacionEvento("¡COLISIÓN!", jActual);
             resolverCombate(jActual, oponente);
         } else {
             finalizarTurno();
@@ -1018,13 +1026,48 @@ public class TableroController {
         cameraTransition.play();
     }
 
-    private void mostrarEventoDialogo(String titulo, String mensaje, Runnable onContinue, Jugador... involucrados) {
+    private void mostrarNotificacionEvento(String mensaje, Jugador j) {
+        if (eventNotificationLabel == null) return;
+        
+        Color c = getColorFromString(j.getColor());
+        String hex = String.format("#%02X%02X%02X",
+            (int)(c.getRed() * 255),
+            (int)(c.getGreen() * 255),
+            (int)(c.getBlue() * 255));
+            
+        eventNotificationLabel.setText(mensaje.toUpperCase());
+        eventNotificationLabel.setStyle("-fx-effect: dropshadow(three-pass-box, " + hex + ", 15, 0.5, 0, 0);");
+        eventNotificationLabel.setVisible(true);
+        eventNotificationLabel.setOpacity(0);
+        eventNotificationLabel.setTranslateY(-50);
+        
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), eventNotificationLabel);
+        fadeIn.setToValue(1);
+        
+        TranslateTransition slideDown = new TranslateTransition(Duration.millis(300), eventNotificationLabel);
+        slideDown.setToY(0);
+        
+        PauseTransition stay = new PauseTransition(Duration.seconds(2));
+        
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(500), eventNotificationLabel);
+        fadeOut.setToValue(0);
+        
+        SequentialTransition seq = new SequentialTransition(
+            new ParallelTransition(fadeIn, slideDown),
+            stay,
+            fadeOut
+        );
+        seq.setOnFinished(e -> eventNotificationLabel.setVisible(false));
+        seq.play();
+    }
+
+    private void mostrarEventoDialogo(String titulo, String mensaje, Runnable onComplete, Jugador... involucrados) {
         Platform.runLater(new java.lang.Runnable() {
             @Override
             public void run() {
                 eventTitleLabel.setText(titulo);
                 eventMessageLabel.setText(mensaje);
-                onEventContinue = onContinue;
+                onEventContinue = onComplete;
                 
                 highlightingBackups.clear();
                 highlightLayer.getChildren().clear();

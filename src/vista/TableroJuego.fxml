@@ -209,4 +209,11 @@
             </VBox>
         </VBox>
     </StackPane>
+
+    <!-- CAPA 5: NOTIFICACIONES VOLÁTILES (TOP CENTER) - CAPA MÁS ALTA -->
+    <StackPane fx:id="eventNotificationContainer" pickOnBounds="false" mouseTransparent="true" 
+               StackPane.alignment="TOP_CENTER" translateY="80">
+        <Label fx:id="eventNotificationLabel" text="¡EVENTO!" visible="false" 
+               styleClass="event-notification-text" />
+    </StackPane>
 </StackPane>
