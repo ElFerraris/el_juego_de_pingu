@@ -5,6 +5,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import modelo.Tablero;
 
 /**
@@ -69,6 +71,21 @@ public class SeedSelectionController {
         seedField.requestFocus();
         
         errorLabel.setText("Estado: Modo Personalizado");
+    }
+
+    /**
+     * Copia la semilla actual al portapapeles.
+     */
+    @FXML
+    private void handleCopySeed(ActionEvent event) {
+        String seed = seedField.getText();
+        if (seed != null && !seed.isEmpty()) {
+            final Clipboard clipboard = Clipboard.getSystemClipboard();
+            final ClipboardContent content = new ClipboardContent();
+            content.putString(seed);
+            clipboard.setContent(content);
+            errorLabel.setText("¡Semilla copiada al portapapeles! 📋");
+        }
     }
 
     private void desmarcarTodos() {

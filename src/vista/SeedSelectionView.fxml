@@ -37,8 +37,11 @@
             </HBox>
 
             <VBox fx:id="seedInputContainer" spacing="10" alignment="CENTER" visible="true">
-                <TextField fx:id="seedField" promptText="Semilla del mundo..." disable="true" maxWidth="450" 
-                           style="-fx-font-size: 18px; -fx-alignment: center; -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);"/>
+                <HBox spacing="10" alignment="CENTER">
+                    <TextField fx:id="seedField" promptText="Semilla del mundo..." disable="true" prefWidth="450" 
+                               style="-fx-font-size: 18px; -fx-alignment: center; -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);"/>
+                    <Button onAction="#handleCopySeed" text="📋" styleClass="button" prefHeight="45" prefWidth="50" style="-fx-font-size: 18px;"/>
+                </HBox>
                 <Label fx:id="errorLabel" text="" style="-fx-text-fill: #ff5252; -fx-font-size: 16px;" />
             </VBox>
         </VBox>
