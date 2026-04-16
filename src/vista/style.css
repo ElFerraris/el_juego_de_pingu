@@ -85,6 +85,12 @@
     -fx-text-fill: white;
 }
 
+.button-primary:hover {
+    -fx-background-color:
+        #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1, #0d47a1,
+        #42a5f5, #42a5f5, #42a5f5, #42a5f5, #42a5f5, #42a5f5, #42a5f5;
+}
+
 .button-secondary {
     -fx-background-color:
         #37474f, #37474f, #37474f, #37474f, #37474f, #37474f, #37474f,
@@ -92,11 +98,23 @@
     -fx-text-fill: white;
 }
 
+.button-secondary:hover {
+    -fx-background-color:
+        #37474f, #37474f, #37474f, #37474f, #37474f, #37474f, #37474f,
+        #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae;
+}
+
 .button-danger {
     -fx-background-color:
         #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
         #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350;
     -fx-text-fill: white;
+}
+
+.button-danger:hover {
+    -fx-background-color:
+        #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
+        #e57373, #e57373, #e57373, #e57373, #e57373, #e57373, #e57373;
 }
 
 /* BOTÓN DINÁMICO (Mantiene el efecto pixelado con color variable) */
