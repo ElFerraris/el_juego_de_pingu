@@ -696,5 +696,37 @@ public class BBDD {
         }
         return jugadores;
     }
+    
+    /**
+     * Elimina una partida de la base de datos. 
+     * Gracias al ON DELETE CASCADE en Oracle, las participaciones se borran solas.
+     */
+    public boolean eliminarPartida(int idPartida) {
+        String sql = "DELETE FROM partida WHERE num_partida = ?";
+
+        try (Connection con = conectarBD()) {
+            
+            if (con == null) {
+                return false;
+            }
+
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+                pstmt.setInt(1, idPartida);
+                
+                int filasAfectadas = pstmt.executeUpdate();
+                
+                if (filasAfectadas > 0) {
+                    System.out.println("► Partida " + idPartida + " eliminada.");
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("► ERROR al eliminar partida: " + e.getMessage());
+            return false;
+        }
+    }
 
 }
