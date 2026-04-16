@@ -65,14 +65,18 @@ public class BBDD {
             if (con == null) return 0;
 
             // 2. Preparamos la llamada al procedimiento de Oracle
-            String sql = "{? = call insertar_partida(?)}"; 
+            // Ahora recibe dos parámetros: seed y nombre
+            String sql = "{? = call insertar_partida(?, ?)}"; 
 
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 // Registramos el tipo del primer "?" (el retorno)
                 cstmt.registerOutParameter(1, java.sql.Types.INTEGER);
                 
-                // Pasamos el valor del segundo "?" (la seed)
+                // 1. Semilla del tablero
                 cstmt.setString(2, juego.getTablero().getSeed());
+                
+                // 2. Nombre de la partida
+                cstmt.setString(3, juego.getNombrePartida());
                 
                 cstmt.execute();
                 

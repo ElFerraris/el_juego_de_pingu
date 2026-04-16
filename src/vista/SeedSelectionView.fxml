@@ -13,33 +13,40 @@
     
     <Region style="-fx-background-color: rgba(5,20,60,0.15);"/>
 
-    <VBox spacing="40" alignment="CENTER" maxWidth="1000" maxHeight="650" styleClass="glass-panel">
-        <Label text="CONFIGURACIÓN DEL MUNDO" styleClass="title-text" />
+    <VBox spacing="35" alignment="CENTER" maxWidth="1000" maxHeight="680" styleClass="glass-panel">
+        <Label text="CONFIGURACIÓN DE LA PARTIDA" styleClass="title-text" />
         
-        <VBox spacing="25" alignment="CENTER">
-            <Label text="OPCIÓN A: ELEGIR UN MUNDO RECOMENDADO" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-opacity: 0.8;"/>
-            <HBox spacing="20" alignment="CENTER">
-                <Button fx:id="btnIsla" text="ISLA PINGÜINO" onAction="#handleQuickSeed" styleClass="button" prefWidth="250" prefHeight="90" />
-                <Button fx:id="btnValle" text="VALLE HELADO" onAction="#handleQuickSeed" styleClass="button" prefWidth="250" prefHeight="90" />
-                <Button fx:id="btnMontana" text="MONTAÑA CRISTAL" onAction="#handleQuickSeed" styleClass="button" prefWidth="250" prefHeight="90" />
-            </HBox>
+        <!-- SECCIÓN 1: NOMBRE DE LA PARTIDA -->
+        <VBox spacing="15" alignment="CENTER">
+            <Label text="NOMBRE DE TU AVENTURA" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-opacity: 0.8;"/>
+            <TextField fx:id="nameField" promptText="Dale un nombre a tu partida (máx. 100 caracteres)" maxWidth="600" 
+                       style="-fx-font-size: 20px; -fx-alignment: center;"/>
         </VBox>
 
         <Separator maxWidth="700" />
 
+        <!-- SECCIÓN 2: SELECCIÓN DE SEMILLA -->
         <VBox spacing="20" alignment="CENTER">
-            <Label text="OPCIÓN B: SEMILLA PERSONALIZADA" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-opacity: 0.8;"/>
-            <HBox spacing="20" alignment="CENTER">
-                <Button fx:id="btnCustom" text="ESCRIBIR MI PROPIA SEMILLA" onAction="#handleEnableCustomSeed" styleClass="button" prefWidth="350" prefHeight="60" />
-                <TextField fx:id="seedField" promptText="Solo números (ej: 2233...)" disable="true" maxWidth="400" 
-                           style="-fx-font-size: 22px; -fx-alignment: center; -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);"/>
+            <Label text="EL MUNDO HELADO" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-opacity: 0.8;"/>
+            
+            <HBox spacing="30" alignment="CENTER">
+                <Button fx:id="btnRandom" text="SEMILLA ALEATORIA" onAction="#handleRandomSeed" 
+                        styleClass="button" prefWidth="280" prefHeight="70" />
+                <Button fx:id="btnCustom" text="SEMILLA PERSONALIZADA" onAction="#handleEnableCustomSeed" 
+                        styleClass="button" prefWidth="280" prefHeight="70" />
             </HBox>
-            <Label fx:id="errorLabel" styleClass="error-text" text="" style="-fx-text-fill: #ff5252; -fx-font-size: 18px;" />
+
+            <VBox fx:id="seedInputContainer" spacing="10" alignment="CENTER" visible="true">
+                <TextField fx:id="seedField" promptText="Semilla del mundo..." disable="true" maxWidth="450" 
+                           style="-fx-font-size: 18px; -fx-alignment: center; -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);"/>
+                <Label fx:id="errorLabel" text="" style="-fx-text-fill: #ff5252; -fx-font-size: 16px;" />
+            </VBox>
         </VBox>
 
-        <HBox spacing="40" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
-            <Button text="VOLVER" onAction="#handleBack" styleClass="button-secondary" prefWidth="220" prefHeight="70" />
-            <Button text="INICIAR PARTIDA" onAction="#handleStartGame" styleClass="button-primary" prefWidth="320" prefHeight="80" />
+        <!-- ACCIONES -->
+        <HBox spacing="40" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+            <Button text="VOLVER" onAction="#handleBack" styleClass="button-secondary" prefWidth="200" prefHeight="65" />
+            <Button text="INICIAR PARTIDA" onAction="#handleStartGame" styleClass="button-primary" prefWidth="300" prefHeight="75" />
         </HBox>
     </VBox>
 </StackPane>

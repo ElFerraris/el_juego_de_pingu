@@ -28,6 +28,9 @@ public class GameContext {
     // El "Seed" o código del tablero actual
     private String seed;
     
+    // Nombre de la partida para la BD
+    private String gameName;
+    
     // ID de la partida en caso de estar cargando una partida de la BD
     private int idPartidaCargar = -1;
     
@@ -54,6 +57,7 @@ public class GameContext {
         currentUser = null;
         configuredPlayers.clear();
         seed = null;
+        gameName = null;
         idPartidaCargar = -1;
         turnoModoFuga = 0;
         actionToConfirm = null;
@@ -70,6 +74,9 @@ public class GameContext {
 
     public String getSeed() { return seed; }
     public void setSeed(String seed) { this.seed = seed; }
+
+    public String getGameName() { return gameName; }
+    public void setGameName(String gameName) { this.gameName = gameName; }
 
     public int getIdPartidaCargar() { return idPartidaCargar; }
     public void setIdPartidaCargar(int id) { this.idPartidaCargar = id; }

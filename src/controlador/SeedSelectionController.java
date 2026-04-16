@@ -14,29 +14,44 @@ import modelo.Tablero;
  */
 public class SeedSelectionController {
 
+    @FXML private TextField nameField;
     @FXML private TextField seedField;
     @FXML private Label errorLabel;
     
-    @FXML private Button btnIsla;
-    @FXML private Button btnValle;
-    @FXML private Button btnMontana;
+    @FXML private Button btnRandom;
     @FXML private Button btnCustom;
 
     private boolean isCustomMode = false;
 
     @FXML
     public void initialize() {
-        // Por defecto, seleccionamos la Isla con una semilla aleatoria
-        seleccionarMundo(btnIsla);
+        // Limitador de 100 caracteres para el nombre
+        nameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() > 100) {
+                nameField.setText(oldValue);
+            }
+        });
+        
+        // Por defecto: Semilla aleatoria
+        handleRandomSeed(null);
     }
 
     /**
-     * Toca un botón de mundo recomendado: genera semilla y bloquea el campo manual.
+     * Genera automáticamente una semilla válida.
      */
     @FXML
-    private void handleQuickSeed(ActionEvent event) {
-        Button selected = (Button) event.getSource();
-        seleccionarMundo(selected);
+    private void handleRandomSeed(ActionEvent event) {
+        desmarcarTodos();
+        btnRandom.getStyleClass().add("button-selected");
+        
+        isCustomMode = false;
+        seedField.setDisable(true);
+        
+        // Generamos una semilla válida real
+        String validSeed = Tablero.generarSeedValida();
+        seedField.setText(validSeed);
+        
+        errorLabel.setText("Estado: Semilla Aleatoria Generada");
     }
 
     /**
@@ -53,55 +68,48 @@ public class SeedSelectionController {
         seedField.setPromptText("Escribe aquí tu semilla numérica...");
         seedField.requestFocus();
         
-        errorLabel.setText("");
-    }
-
-    private void seleccionarMundo(Button btn) {
-        desmarcarTodos();
-        btn.getStyleClass().add("button-selected");
-        
-        isCustomMode = false;
-        seedField.setDisable(true);
-        
-        // Generamos una semilla válida real para este mundo
-        String validSeed = Tablero.generarSeedValida();
-        seedField.setText(validSeed);
-        
-        errorLabel.setText("Modo: " + btn.getText() + " (Semilla Generada)");
+        errorLabel.setText("Estado: Modo Personalizado");
     }
 
     private void desmarcarTodos() {
-        btnIsla.getStyleClass().remove("button-selected");
-        btnValle.getStyleClass().remove("button-selected");
-        btnMontana.getStyleClass().remove("button-selected");
+        btnRandom.getStyleClass().remove("button-selected");
         btnCustom.getStyleClass().remove("button-selected");
     }
 
     @FXML
     private void handleBack(ActionEvent event) {
-        // Volvemos a la configuración de jugadores con transición hacia atrás (baja)
         NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.BACKWARD);
     }
 
     @FXML
     private void handleStartGame(ActionEvent event) {
+        String name = nameField.getText();
         String seed = seedField.getText();
 
-        if (seed == null || seed.trim().isEmpty()) {
-            errorLabel.setText("Debes introducir una semilla o elegir un mundo.");
+        // 1. Validar nombre
+        if (name == null || name.trim().isEmpty()) {
+            errorLabel.setText("¡Falta el nombre de la partida!");
+            nameField.requestFocus();
             return;
         }
 
-        // Validación Real: Usamos un objeto Tablero temporal para validar
+        // 2. Validar semilla
+        if (seed == null || seed.trim().isEmpty()) {
+            errorLabel.setText("¡Falta la semilla del mundo!");
+            return;
+        }
+
         Tablero validador = new Tablero();
         if (!validador.validarSeed(seed)) {
-            errorLabel.setText("Semilla inválida: Se requieren al menos 2 trineos ('3') y 2 agujeros ('2').");
+            errorLabel.setText("Semilla inválida: Faltan trineos o agujeros.");
             return;
         }
 
-        // Guardamos la semilla en el contexto global
+        // Guardar en el contexto global
+        GameContext.getInstance().setGameName(name.trim());
         GameContext.getInstance().setSeed(seed.trim());
-        System.out.println("► Semilla Validada: " + seed);
+        
+        System.out.println("► Partida: " + name + " | Seed: " + seed);
 
         NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
     }

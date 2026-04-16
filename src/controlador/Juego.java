@@ -18,6 +18,7 @@ public class Juego {
     private int turnoActual;
     private boolean partidaFinalizada;
     private Jugador ganador;
+    private String nombrePartida;
     private BBDD baseDatos; // Composición en vez de herencia
 
     public Juego() {
@@ -470,6 +471,14 @@ public class Juego {
 
     public BBDD getBaseDatos() {
         return baseDatos;
+    }
+
+    public String getNombrePartida() {
+        return nombrePartida;
+    }
+
+    public void setNombrePartida(String nombrePartida) {
+        this.nombrePartida = nombrePartida;
     }
 
     

@@ -160,6 +160,9 @@ public class TableroController {
         String seed = GameContext.getInstance().getSeed();
         tablero.introducirSeed(seed);
         
+        // Asignamos el nombre de la partida al modelo
+        juegoSimulado.setNombrePartida(GameContext.getInstance().getGameName());
+        
         this.jugadores = GameContext.getInstance().getConfiguredPlayers();
         
         // Centrar en el primer jugador al inicio (ahora que sabemos quiénes son)
