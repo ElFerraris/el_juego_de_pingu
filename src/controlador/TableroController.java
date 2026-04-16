@@ -27,6 +27,7 @@ import javafx.util.Duration;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -692,21 +693,29 @@ public class TableroController {
 
     private void aplicarEstiloPorJugador(Jugador j) {
         Color c = getColorFromString(j.getColor());
-        // Color más brillante para la capa interna del botón pixelado
-        Color light = c.deriveColor(0, 1.0, 1.25, 1.0);
         
-        String hex = String.format("#%02X%02X%02X",
-            (int)(c.getRed() * 255),
-            (int)(c.getGreen() * 255),
-            (int)(c.getBlue() * 255));
+        // Versiones de color para legibilidad
+        Color border = c;
+        Color fill = c.deriveColor(0, 1.0, 0.6, 1.0); // 40% más oscuro que el original para que resalte el texto blanco
+        Color hover = c.deriveColor(0, 1.0, 0.8, 1.0); // Un poco más claro que el relleno para el hover
+        
+        String hexBorder = String.format("#%02X%02X%02X",
+            (int)(border.getRed() * 255), (int)(border.getGreen() * 255), (int)(border.getBlue() * 255));
             
-        String hexLight = String.format("#%02X%02X%02X",
-            (int)(light.getRed() * 255),
-            (int)(light.getGreen() * 255),
-            (int)(light.getBlue() * 255));
+        String hexFill = String.format("#%02X%02X%02X",
+            (int)(fill.getRed() * 255), (int)(fill.getGreen() * 255), (int)(fill.getBlue() * 255));
+            
+        String hexHover = String.format("#%02X%02X%02X",
+            (int)(hover.getRed() * 255), (int)(hover.getGreen() * 255), (int)(hover.getBlue() * 255));
+
+        String shadowHex = String.format("rgba(%d, %d, %d, 0.5)",
+            (int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
         
         // Usamos variables CSS para no machacar el estilo del borde pixelado
-        String style = "-fx-player-color: " + hex + "; -fx-player-color-light: " + hexLight + ";";
+        String style = "-fx-player-color-border: " + hexBorder + "; " +
+                      "-fx-player-color-fill: " + hexFill + "; " +
+                      "-fx-player-color-hover: " + hexHover + "; " +
+                      "-fx-player-color-shadow: " + shadowHex + ";";
         
         btnDado.setStyle(style);
         btnRecolectar.setStyle(style);
@@ -714,7 +723,7 @@ public class TableroController {
         
         // Borde del panel de inventario
         inventoryOverlayPanel.lookup(".inventory-floating-panel")
-                            .setStyle("-fx-border-color: " + hex + "; -fx-border-width: 8 0 0 0;");
+                .setStyle("-fx-border-color: " + hexBorder + "; -fx-border-width: 8 0 0 0;");
     }
 
     private VBox crearTarjetaEstadoSecundaria(Jugador j) {

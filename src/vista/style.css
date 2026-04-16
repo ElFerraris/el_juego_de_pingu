@@ -72,15 +72,10 @@
     -fx-effect: dropshadow(one-pass-box, rgba(13, 71, 161, 0.5), 0, 0, 0, 6);
 }
 
-/* BOTÓN DINÁMICO (Mantiene el efecto pixelado con color variable) */
-.button-dynamic {
-    -fx-player-color: #0d47a1;
-    -fx-player-color-light: #1e88e5;
-    
-    -fx-background-color:
-        -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color, -fx-player-color,
-        -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light, -fx-player-color-light;
-    -fx-text-fill: white;
+
+.button:pressed, .button-dynamic:pressed {
+    -fx-translate-y: 2;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.2), 0, 0, 0, 1);
 }
 
 .button-primary {
@@ -102,6 +97,33 @@
         #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
         #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350;
     -fx-text-fill: white;
+}
+
+/* BOTÓN DINÁMICO (Mantiene el efecto pixelado con color variable) */
+/* Se coloca al final para que sobreescriba a button-primary/secondary durante el turno */
+.button-dynamic {
+    -fx-player-color-border: #0d47a1;
+    -fx-player-color-fill: #1e88e5;
+    -fx-player-color-hover: #42a5f5;
+    -fx-player-color-shadow: rgba(13, 71, 161, 0.5);
+    
+    -fx-background-color:
+        -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border,
+        -fx-player-color-fill, -fx-player-color-fill, -fx-player-color-fill, -fx-player-color-fill, -fx-player-color-fill, -fx-player-color-fill, -fx-player-color-fill;
+    -fx-background-insets:
+        0 12 0 12, 2 8 2 8, 4 6 4 6, 6 4 6 4, 8 2 8 2, 10 2 10 2, 12 0 12 0,
+        3 15 3 15, 5 11 5 11, 7 9 7 9, 9 7 9 7, 11 5 11 5, 13 5 13 5, 15 3 15 3;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(one-pass-box, -fx-player-color-shadow, 0, 0, 0, 4);
+}
+
+/* Hover específico para botones dinámicos para evitar que se pongan blancos */
+.button-dynamic:hover {
+    -fx-background-color:
+        -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border, -fx-player-color-border,
+        -fx-player-color-hover, -fx-player-color-hover, -fx-player-color-hover, -fx-player-color-hover, -fx-player-color-hover, -fx-player-color-hover, -fx-player-color-hover;
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(one-pass-box, -fx-player-color-shadow, 0, 0, 0, 6);
 }
 
 /* TRUE CIRCULAR GLASS PANEL */
