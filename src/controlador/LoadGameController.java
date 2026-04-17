@@ -136,7 +136,8 @@ public class LoadGameController {
 
         new Thread(() -> {
             try {
-                List<PartidaGuardada> pendientes = bbdd.obtenerPartidasPendientes();
+                int idUsuarioActual = GameContext.getInstance().getCurrentUser().getId();
+                List<PartidaGuardada> pendientes = bbdd.obtenerPartidasPendientes(idUsuarioActual);
                 Platform.runLater(() -> {
                     ObservableList<PartidaGuardada> observablePartidas = FXCollections.observableArrayList(pendientes);
                     listaPartidas.setItems(observablePartidas);

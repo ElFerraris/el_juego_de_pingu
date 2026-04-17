@@ -498,7 +498,7 @@ public class BBDD {
         }
     }
     
-    public ArrayList<modelo.PartidaGuardada> obtenerPartidasPendientes() {
+    public ArrayList<modelo.PartidaGuardada> obtenerPartidasPendientes(int idUsuario) {
         // Usamos LinkedHashMap para mantener el orden de la consulta (ORDER BY hora_partida DESC)
         Map<Integer, modelo.PartidaGuardada> mapa = new LinkedHashMap<>();
         
@@ -508,11 +508,14 @@ public class BBDD {
                      "FROM partida p " +
                      "LEFT JOIN participacion_jugadores pj ON p.num_partida = pj.id_partida " +
                      "WHERE p.ganador IS NULL " +
+                     "AND p.num_partida IN (SELECT id_partida FROM participacion_jugadores WHERE id_jugador = ?) " +
                      "ORDER BY p.hora_partida DESC";
 
         try (Connection con = conectarBD();
-             PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, idUsuario);
+            try (ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 int id = rs.getInt("num_partida");
@@ -534,6 +537,7 @@ public class BBDD {
                         mapa.get(id).getColoresJugadores().add(color);
                     }
                 }
+            }
             }
 
         } catch (SQLException e) {
