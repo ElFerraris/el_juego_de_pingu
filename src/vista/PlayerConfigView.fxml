@@ -21,8 +21,6 @@
         </HBox>
 
         <VBox spacing="30" alignment="CENTER">
-            <CheckBox fx:id="focaCheckbox" text="AÑADIR FOCA LOCA (CPU)" styleClass="premium-checkbox"/>
-            
             <Label fx:id="errorLabel" styleClass="error-text" wrapText="true" textAlignment="CENTER" />
             
             <HBox spacing="25" alignment="CENTER">

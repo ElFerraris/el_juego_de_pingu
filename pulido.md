@@ -75,3 +75,13 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
     - Añadido un **overlay animado** ("TURNO DE CPU") sobre los botones de acción para mejorar el feedback visual.
     - Los botones de acción se **deshabilitan explícitamente** durante el turno de la CPU.
     - Solucionado error que bloqueaba la partida si la CPU intentaba recolectar con el inventario lleno.
+- [x] **19. Rediseño de Configuración de Personajes**
+    - Se muestran siempre **4 tarjetas fijas** para los jugadores.
+    - **P1**: Bloqueado automáticamente al usuario logueado.
+    - **P2-P4**: Selector de tipo (Jugador, Foca Loca o Vacío).
+    - **Selector de Colores Premium**: El círculo de color ahora está en el centro de la tarjeta y tiene un efecto de brillo.
+    - **Borde Dinámico**: El contorno de cada tarjeta cambia de color automáticamente al seleccionar el color del pingüino.
+    - **Animaciones Premium**: 
+        - Las tarjetas aparecen con una animación escalonada de **escalado y fundido**.
+        - Se ha añadido un **efecto de destello blanco** ("flash") al cambiar el tipo de jugador o el color, suavizando la transición visual.
+    - Las tarjetas vacías o de CPU tienen estilos visuales diferenciados (bordes punteados o grises).

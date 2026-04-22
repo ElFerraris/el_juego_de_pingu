@@ -195,7 +195,60 @@
     -fx-padding: 2px 4px;
 }
 
-/* CARDS DE JUGADOR (Panel lateral) */
+/* CARDS DE CONFIGURACIÓN (NUEVA PARTIDA) */
+.player-card {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-background-radius: 15;
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 4;
+    -fx-padding: 20;
+    -fx-spacing: 15;
+    -fx-alignment: center;
+    -fx-min-width: 220;
+    -fx-min-height: 320;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);
+}
+
+.player-card-empty {
+    -fx-opacity: 0.5;
+    -fx-border-style: dashed;
+    -fx-border-color: #90a4ae;
+}
+
+.player-card-foca {
+    -fx-border-color: #546e7a;
+}
+
+.add-player-button {
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 3;
+    -fx-border-style: dashed;
+    -fx-font-size: 50px;
+    -fx-text-fill: #0d47a1;
+    -fx-background-radius: 15;
+    -fx-cursor: hand;
+}
+
+.remove-slot-button {
+    -fx-background-color: #ff5252;
+    -fx-text-fill: white;
+    -fx-background-radius: 50%;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-max-width: 30;
+    -fx-max-height: 30;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+}
+
+.premium-checkbox {
+    -fx-font-size: 18px;
+    -fx-text-fill: #0d47a1;
+}
+
+/* CARDS DE JUGADOR (Panel lateral - Tablero) */
 .player-status-card {
     -fx-background-color: rgba(255, 255, 255, 0.4);
     -fx-padding: 12;
