@@ -374,3 +374,20 @@
     -fx-background-color: rgba(0, 0, 0, 0.3);
     -fx-background-radius: 10;
 }
+
+/* CPU TURN OVERLAY */
+.cpu-turn-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-radius: 0;
+    -fx-border-color: #ff5252;
+    -fx-border-width: 4;
+    -fx-border-style: dashed;
+    -fx-alignment: center;
+}
+
+.cpu-turn-text {
+    -fx-text-fill: white;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(one-pass-box, black, 2, 2, 1, 1);
+}

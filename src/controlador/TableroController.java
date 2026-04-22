@@ -143,6 +143,7 @@ public class TableroController {
     private TranslateTransition cameraTransition;
     @FXML private StackPane eventNotificationContainer;
     @FXML private Label eventNotificationLabel;
+    @FXML private StackPane cpuTurnOverlay;
     
     private final BBDD bbdd = new BBDD();
     private Juego juegoSimulado = new Juego();
@@ -374,7 +375,9 @@ public class TableroController {
 
     @FXML
     private void handleRollDice(ActionEvent event) {
-        ejecutarTurno((int)(Math.random() * 6) + 1);
+        if (animacionEnCurso) return;
+        int pasos = (int)(Math.random() * 6) + 1;
+        ejecutarTurno(pasos);
     }
 
     @FXML
@@ -386,6 +389,9 @@ public class TableroController {
         
         if (actuales >= Inventario.MAX_BOLAS_NIEVE) {
             log(jActual.getNombre() + " ya tiene el máximo de bolas de nieve (" + Inventario.MAX_BOLAS_NIEVE + ").");
+            if (jActual instanceof Foca) {
+                finalizarTurno();
+            }
             return;
         }
         
@@ -415,10 +421,12 @@ public class TableroController {
 
     @FXML
     private void handleUseDadoLento(ActionEvent event) {
+        if (animacionEnCurso) return;
         Jugador jActual = jugadores.get(turnoActual);
         if (jActual.getInventario().tieneObjeto("DadoLento")) {
             jActual.getInventario().usarDadoEspecifico("Lento", jActual);
-            ejecutarTurno((int)(Math.random() * 3) + 1);
+            int pasos = (int)(Math.random() * 3) + 1;
+            ejecutarTurno(pasos);
         } else {
             log(jActual.getNombre() + " no tiene Dados Lentos.");
         }
@@ -426,10 +434,12 @@ public class TableroController {
 
     @FXML
     private void handleUseDadoRapido(ActionEvent event) {
+        if (animacionEnCurso) return;
         Jugador jActual = jugadores.get(turnoActual);
         if (jActual.getInventario().tieneObjeto("DadoRapido")) {
             jActual.getInventario().usarDadoEspecifico("Rapido", jActual);
-            ejecutarTurno((int)(Math.random() * 6) + 3);
+            int pasos = (int)(Math.random() * 6) + 3;
+            ejecutarTurno(pasos);
         } else {
             log(jActual.getNombre() + " no tiene Dados Rápidos.");
         }
@@ -638,7 +648,10 @@ public class TableroController {
             smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
         }
         
-        comprobarBloqueoInicioTurno();
+        // Comprobamos si el nuevo turno es de la CPU o está bloqueado
+        Platform.runLater(() -> {
+            comprobarBloqueoInicioTurno();
+        });
     }
 
     private void comprobarBloqueoInicioTurno() {
@@ -650,12 +663,49 @@ public class TableroController {
             PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
             pause.setOnFinished(e -> finalizarTurno());
             pause.play();
+        } else if (j instanceof Foca) {
+            // Es el turno de la CPU
+            setControlesBloqueados(true);
+            ejecutarTurnoCPU((Foca) j);
         }
+    }
+
+    private void ejecutarTurnoCPU(Foca foca) {
+        log("La CPU (" + foca.getNombre() + ") está pensando...");
+        
+        // Pequeña pausa para que el usuario vea el cambio de turno y el overlay
+        PauseTransition delay = new PauseTransition(Duration.seconds(2));
+        delay.setOnFinished(e -> {
+            Cpu.Accion accion = Cpu.decidirAccion(foca, tablero);
+            
+            switch (accion) {
+                case LANZAR_DADO:
+                    log("La CPU decide lanzar el dado.");
+                    handleRollDice(null);
+                    break;
+                case RECOLECTAR_BOLAS:
+                    log("La CPU decide recolectar bolas de nieve.");
+                    handleCollectSnowballs(null);
+                    break;
+                case USAR_DADO_RAPIDO:
+                    log("La CPU decide usar un DADO RÁPIDO.");
+                    handleUseDadoRapido(null);
+                    break;
+                case USAR_DADO_LENTO:
+                    log("La CPU decide usar un DADO LENTO.");
+                    handleUseDadoLento(null);
+                    break;
+            }
+        });
+        delay.play();
     }
 
     private void actualizarUI() {
         Jugador jActual = jugadores.get(turnoActual);
         
+        // Mostrar/Ocultar overlay de CPU con animación
+        mostrarOverlayCPU(jActual instanceof Foca);
+
         turnCircles.forEach((j, circle) -> {
             if (j == jActual) {
                 // Iluminar para el turno actual
@@ -1372,5 +1422,24 @@ public class TableroController {
         pt.setInterpolator(Interpolator.EASE_IN);
         pt.setOnFinished(e -> inventoryOverlayPanel.setVisible(false));
         pt.play();
+    }
+
+    private void mostrarOverlayCPU(boolean mostrar) {
+        if (cpuTurnOverlay == null) return;
+
+        if (mostrar && !cpuTurnOverlay.isVisible()) {
+            cpuTurnOverlay.setVisible(true);
+            cpuTurnOverlay.setOpacity(0);
+            FadeTransition ft = new FadeTransition(Duration.millis(400), cpuTurnOverlay);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.play();
+        } else if (!mostrar && cpuTurnOverlay.isVisible()) {
+            FadeTransition ft = new FadeTransition(Duration.millis(400), cpuTurnOverlay);
+            ft.setFromValue(cpuTurnOverlay.getOpacity());
+            ft.setToValue(0);
+            ft.setOnFinished(e -> cpuTurnOverlay.setVisible(false));
+            ft.play();
+        }
     }
 }

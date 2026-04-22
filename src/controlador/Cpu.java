@@ -1,0 +1,94 @@
+package controlador;
+
+import modelo.Jugador;
+import modelo.Foca;
+import modelo.Inventario;
+import modelo.Tablero;
+import modelo.Casilla;
+import java.util.ArrayList;
+import java.util.Random;
+
+/**
+ * Clase que gestiona la lógica de decisión de la CPU (Foca) con una IA básica.
+ */
+public class Cpu {
+
+    public enum Accion {
+        LANZAR_DADO,
+        RECOLECTAR_BOLAS,
+        USAR_DADO_RAPIDO,
+        USAR_DADO_LENTO
+    }
+
+    private static final Random random = new Random();
+
+    /**
+     * Decide qué acción tomará la CPU en su turno basándose en el estado del juego.
+     * @param foca El jugador CPU.
+     * @param tablero El tablero actual para analizar casillas próximas.
+     * @return La acción decidida.
+     */
+    public static Accion decidirAccion(Foca foca, Tablero tablero) {
+        Inventario inv = foca.getInventario();
+        int posActual = foca.getPosicion();
+        int bolas = inv.getCantidad("BolaNieve");
+
+        // --- 1. PRIORIDAD: RECOLECTAR BOLAS ---
+        // Si tiene pocas bolas y no está al final, recolecta (pero solo si no tiene el máximo)
+        if (bolas < 10 && posActual < Tablero.TAMANYO_TABLERO - 10) {
+            if (bolas < Inventario.MAX_BOLAS_NIEVE) {
+                // 70% de probabilidad de recolectar si le faltan bolas
+                if (random.nextDouble() < 0.7) {
+                    return Accion.RECOLECTAR_BOLAS;
+                }
+            }
+        }
+
+        // --- 2. ANÁLISIS DEL TABLERO PRÓXIMO (6 casillas adelante) ---
+        boolean hayAgujeroCerca = false;
+        boolean hayTrineoCerca = false;
+        int distAgujero = -1;
+        int distTrineo = -1;
+
+        for (int i = 1; i <= 6; i++) {
+            Casilla c = tablero.getCasilla(posActual + i);
+            if (c != null) {
+                if (c.getTipo().equals("Casilla AGUJERO") && !hayAgujeroCerca) {
+                    hayAgujeroCerca = true;
+                    distAgujero = i;
+                }
+                if (c.getTipo().equals("Casilla TRINEO") && !hayTrineoCerca) {
+                    hayTrineoCerca = true;
+                    distTrineo = i;
+                }
+            }
+        }
+
+        // --- 3. USO DE DADOS ESPECIALES ---
+        
+        // Si hay un trineo muy cerca (1-3), intentar caer en él con dado lento
+        if (hayTrineoCerca && distTrineo <= 3 && inv.tieneObjetoEspecifico("Lento")) {
+            return Accion.USAR_DADO_LENTO;
+        }
+
+        // Si hay un agujero a media distancia (3-5), intentar saltarlo con dado rápido
+        if (hayAgujeroCerca && distAgujero >= 3 && distAgujero <= 5 && inv.tieneObjetoEspecifico("Rapido")) {
+            return Accion.USAR_DADO_RAPIDO;
+        }
+
+        // Si hay un agujero muy cerca (1-2), intentar evitarlo con dado lento (sacar un 3+ para saltar o 1 para quedar antes)
+        // O simplemente si el dado rápido nos aleja lo suficiente
+        if (hayAgujeroCerca && distAgujero <= 2) {
+            if (inv.tieneObjetoEspecifico("Rapido")) return Accion.USAR_DADO_RAPIDO;
+            if (inv.tieneObjetoEspecifico("Lento")) return Accion.USAR_DADO_LENTO;
+        }
+
+        // --- 4. DECISIÓN POR DEFECTO ---
+        // Si tiene dados rápidos y está lejos de la meta, usarlos a veces para avanzar
+        if (inv.tieneObjetoEspecifico("Rapido") && posActual < Tablero.TAMANYO_TABLERO - 15) {
+            if (random.nextDouble() < 0.3) return Accion.USAR_DADO_RAPIDO;
+        }
+
+        return Accion.LANZAR_DADO;
+    }
+}

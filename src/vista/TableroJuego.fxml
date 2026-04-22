@@ -54,22 +54,29 @@
         <!-- PANEL DERECHO ELIMINADO -->
 
         <bottom>
-            <HBox spacing="30" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 20;">
-                <Region HBox.hgrow="ALWAYS" />
-                
-                <HBox spacing="20" alignment="CENTER">
-                    <Button fx:id="btnDado" text="TIRAR DADO 🎲" onAction="#handleRollDice" prefWidth="200" prefHeight="60" styleClass="button-primary, button-dynamic" />
-                    <Button fx:id="btnRecolectar" text="RECOLECTAR ❄" onAction="#handleCollectSnowballs" prefWidth="200" prefHeight="60" styleClass="button-secondary, button-dynamic" />
-                    <Button fx:id="btnInventario" text="INVENTARIO 🎒" onAction="#handleOpenInventory" prefWidth="200" prefHeight="60" styleClass="button-secondary, button-dynamic" />
+            <StackPane>
+                <HBox spacing="30" alignment="CENTER" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 20;">
+                    <Region HBox.hgrow="ALWAYS" />
+                    
+                    <HBox spacing="20" alignment="CENTER">
+                        <Button fx:id="btnDado" text="TIRAR DADO 🎲" onAction="#handleRollDice" prefWidth="200" prefHeight="60" styleClass="button-primary, button-dynamic" />
+                        <Button fx:id="btnRecolectar" text="RECOLECTAR ❄" onAction="#handleCollectSnowballs" prefWidth="200" prefHeight="60" styleClass="button-secondary, button-dynamic" />
+                        <Button fx:id="btnInventario" text="INVENTARIO 🎒" onAction="#handleOpenInventory" prefWidth="200" prefHeight="60" styleClass="button-secondary, button-dynamic" />
+                    </HBox>
+                    
+                    <Region HBox.hgrow="ALWAYS" />
+                    
+                    <Button onAction="#handleResetCamera" text="⌂" prefWidth="65" prefHeight="50" minWidth="65"
+                            styleClass="button-secondary">
+                        <tooltip><Tooltip text="Centrar Cámara" /></tooltip>
+                    </Button>
                 </HBox>
-                
-                <Region HBox.hgrow="ALWAYS" />
-                
-                <Button onAction="#handleResetCamera" text="⌂" prefWidth="65" prefHeight="50" minWidth="65"
-                        styleClass="button-secondary">
-                    <tooltip><Tooltip text="Centrar Cámara" /></tooltip>
-                </Button>
-            </HBox>
+
+                <!-- Overlay de Turno CPU (Cubre todo el footer) -->
+                <StackPane fx:id="cpuTurnOverlay" visible="false" styleClass="cpu-turn-overlay" mouseTransparent="false">
+                    <Label text="🚫 TURNO DE CPU 🚫" styleClass="cpu-turn-text" />
+                </StackPane>
+            </StackPane>
         </bottom>
     </BorderPane>
 

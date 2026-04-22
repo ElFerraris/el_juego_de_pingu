@@ -66,3 +66,12 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
 - [x] **17. Corrección de Superposición y Errores Críticos**
     - Solucionado error `NullPointerException` al intentar cerrar la partida.
     - Asegurado que solo se muestre un menú overlay a la vez (evitando el Menú de Pausa detrás de las alertas).
+- [x] **18. Automatización de CPU (Foca Loca)**
+    - Implementada lógica de decisión automática para los jugadores tipo `Foca`.
+    - **IA Básica**: La CPU ahora analiza el entorno:
+        - Prioriza recolectar bolas si tiene menos de 10.
+        - Usa **Dados Rápidos** para intentar saltar agujeros (casillas 3-5 adelante).
+        - Usa **Dados Lentos** para intentar caer en trineos o evitar agujeros cercanos.
+    - Añadido un **overlay animado** ("TURNO DE CPU") sobre los botones de acción para mejorar el feedback visual.
+    - Los botones de acción se **deshabilitan explícitamente** durante el turno de la CPU.
+    - Solucionado error que bloqueaba la partida si la CPU intentaba recolectar con el inventario lleno.
