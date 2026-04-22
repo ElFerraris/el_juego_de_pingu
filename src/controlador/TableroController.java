@@ -552,30 +552,35 @@ public class TableroController {
     }
 
     private void procesarEfectosCasilla(Jugador j) {
-        int posAntes = j.getPosicion();
-        
-        String logEfecto = tablero.aplicarEfectoCasilla(j);
-        if (logEfecto != null && !logEfecto.isEmpty()) {
-            log(logEfecto.replace("\n", " "));
-        }
-        
-        int posDespues = j.getPosicion();
+        // Pausa de 1 segundo antes de ejecutar el efecto para que el usuario vea dónde ha caído
+        PauseTransition effectDelay = new PauseTransition(Duration.seconds(1));
+        effectDelay.setOnFinished(ev -> {
+            int posAntes = j.getPosicion();
+            
+            String logEfecto = tablero.aplicarEfectoCasilla(j);
+            if (logEfecto != null && !logEfecto.isEmpty()) {
+                log(logEfecto.replace("\n", " "));
+            }
+            
+            int posDespues = j.getPosicion();
 
-        if (posAntes != posDespues) {
-            String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
-            mostrarNotificacionEvento("¡" + tipo + "!", j);
-            
-            log("¡Efecto! " + j.getNombre() + " se mueve a la casilla " + posDespues);
-            // Animación secundaria rápida para el efecto (trineo/agujero)
-            moverFichaDirecta(j, posAntes, posDespues);
-            
-            // Esperamos un poco después del efecto antes de comprobar batalla
-            PauseTransition wait = new PauseTransition(Duration.seconds(1));
-            wait.setOnFinished(e -> comprobarBatallaYFinalizarTurno(j));
-            wait.play();
-        } else {
-            comprobarBatallaYFinalizarTurno(j);
-        }
+            if (posAntes != posDespues) {
+                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
+                mostrarNotificacionEvento("¡" + tipo + "!", j);
+                
+                log("¡Efecto! " + j.getNombre() + " se mueve a la casilla " + posDespues);
+                // Animación secundaria rápida para el efecto (trineo/agujero)
+                moverFichaDirecta(j, posAntes, posDespues);
+                
+                // Esperamos un poco después del efecto antes de comprobar batalla
+                PauseTransition wait = new PauseTransition(Duration.seconds(1));
+                wait.setOnFinished(e -> comprobarBatallaYFinalizarTurno(j));
+                wait.play();
+            } else {
+                comprobarBatallaYFinalizarTurno(j);
+            }
+        });
+        effectDelay.play();
     }
 
     private void comprobarBatallaYFinalizarTurno(Jugador jActual) {
@@ -674,8 +679,71 @@ public class TableroController {
     }
     
     private void moverFichaDirecta(Jugador j, int desde, int hasta) {
-        casillaNodes.get(desde).getChildren().remove(playerTokens.get(j));
-        posicionarToken(j);
+        Casilla cOrig = tablero.getCasilla(desde);
+        String tipo = (cOrig != null) ? cOrig.getTipo().toUpperCase() : "";
+        Node token = playerTokens.get(j);
+        
+        if (tipo.contains("AGUJERO")) {
+            // --- EFECTO AGUJERO: Se desvanece (cae) y reaparece ---
+            FadeTransition fo = new FadeTransition(Duration.millis(500), token);
+            fo.setToValue(0);
+            fo.setOnFinished(e -> {
+                casillaNodes.get(desde).getChildren().remove(token);
+                posicionarToken(j);
+                token.setOpacity(0);
+                FadeTransition fi = new FadeTransition(Duration.millis(500), token);
+                fi.setToValue(1);
+                fi.play();
+            });
+            fo.play();
+        } else if (tipo.contains("TRINEO")) {
+            // --- EFECTO TRINEO: Deslizamiento rápido ---
+            double dx = casillaNodes.get(hasta).getLayoutX() - casillaNodes.get(desde).getLayoutX();
+            double dy = casillaNodes.get(hasta).getLayoutY() - casillaNodes.get(desde).getLayoutY();
+            
+            TranslateTransition tt = new TranslateTransition(Duration.millis(800), token);
+            tt.setByX(dx);
+            tt.setByY(dy);
+            tt.setInterpolator(Interpolator.EASE_BOTH);
+            tt.setOnFinished(e -> {
+                casillaNodes.get(desde).getChildren().remove(token);
+                token.setTranslateX(0); 
+                token.setTranslateY(0);
+                posicionarToken(j);
+            });
+            tt.play();
+        } else {
+            // --- EFECTO OSO / COMBATE: Salto parabólico ---
+            animarSalto(j, desde, hasta, 1000);
+        }
+    }
+
+    private void animarSalto(Jugador j, int desde, int hasta, int duracionMs) {
+        Node token = playerTokens.get(j);
+        double dx = casillaNodes.get(hasta).getLayoutX() - casillaNodes.get(desde).getLayoutX();
+        double dy = casillaNodes.get(hasta).getLayoutY() - casillaNodes.get(desde).getLayoutY();
+
+        // Movimiento X/Y
+        TranslateTransition move = new TranslateTransition(Duration.millis(duracionMs), token);
+        move.setByX(dx);
+        move.setByY(dy);
+        move.setInterpolator(Interpolator.LINEAR);
+        
+        // El arco del salto (Arriba/Abajo)
+        TranslateTransition jump = new TranslateTransition(Duration.millis(duracionMs / 2.0), token);
+        jump.setByY(-120);
+        jump.setCycleCount(2);
+        jump.setAutoReverse(true);
+        jump.setInterpolator(Interpolator.EASE_OUT);
+
+        ParallelTransition pt = new ParallelTransition(move, jump);
+        pt.setOnFinished(e -> {
+            casillaNodes.get(desde).getChildren().remove(token);
+            token.setTranslateX(0);
+            token.setTranslateY(0);
+            posicionarToken(j);
+        });
+        pt.play();
     }
 
     private void finalizarTurno() {
