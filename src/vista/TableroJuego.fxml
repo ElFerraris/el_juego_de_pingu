@@ -5,6 +5,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.Group?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import java.net.URL?>
 
 <StackPane fx:id="rootStack" styleClass="root-plain-bg" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
@@ -195,6 +197,15 @@
             </HBox>
         </VBox>
     </StackPane>
+
+    <!-- CAPA 3.5: DADO ANIMADO (MARIO PARTY STYLE) -->
+    <VBox fx:id="diceAnimationContainer" visible="false" alignment="CENTER" pickOnBounds="false" mouseTransparent="true">
+        <StackPane maxWidth="300" maxHeight="300">
+            <ImageView fx:id="diceImageView" fitWidth="200" fitHeight="200" preserveRatio="true" />
+            <Label fx:id="diceNumberLabel" visible="false" text="0" 
+                   style="-fx-font-size: 120px; -fx-font-weight: bold; -fx-text-fill: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 15, 0.5, 0, 0);" />
+        </StackPane>
+    </VBox>
 
     <!-- CAPA 4: EVENTOS (OCURRENCIAS EN EL MUNDO) - CAPA SUPERIOR ABSOLUTA -->
     <StackPane fx:id="eventOverlay" visible="false">

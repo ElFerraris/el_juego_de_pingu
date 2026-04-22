@@ -52,6 +52,11 @@ public class TableroController {
     @FXML private Button btnRecolectar;
     @FXML private Button btnInventario;
     @FXML private Button btnMenu;
+    
+    // Capas de animación
+    @FXML private VBox diceAnimationContainer;
+    @FXML private ImageView diceImageView;
+    @FXML private Label diceNumberLabel;
     @FXML private Label dadoResultadoLabel;
     @FXML private TextArea gameLogArea;
     
@@ -447,16 +452,56 @@ public class TableroController {
 
     private void ejecutarTurno(int pasos) {
         if (animacionEnCurso) return;
+        animacionEnCurso = true; // Bloqueamos para evitar clics dobles
         
         Jugador jActual = jugadores.get(turnoActual);
         dadoResultadoLabel.setText("Último dado: " + pasos);
         log(jActual.getNombre() + " saca un " + pasos);
         
         setControlesBloqueados(true);
-        moverJugadorAnimado(jActual, pasos, () -> {
-            // Al terminar el movimiento, aplicamos efectos
-            procesarEfectosCasilla(jActual);
+
+        // --- ANIMACIÓN DE DADO (MARIO PARTY STYLE) ---
+        try {
+            Image rollingGif = new Image(getClass().getResource("/assets/tablero/dados/dado_rodando.gif").toExternalForm());
+            diceImageView.setImage(rollingGif);
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el GIF del dado: " + e.getMessage());
+        }
+
+        diceImageView.setVisible(true);
+        diceNumberLabel.setVisible(false);
+        diceAnimationContainer.setOpacity(0);
+        diceAnimationContainer.setTranslateY(0); // Empezamos en el centro
+        diceAnimationContainer.setVisible(true);
+        
+        // Aparece el contenedor
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), diceAnimationContainer);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+
+        // Pausa de 2.0s para la animación del dado rodando
+        PauseTransition rollPause = new PauseTransition(Duration.seconds(2.0));
+        rollPause.setOnFinished(e -> {
+            diceImageView.setVisible(false);
+            diceNumberLabel.setText(String.valueOf(pasos));
+            diceNumberLabel.setVisible(true);
+            
+            // Pequeña pausa con el número fijo antes de empezar a andar
+            PauseTransition moveDelay = new PauseTransition(Duration.seconds(1.0));
+            moveDelay.setOnFinished(e2 -> {
+                // Mario Party Style: El número se mueve a la parte superior cuando el jugador empieza a andar
+                TranslateTransition moveUp = new TranslateTransition(Duration.millis(500), diceAnimationContainer);
+                moveUp.setToY(-280);
+                moveUp.setInterpolator(Interpolator.EASE_BOTH);
+                moveUp.play();
+
+                moverJugadorAnimado(jActual, pasos, () -> {
+                    procesarEfectosCasilla(jActual);
+                });
+            });
+            moveDelay.play();
         });
+        rollPause.play();
     }
 
     /**
@@ -464,11 +509,24 @@ public class TableroController {
      */
     private void moverJugadorAnimado(Jugador j, int pasosRestantes, Runnable onComplete) {
         if (pasosRestantes <= 0 || j.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
-            onComplete.run();
+            // Aseguramos que el número llegue a 0 antes de desaparecer
+            diceNumberLabel.setText("0");
+            
+            // El número desaparece rápido desvaneciéndose
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(400), diceAnimationContainer);
+            fadeOut.setToValue(0);
+            fadeOut.setOnFinished(e -> {
+                diceAnimationContainer.setVisible(false);
+                onComplete.run();
+            });
+            fadeOut.play();
             return;
         }
 
         animacionEnCurso = true;
+        // Actualizamos el número en pantalla (Countdown)
+        diceNumberLabel.setText(String.valueOf(pasosRestantes));
+
         int posAntigua = j.getPosicion();
         int posNueva = posAntigua + 1;
         
@@ -486,7 +544,7 @@ public class TableroController {
         }
 
         // Pequeña pausa antes del siguiente paso
-        PauseTransition pause = new PauseTransition(Duration.millis(300));
+        PauseTransition pause = new PauseTransition(Duration.millis(350));
         pause.setOnFinished(e -> {
             moverJugadorAnimado(j, pasosRestantes - 1, onComplete);
         });

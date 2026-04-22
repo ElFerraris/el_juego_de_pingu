@@ -85,3 +85,8 @@ Este archivo contiene el historial de pequeños ajustes visuales y funcionales s
         - Las tarjetas aparecen con una animación escalonada de **escalado y fundido**.
         - Se ha añadido un **efecto de destello blanco** ("flash") al cambiar el tipo de jugador o el color, suavizando la transición visual.
     - Las tarjetas vacías o de CPU tienen estilos visuales diferenciados (bordes punteados o grises).
+- [x] **20. Animación de Dado Estilo Mario Party**
+    - Añadida animación de dado rodando (GIF) al realizar una tirada.
+    - El número obtenido aparece en grande en el centro de la pantalla tras la animación.
+    - **Contador Dinámico**: El número disminuye paso a paso mientras el pingüino avanza por el tablero.
+    - **Desvanecimiento**: Al llegar a cero, el contador se desvanece suavemente para no obstruir la vista de los efectos de casilla.
