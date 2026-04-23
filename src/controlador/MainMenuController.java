@@ -8,55 +8,98 @@ import modelo.Jugador;
 import javafx.application.Platform;
 
 /**
- * MainMenuController
- * 
  * Controlador para la vista del Menú Principal.
- * Gestiona las opciones de iniciar nueva partida, cargar o salir.
+ * 
+ * <p>Esta clase se encarga de gestionar las interacciones del usuario en la pantalla inicial
+ * del juego después del login. Permite navegar hacia la configuración de partida, cargar
+ * partidas guardadas, acceder a opciones o cerrar la sesión.</p>
+ * 
+ * <p>En JavaFX, los controladores se enlazan con archivos .fxml mediante la anotación {@code @FXML}.</p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class MainMenuController {
 
-    @FXML private Label welcomeLabel;
+    /** Etiqueta que muestra el mensaje de bienvenida al jugador actual. */
+    @FXML 
+    private Label welcomeLabel;
 
+    /**
+     * Método de inicialización automática de JavaFX.
+     * 
+     * <p>Se ejecuta después de que el archivo FXML ha sido cargado y los campos anotados 
+     * con {@code @FXML} han sido inyectados. Aquí preparamos la interfaz con los datos
+     * del usuario logueado.</p>
+     */
     @FXML
     public void initialize() {
-        // Obtenemos el usuario del contexto global para darle la bienvenida
+        // Obtenemos el usuario del contexto global (Singleton) para personalizar el saludo
         Jugador current = GameContext.getInstance().getCurrentUser();
-        if (current != null) {
-            welcomeLabel.setText("Bienvenido, " + current.getNombre());
-        } else {
-            welcomeLabel.setText("Bienvenido, Pingüino");
-        }
+
+        // Mostramos su nombre
+        welcomeLabel.setText("Bienvenido " + current.getNombre());
     }
 
+    /**
+     * Navega a la pantalla de configuración de jugadores.
+     * 
+     * @param event El evento de acción disparado por el botón "Nueva Partida".
+     */
     @FXML
     private void showPlayerConfig(ActionEvent event) {
-        // Navegamos a la configuración de jugadores con transición hacia adelante (sube)
-        NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.FORWARD);
+        // Usamos el NavigationController para cambiar de escena.
+        // La dirección FORWARD suele implicar una animación de entrada/subida.
+        NavigationController.navigateTo(event, "PlayerConfigView.fxml", NavigationController.Direction.LEFT);
     }
 
+    /**
+     * Navega a la pantalla de carga de partidas guardadas.
+     * 
+     * @param event El evento de acción disparado por el botón "Cargar Partida".
+     */
     @FXML
     private void showLoadGame(ActionEvent event) {
-        // Navegamos a la carga de partidas con transición hacia adelante
-        NavigationController.navigateTo(event, "LoadGameView.fxml", NavigationController.Direction.FORWARD);
+        NavigationController.navigateTo(event, "LoadGameView.fxml", NavigationController.Direction.LEFT);
     }
 
+    /**
+     * Navega a la pantalla de opciones/ajustes del juego.
+     * 
+     * @param event El evento de acción disparado por el botón "Opciones".
+     */
     @FXML
     private void showOptions(ActionEvent event) {
-        // Navegamos a las opciones con transición hacia adelante
         NavigationController.navigateTo(event, "OptionsView.fxml", NavigationController.Direction.FORWARD);
     }
 
+    /**
+     * Gestiona el cierre de sesión del usuario.
+     * 
+     * <p>En lugar de cerrar directamente, marca el tipo de acción en el contexto global
+     * y abre un diálogo de confirmación.</p>
+     * 
+     * @param event El evento de acción disparado por el botón "Cerrar Sesión".
+     */
     @FXML
     private void handleLogout(ActionEvent event) {
-        // Marcamos la acción a confirmar y navegamos al diálogo
+        // Marcamos la intención de cerrar sesión para que el diálogo sepa qué confirmar
         GameContext.getInstance().setActionToConfirm(GameContext.ActionConfirmType.LOGOUT);
         NavigationController.navigateTo(event, "ConfirmDialogView.fxml", NavigationController.Direction.FORWARD);
     }
 
+    /**
+     * Gestiona la salida completa de la aplicación.
+     * 
+     * <p>Similar al logout, solicita confirmación mediante un diálogo emergente.</p>
+     * 
+     * @param event El evento de acción disparado por el botón "Salir".
+     */
     @FXML
     private void handleQuitGame(ActionEvent event) {
-        // Marcamos la acción a confirmar y navegamos al diálogo
+        // Marcamos la intención de salir del programa
         GameContext.getInstance().setActionToConfirm(GameContext.ActionConfirmType.QUIT);
         NavigationController.navigateTo(event, "ConfirmDialogView.fxml", NavigationController.Direction.FORWARD);
     }
 }
+
