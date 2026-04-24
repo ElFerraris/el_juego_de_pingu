@@ -57,9 +57,6 @@ public class NavigationController {
     /**
      * Cierra la sesión, limpia el estado del juego y reinicia la aplicación.
      * 
-     * <p>Este método es vital para asegurar que no queden datos residuales de una 
-     * partida anterior al cambiar de usuario o volver al login.</p>
-     * 
      * @param currentStage El Stage actual que debe cerrarse.
      */
     public static void logoutAndRestart(Stage currentStage) {
@@ -71,17 +68,15 @@ public class NavigationController {
         // 2. Cerramos la ventana de juego actual
         currentStage.close();
         
-        // 3. Lanzamos una nueva instancia de la aplicación en el hilo de JavaFX
-        Platform.runLater(() -> {
-            try {
-                Stage newStage = new Stage();
-                newStage.setResizable(false); // Impedimos que el usuario cambie el tamaño manualmente
-                new aplicacion.Main().start(newStage);
-            } catch (Exception e) {
-                System.err.println("Error al reiniciar la aplicación: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
+        // 3. Lanzamos una nueva instancia de la aplicación directamente
+        try {
+            Stage newStage = new Stage();
+            newStage.setResizable(false);
+            new aplicacion.Main().start(newStage);
+        } catch (Exception e) {
+            System.err.println("Error al reiniciar la aplicación: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -159,54 +154,34 @@ public class NavigationController {
     }
 
     /**
-     * Carga el tablero de forma asíncrona.
+     * Carga el tablero de forma síncrona.
      * 
-     * <p>Este método es crítico para la experiencia de usuario: muestra un GIF de carga
-     * y utiliza un hilo secundario para cargar el complejo FXML del tablero, evitando
-     * que la música o la interfaz se congelen durante el proceso.</p>
+     * <p>NOTA: Se ha eliminado la carga asíncrona por requisitos del proyecto.</p>
      * 
      * @param event El evento que dispara la carga.
      * @param fxmlFile El archivo del tablero.
      */
     public static void navigateToBoardAsync(ActionEvent event, String fxmlFile) {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        showLoading(stage.getScene());
-
-        // Pequeña pausa para asegurar que el overlay de carga se renderice antes del "lag" de carga
-        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.millis(150));
-        pause.setOnFinished(e -> {
-            javafx.concurrent.Task<Parent> loadTask = new javafx.concurrent.Task<>() {
-                @Override
-                protected Parent call() throws Exception {
-                    String fullPath = VISTA_PATH + fxmlFile;
-                    FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
-                    return loader.load();
-                }
-            };
-
-            loadTask.setOnSucceeded(workerEvent -> {
-                Parent root = loadTask.getValue();
-                Scene scene = stage.getScene();
-                scene.setRoot(root);
-                ensureCssLoaded(scene);
-                applyGlobalEffects(root, fxmlFile);
-                
-                // Restauramos la preferencia de pantalla completa del usuario
-                stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
-                setupGlobalHotkeys(scene);
-                System.out.println("► Tablero cargado asíncronamente.");
-            });
-
-            loadTask.setOnFailed(workerEvent -> {
-                hideLoading();
-                System.err.println("► Error en carga asíncrona: " + loadTask.getException().getMessage());
-                loadTask.getException().printStackTrace();
-            });
-
-            new Thread(loadTask).start();
-        });
-        pause.play();
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            String fullPath = VISTA_PATH + fxmlFile;
+            FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
+            Parent root = loader.load();
+            
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
+            ensureCssLoaded(scene);
+            applyGlobalEffects(root, fxmlFile);
+            
+            stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
+            setupGlobalHotkeys(scene);
+            System.out.println("► Tablero cargado síncronamente.");
+        } catch (Exception e) {
+            System.err.println("► Error en carga síncrona: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     /**
      * Lógica interna para manejar las transiciones animadas entre escenas.

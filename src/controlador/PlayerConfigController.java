@@ -39,26 +39,14 @@ public class PlayerConfigController {
 
     @FXML
     public void initialize() {
-        new Thread(() -> {
-            try {
-                Platform.runLater(() -> {
-                    if (playerSlotsContainer.getScene() != null) {
-                        NavigationController.showLoading(playerSlotsContainer.getScene());
-                    }
-                });
-
-                List<String> names = db.obtenerTodosLosJugadores();
-                
-                Platform.runLater(() -> {
-                    allPlayerNames = names;
-                    setupFixedSlots();
-                    NavigationController.hideLoading();
-                });
-            } catch (Exception e) {
-                Platform.runLater(NavigationController::hideLoading);
-                System.err.println("Error cargando jugadores: " + e.getMessage());
-            }
-        }).start();
+        try {
+            // Carga síncrona de jugadores
+            List<String> names = db.obtenerTodosLosJugadores();
+            allPlayerNames = names;
+            setupFixedSlots();
+        } catch (Exception e) {
+            System.err.println("Error cargando jugadores: " + e.getMessage());
+        }
     }
 
     private void setupFixedSlots() {

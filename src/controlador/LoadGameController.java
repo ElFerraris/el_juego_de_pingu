@@ -129,25 +129,14 @@ public class LoadGameController {
     }
 
     private void cargarListaDeBD() {
-        // Obtenemos la escena si ya existe, si no, lo intentaremos después
-        Platform.runLater(() -> {
-             NavigationController.showLoading(listaPartidas.getScene());
-        });
-
-        new Thread(() -> {
-            try {
-                int idUsuarioActual = GameContext.getInstance().getCurrentUser().getId();
-                List<PartidaGuardada> pendientes = bbdd.obtenerPartidasPendientes(idUsuarioActual);
-                Platform.runLater(() -> {
-                    ObservableList<PartidaGuardada> observablePartidas = FXCollections.observableArrayList(pendientes);
-                    listaPartidas.setItems(observablePartidas);
-                    NavigationController.hideLoading();
-                });
-            } catch (Exception e) {
-                Platform.runLater(NavigationController::hideLoading);
-                System.err.println("Error cargando lista: " + e.getMessage());
-            }
-        }).start();
+        try {
+            int idUsuarioActual = GameContext.getInstance().getCurrentUser().getId();
+            List<PartidaGuardada> pendientes = bbdd.obtenerPartidasPendientes(idUsuarioActual);
+            ObservableList<PartidaGuardada> observablePartidas = FXCollections.observableArrayList(pendientes);
+            listaPartidas.setItems(observablePartidas);
+        } catch (Exception e) {
+            System.err.println("Error cargando lista: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -155,33 +144,27 @@ public class LoadGameController {
         PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
         if (seleccionada == null) return;
 
-        NavigationController.showLoading(listaPartidas.getScene());
-        
-        new Thread(() -> {
-            try {
-                Juego juegoTemp = new Juego();
-                boolean ok = bbdd.cargarDatosPartida(seleccionada.getIdPartida(), juegoTemp);
+        try {
+            Juego juegoTemp = new Juego();
+            boolean ok = bbdd.cargarDatosPartida(seleccionada.getIdPartida(), juegoTemp);
 
-                Platform.runLater(() -> {
-                    if (ok) {
-                        System.out.println("► Partida cargada con éxito. Redirigiendo a tablero...");
-                        GameContext context = GameContext.getInstance();
-                        context.setIdPartidaCargar(seleccionada.getIdPartida());
-                        context.setSeed(juegoTemp.getTablero().getSeed());
-                        context.setConfiguredPlayers(juegoTemp.getJugadores());
-                        context.setTurnoCargado(juegoTemp.getTurnoActual());
-                        
-                        NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
-                    } else {
-                        NavigationController.hideLoading();
-                        mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada.", Alert.AlertType.ERROR);
-                    }
-                });
-            } catch (Exception e) {
-                Platform.runLater(NavigationController::hideLoading);
+            if (ok) {
+                System.out.println("► Partida cargada con éxito. Redirigiendo a tablero...");
+                GameContext context = GameContext.getInstance();
+                context.setIdPartidaCargar(seleccionada.getIdPartida());
+                context.setSeed(juegoTemp.getTablero().getSeed());
+                context.setConfiguredPlayers(juegoTemp.getJugadores());
+                context.setTurnoCargado(juegoTemp.getTurnoActual());
+                
+                NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
+            } else {
+                mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada.", Alert.AlertType.ERROR);
             }
-        }).start();
+        } catch (Exception e) {
+            System.err.println("Error al jugar partida: " + e.getMessage());
+        }
     }
+
 
     @FXML
     private void handleVolver(ActionEvent event) {

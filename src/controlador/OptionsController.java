@@ -61,15 +61,18 @@ public class OptionsController {
         musicSlider.valueProperty().addListener((obs, oldVal, newVal) -> checkChanges());
         sfxSlider.valueProperty().addListener((obs, oldVal, newVal) -> checkChanges());
 
-        // Sincronización en tiempo real si el estado cambia externamente (tecla F o Esc)
-        Platform.runLater(() -> {
-            if (applyButton.getScene() != null && applyButton.getScene().getWindow() instanceof Stage) {
-                Stage stage = (Stage) applyButton.getScene().getWindow();
-                stage.fullScreenProperty().addListener((obs, oldVal, isNowFull) -> {
-                    if (fullscreenCheck.isSelected() != isNowFull) {
-                        fullscreenCheck.setSelected(isNowFull);
-                        initialFullscreen = isNowFull; // Sincronizamos el estado inicial para evitar marcar cambios falsos
-                        checkChanges();
+        // Sincronización en tiempo real si el estado cambia externamente (tecla F11)
+        applyButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obsW, oldWin, newWin) -> {
+                    if (newWin instanceof Stage stage) {
+                        stage.fullScreenProperty().addListener((obsF, oldF, isNowFull) -> {
+                            if (fullscreenCheck.isSelected() != isNowFull) {
+                                fullscreenCheck.setSelected(isNowFull);
+                                initialFullscreen = isNowFull; // Sincronizamos el estado inicial para evitar marcar cambios falsos
+                                checkChanges();
+                            }
+                        });
                     }
                 });
             }

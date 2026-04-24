@@ -172,20 +172,18 @@ public class TableroController {
         this.jugadores = GameContext.getInstance().getConfiguredPlayers();
         
         // Centrar en el primer jugador al inicio (ahora que sabemos quiénes son)
-        Platform.runLater(() -> {
-            if (jugadores != null && !jugadores.isEmpty()) {
-                smoothCenterOnPlayer(jugadores.get(0), 1.0);
-            } else {
-                centrarTablero();
-            }
-        });
+        if (jugadores != null && !jugadores.isEmpty()) {
+            smoothCenterOnPlayer(jugadores.get(0), 1.0);
+        } else {
+            centrarTablero();
+        }
 
         // Centrar tablero automáticamente cuando se conozcan las dimensiones reales
         cameraViewport.widthProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
+            if (newVal.doubleValue() > 0) this.centrarTablero();
         });
         cameraViewport.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() > 0) Platform.runLater(this::centrarTablero);
+            if (newVal.doubleValue() > 0) this.centrarTablero();
         });
         
         juegoSimulado.setTablero(this.tablero);
@@ -775,9 +773,7 @@ public class TableroController {
         }
         
         // Comprobamos si el nuevo turno es de la CPU o está bloqueado
-        Platform.runLater(() -> {
-            comprobarBloqueoInicioTurno();
-        });
+        comprobarBloqueoInicioTurno();
     }
 
     private void comprobarBloqueoInicioTurno() {
@@ -1250,50 +1246,45 @@ public class TableroController {
     }
 
     private void mostrarEventoDialogo(String titulo, String mensaje, Runnable onComplete, Jugador... involucrados) {
-        Platform.runLater(new java.lang.Runnable() {
-            @Override
-            public void run() {
-                eventTitleLabel.setText(titulo);
-                eventMessageLabel.setText(mensaje);
-                onEventContinue = onComplete;
+        eventTitleLabel.setText(titulo);
+        eventMessageLabel.setText(mensaje);
+        onEventContinue = onComplete;
+        
+        highlightingBackups.clear();
+        highlightLayer.getChildren().clear();
+        
+        for (Jugador j : involucrados) {
+            Circle token = playerTokens.get(j);
+            if (token != null) {
+                // Cast explícito a Pane para evitar que el compilador se queje de visibilidad
+                Pane originalParent = (Pane) token.getParent();
+                highlightingBackups.put(j, originalParent);
                 
-                highlightingBackups.clear();
-                highlightLayer.getChildren().clear();
+                // Coordenadas globales
+                javafx.geometry.Bounds bounds = token.localToScene(token.getBoundsInLocal());
                 
-                for (Jugador j : involucrados) {
-                    Circle token = playerTokens.get(j);
-                    if (token != null) {
-                        // Cast explícito a Pane para evitar que el compilador se queje de visibilidad
-                        Pane originalParent = (Pane) token.getParent();
-                        highlightingBackups.put(j, originalParent);
-                        
-                        // Coordenadas globales
-                        javafx.geometry.Bounds bounds = token.localToScene(token.getBoundsInLocal());
-                        
-                        // Mover ficha de capa
-                        originalParent.getChildren().remove(token);
-                        highlightLayer.getChildren().add(token);
-                        
-                        // Reposicionar visualmente
-                        javafx.geometry.Point2D localP = highlightLayer.sceneToLocal(bounds.getMinX(), bounds.getMinY());
-                        token.setTranslateX(localP.getX() + token.getRadius());
-                        token.setTranslateY(localP.getY() + token.getRadius());
-                        
-                        token.setEffect(new DropShadow(25, Color.WHITE));
-                    }
-                }
-                // Limpiar interferencias de otras capas
-                overlayPane.setVisible(false);
+                // Mover ficha de capa
+                originalParent.getChildren().remove(token);
+                highlightLayer.getChildren().add(token);
                 
-                eventOverlay.setVisible(true);
-                FadeTransition ft = new FadeTransition(Duration.millis(300), eventOverlay);
-                ft.setFromValue(0);
-                ft.setToValue(1);
-                ft.play();
+                // Reposicionar visualmente
+                javafx.geometry.Point2D localP = highlightLayer.sceneToLocal(bounds.getMinX(), bounds.getMinY());
+                token.setTranslateX(localP.getX() + token.getRadius());
+                token.setTranslateY(localP.getY() + token.getRadius());
                 
-                animateIn(eventDialogueBox);
+                token.setEffect(new DropShadow(25, Color.WHITE));
             }
-        });
+        }
+        // Limpiar interferencias de otras capas
+        overlayPane.setVisible(false);
+        
+        eventOverlay.setVisible(true);
+        FadeTransition ft = new FadeTransition(Duration.millis(300), eventOverlay);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
+        
+        animateIn(eventDialogueBox);
     }
 
     @FXML

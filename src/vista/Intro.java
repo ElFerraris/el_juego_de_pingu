@@ -3,7 +3,7 @@ package vista;
 import java.io.IOException;
 import java.io.File;
 
-import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -68,15 +68,14 @@ public class Intro {
                 });
 
                 // Fallback: Si en 5 segundos no ha empezado, saltamos (evita pantalla en negro infinita)
-                new Thread(() -> {
-                    try { Thread.sleep(5000); } catch (InterruptedException e) {}
-                    Platform.runLater(() -> {
-                        if (mediaPlayer != null && mediaPlayer.getStatus() != MediaPlayer.Status.PLAYING) {
-                            System.out.println("► Failsafe: La intro tarda demasiado en cargar, saltando...");
-                            finalizarIntro();
-                        }
-                    });
-                }).start();
+                javafx.animation.PauseTransition failsafe = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
+                failsafe.setOnFinished(e -> {
+                    if (mediaPlayer != null && mediaPlayer.getStatus() != MediaPlayer.Status.PLAYING) {
+                        System.out.println("► Failsafe: La intro tarda demasiado en cargar, saltando...");
+                        finalizarIntro();
+                    }
+                });
+                failsafe.play();
 
             } catch (Exception e) {
                 System.err.println("Error al inicializar el MediaPlayer: " + e.getMessage());
@@ -118,7 +117,7 @@ public class Intro {
         }
 
         // 3. Forzar foco para que el teclado funcione
-        Platform.runLater(() -> rootPane.requestFocus());
+        rootPane.requestFocus();
     }
 
     private void aplicarExitHint(Window window) {

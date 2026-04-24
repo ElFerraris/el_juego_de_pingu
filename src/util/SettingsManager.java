@@ -26,7 +26,7 @@ public class SettingsManager {
         load();
     }
 
-    public static synchronized SettingsManager getInstance() {
+    public static SettingsManager getInstance() {
         if (instance == null) {
             instance = new SettingsManager();
         }
