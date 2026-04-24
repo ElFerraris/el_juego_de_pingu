@@ -5,45 +5,74 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * GameContext (Patrón Singleton)
+ * <h1>GameContext</h1>
  * 
- * Este archivo es el "Cerebro Central" de la aplicación. 
- * Sirve para guardar datos mientras te mueves entre diferentes pantallas (escenas).
+ * <p>Esta clase actúa como el <b>Contenedor de Estado Global</b> de la aplicación. 
+ * Su función principal es permitir el intercambio de información entre diferentes 
+ * controladores de vista sin necesidad de pasar objetos manualmente en cada transición.</p>
  * 
- * Al ser un Singleton, solo existe UNA instancia de esta clase en todo el programa.
+ * <h1>Patrón Singleton</h1>
+ * <p>Utiliza el patrón de diseño <b>Singleton</b>, lo que garantiza que en toda la 
+ * ejecución del programa solo exista una única instancia de esta clase. Esto es ideal 
+ * para gestionar datos centralizados como el usuario logueado o la configuración de la partida.</p>
+ * 
+ * @author BadLabs©️
+ * @version 1.1
  */
 public class GameContext {
+    
+    /** La única instancia permitida de esta clase. */
     private static GameContext instance;
 
-    // Tipos de acción que pueden necesitar confirmación
+    /** 
+     * Enumeración para definir qué tipo de acción requiere una confirmación 
+     * por parte del usuario en los diálogos emergentes.
+     */
     public enum ActionConfirmType { LOGOUT, QUIT }
+    
+    /** Almacena la acción que está pendiente de confirmación. */
     private ActionConfirmType actionToConfirm;
 
-    // Usuario que ha hecho login actualmente
+    /** El usuario (Jugador) que ha iniciado sesión actualmente en el sistema. */
     private Jugador currentUser;
     
-    // Lista de jugadores (pingüinos) configurados para la partida actual
+    /** Lista de jugadores que participarán en la partida que se está configurando. */
     private List<Jugador> configuredPlayers = new ArrayList<>();
     
-    // El "Seed" o código del tablero actual
+    /** 
+     * Código de generación (Seed) del tablero. Permite recrear el mismo mapa 
+     * aleatorio en diferentes sesiones. 
+     */
     private String seed;
     
-    // Nombre de la partida para la BD
+    /** Nombre asignado a la partida actual para su almacenamiento en la Base de Datos. */
     private String gameName;
     
-    // ID de la partida en caso de estar cargando una partida de la BD
+    /** 
+     * Identificador de la partida en la BD. 
+     * Un valor de -1 indica que es una partida nueva (no cargada). 
+     */
     private int idPartidaCargar = -1;
     
-    // Turno actual restaurado de una carga
+    /** Almacena el turno en el que se guardó la partida para poder restaurarlo. */
     private int turnoModoFuga = 0;
 
-    // Constructor privado para evitar que se creen copias con 'new'
+    /** 
+     * Constructor privado.
+     * <p>Al ser privado, impide que otras clases creen nuevas instancias usando 'new GameContext()', 
+     * obligándolas a pasar por {@link #getInstance()}.</p>
+     */
     private GameContext() {}
 
     /**
-     * Método para obtener la única instancia permitida del contexto.
+     * Obtiene la instancia única de GameContext.
+     * 
+     * <p>Si la instancia aún no existe, la crea. Si ya existe, devuelve la existente. 
+     * Se ha eliminado la sincronización para simplificar el flujo según requisitos del proyecto.</p>
+     * 
+     * @return La instancia única de GameContext.
      */
-    public static synchronized GameContext getInstance() {
+    public static GameContext getInstance() {
         if (instance == null) {
             instance = new GameContext();
         }
@@ -51,7 +80,10 @@ public class GameContext {
     }
 
     /**
-     * Limpia los datos de la sesión actual (útil al cerrar sesión).
+     * Reinicia todos los datos del contexto a sus valores por defecto.
+     * 
+     * <p>Es fundamental llamar a este método al cerrar la sesión (Logout) para 
+     * asegurar que el siguiente usuario no vea datos del anterior.</p>
      */
     public void reset() {
         currentUser = null;
@@ -61,31 +93,48 @@ public class GameContext {
         idPartidaCargar = -1;
         turnoModoFuga = 0;
         actionToConfirm = null;
+        System.out.println("► GameContext: Datos reiniciados.");
     }
 
-    // --- GETTERS Y SETTERS ---
-    // Permiten a las vistas leer y escribir los datos compartidos
+    // --- MÉTODOS DE ACCESO (GETTERS Y SETTERS) ---
+    // Permiten a los controladores de las vistas leer y modificar el estado global.
 
+    /** @return El usuario actual logueado. */
     public Jugador getCurrentUser() { return currentUser; }
+    /** @param currentUser Define el usuario que acaba de hacer login. */
     public void setCurrentUser(Jugador currentUser) { this.currentUser = currentUser; }
 
+    /** @return La lista de jugadores configurados para la partida. */
     public List<Jugador> getConfiguredPlayers() { return configuredPlayers; }
+    /** @param players Establece la lista de competidores. */
     public void setConfiguredPlayers(List<Jugador> players) { this.configuredPlayers = players; }
 
+    /** @return El código de generación del mapa actual. */
     public String getSeed() { return seed; }
+    /** @param seed Establece el código para generar el tablero. */
     public void setSeed(String seed) { this.seed = seed; }
 
+    /** @return El nombre de la partida actual. */
     public String getGameName() { return gameName; }
+    /** @param gameName Define el nombre de la partida (ej: "Partida de Prueba"). */
     public void setGameName(String gameName) { this.gameName = gameName; }
 
+    /** @return El ID de la partida en la base de datos. */
     public int getIdPartidaCargar() { return idPartidaCargar; }
+    /** @param id Establece el ID para cargar una partida existente. */
     public void setIdPartidaCargar(int id) { this.idPartidaCargar = id; }
     
+    /** @return True si estamos cargando una partida guardada, false si es una partida nueva. */
     public boolean isPartidaCargada() { return idPartidaCargar != -1; }
     
+    /** @return El turno recuperado de la base de datos. */
     public int getTurnoCargado() { return turnoModoFuga; }
+    /** @param t Establece el turno desde el cual se debe reanudar el juego. */
     public void setTurnoCargado(int t) { this.turnoModoFuga = t; }
 
+    /** @return La acción que requiere confirmación actualmente. */
     public ActionConfirmType getActionToConfirm() { return actionToConfirm; }
+    /** @param action Define qué acción debe validar el diálogo de confirmación. */
     public void setActionToConfirm(ActionConfirmType action) { this.actionToConfirm = action; }
 }
+
