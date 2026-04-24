@@ -85,7 +85,9 @@ public class PlayerConfigController {
         isUpdatingAll = true;
         try {
             for (Slot s : slots) {
-                s.refreshCombo();
+                if (s.getType() != SlotType.NONE) {
+                    s.refreshCombo();
+                }
             }
         } finally {
             isUpdatingAll = false;
@@ -96,17 +98,17 @@ public class PlayerConfigController {
     private void showSeedSelection(ActionEvent event) {
         List<Jugador> configured = new ArrayList<>();
         for (Slot s : slots) {
-            if (s.getType() == SlotType.NONE) continue;
-
-            if (s.getType() == SlotType.PLAYER) {
-                String name = s.getName();
-                if (name == null || name.trim().isEmpty()) {
-                    errorLabel.setText("Todos los jugadores seleccionados deben tener nombre");
-                    return;
+            if (s.getType() != SlotType.NONE) {
+                if (s.getType() == SlotType.PLAYER) {
+                    String name = s.getName();
+                    if (name == null || name.trim().isEmpty()) {
+                        errorLabel.setText("Todos los jugadores seleccionados deben tener nombre");
+                        return;
+                    }
+                    configured.add(new Pinguino(-1, name, s.getColor()));
+                } else if (s.getType() == SlotType.FOCA) {
+                    configured.add(new Foca(-1, "FOCA LOCA"));
                 }
-                configured.add(new Pinguino(-1, name, s.getColor()));
-            } else if (s.getType() == SlotType.FOCA) {
-                configured.add(new Foca(-1, "Foca Loca " + (configured.size() + 1)));
             }
         }
         

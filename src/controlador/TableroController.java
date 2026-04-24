@@ -247,43 +247,44 @@ public class TableroController {
         
         for (int i = 0; i < Tablero.TAMANYO_TABLERO; i++) {
             Casilla c = tablero.getCasilla(i);
-            if (c == null) continue;
             
-            StackPane cellNode = crearNodoCasilla(c);
-            
-            double layoutX, layoutY;
-            int zOrder;
-            
-            if (i < 49) {
-                // Patrón Boustrophedon 7x7 (Isométrico)
-                int gy = i / 7;
-                int gx;
-                if (gy % 2 == 0) {
-                    gx = i % 7; // Izquierda a derecha
+            if (c != null) {
+                StackPane cellNode = crearNodoCasilla(c);
+                
+                double layoutX, layoutY;
+                int zOrder;
+                
+                if (i < 49) {
+                    // Patrón Boustrophedon 7x7 (Isométrico)
+                    int gy = i / 7;
+                    int gx;
+                    if (gy % 2 == 0) {
+                        gx = i % 7; // Izquierda a derecha
+                    } else {
+                        gx = 6 - (i % 7); // Derecha a izquierda
+                    }
+                    
+                    zOrder = gx + gy;
+                    
+                    // Calcular posiciones absolutas en isométrico adaptado al tamaño de 50px
+                    layoutX = centerX + (gx - gy) * xOffset - 25;
+                    layoutY = bottomY - (gx + gy) * yOffset - 25;
                 } else {
-                    gx = 6 - (i % 7); // Derecha a izquierda
+                    // Casilla 49 o 50 (La Meta / Igloo)
+                    zOrder = 7 + 7;
+                    layoutX = centerX + (7 - 7) * xOffset - 25;
+                    // Ajustada para que no pase de la parte superior del todo
+                    layoutY = bottomY - (7 + 7) * yOffset - 25 - 12;
                 }
                 
-                zOrder = gx + gy;
+                cellNode.setUserData(-zOrder); // Guardar Z-Order negativo para fácil ordenación
                 
-                // Calcular posiciones absolutas en isométrico adaptado al tamaño de 50px
-                layoutX = centerX + (gx - gy) * xOffset - 25;
-                layoutY = bottomY - (gx + gy) * yOffset - 25;
-            } else {
-                // Casilla 49 o 50 (La Meta / Igloo)
-                zOrder = 7 + 7;
-                layoutX = centerX + (7 - 7) * xOffset - 25;
-                // Ajustada para que no pase de la parte superior del todo
-                layoutY = bottomY - (7 + 7) * yOffset - 25 - 12;
+                cellNode.setLayoutX(layoutX);
+                cellNode.setLayoutY(layoutY);
+                
+                casillaNodes.put(i, cellNode);
+                sortedNodes.add(cellNode);
             }
-            
-            cellNode.setUserData(-zOrder); // Guardar Z-Order negativo para fácil ordenación
-            
-            cellNode.setLayoutX(layoutX);
-            cellNode.setLayoutY(layoutY);
-            
-            casillaNodes.put(i, cellNode);
-            sortedNodes.add(cellNode);
         }
         
         // Ordenar nodos. El menor zOrder negativo significa mayor Z (más atrás), 
