@@ -593,39 +593,35 @@ public class BBDD {
     
     
     /**
-     * Comprueba si el nickname y la contraseña coinciden en la base de datos.
+     * Realiza el login utilizando la función de encriptación de la base de datos.
      * @param nickname El nombre del jugador.
-     * @param password La contraseña introducida.
-     * @return true si las credenciales son correctas, false en caso contrario.
+     * @param password La contraseña en texto plano (la función de BD se encarga del hash).
+     * @return true si el login es exitoso, false si falla.
      */
     public static boolean loginJugador(String nickname, String password) {
-        // Consulta para contar si hay un usuario con ese nombre Y esa contraseña
-        String sql = "SELECT COUNT(*) FROM jugador WHERE nickname = ? AND CONTRASENA = ?";
-
-        try (Connection con = conectarBD();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
-            
+        // Llamada a la función PL/SQL: {? = call nombre_funcion(?, ?)}
+        String sql = "{? = call verificar_password(?, ?)}";
+        try (Connection con = conectarBD()) {
             if (con == null) return false;
-
-            // Seteamos los parámetros
-            pstmt.setString(1, nickname);
-            pstmt.setString(2, password);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    // Si el conteo es mayor que 0, es que existe y coincide
-                    int coincidencias = rs.getInt(1);
-                    if (coincidencias > 0) {
-                        System.out.println("► Login correcto para: " + nickname);
-                        return true;
-                    }
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+                // Registramos el tipo de salida (el RETURN de la función)
+                cstmt.registerOutParameter(1, java.sql.Types.INTEGER);
+                
+                // Seteamos los parámetros de entrada
+                cstmt.setString(2, nickname);
+                cstmt.setString(3, password);
+                cstmt.execute();
+                // Recuperamos el resultado (1 = OK, 0 = FALLO)
+                int resultado = cstmt.getInt(1);
+                if (resultado == 1) {
+                    System.out.println("► Acceso concedido para: " + nickname);
+                    return true;
                 }
             }
         } catch (SQLException e) {
-            System.out.println("► ERROR en el login: " + e.getMessage());
+            System.out.println("► ERROR crítico en el login seguro: " + e.getMessage());
         }
-
-        System.out.println("► Nickname o contraseña incorrectos.");
+        System.out.println("► Credenciales inválidas.");
         return false;
     }
     
