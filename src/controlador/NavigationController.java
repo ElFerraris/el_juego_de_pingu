@@ -19,23 +19,36 @@ import javafx.scene.input.KeyEvent;
 /**
  * <h1>NavigationController</h1>
  * 
- * <p>El "cerebro" de la navegación de la aplicación. Centraliza la carga de archivos FXML,
- * la gestión de escenas (Scenes) y el control de ventanas (Stages).</p>
+ * <p>
+ * El "cerebro" de la navegación de la aplicación. Centraliza la carga de
+ * archivos FXML,
+ * la gestión de escenas (Scenes) y el control de ventanas (Stages).
+ * </p>
  * 
- * <p>Sus responsabilidades principales incluyen:</p>
+ * <p>
+ * Sus responsabilidades principales incluyen:
+ * </p>
  * <ul>
- *   <li>Cargar vistas con transiciones animadas (desplazamientos, fundidos).</li>
- *   <li>Gestionar la carga asíncrona del tablero para no bloquear la interfaz.</li>
- *   <li>Controlar el modo pantalla completa y los atajos de teclado globales.</li>
- *   <li>Aplicar efectos visuales y de sonido automáticos a los componentes de la interfaz.</li>
+ * <li>Cargar vistas con transiciones animadas (desplazamientos, fundidos).</li>
+ * <li>Gestionar la carga asíncrona del tablero para no bloquear la
+ * interfaz.</li>
+ * <li>Controlar el modo pantalla completa y los atajos de teclado
+ * globales.</li>
+ * <li>Aplicar efectos visuales y de sonido automáticos a los componentes de la
+ * interfaz.</li>
  * </ul>
  * 
  * <h1>Observaciones</h1>
  * 
- * <p>Esta clase utiliza una cosa llamada Sobrecarga de Métodos (o Method Overloading en inglés). Donde
- * basicamente creamos varios metodos con el mismo nombre pero con diferentes parametros, porque para
- * java no es lo mismo metodo(5) que metodo("hola"), pudiendo gestionar muy biien ciertas cosas del
- * proyecto.</p>
+ * <p>
+ * Esta clase utiliza una cosa llamada Sobrecarga de Métodos (o Method
+ * Overloading en inglés). Donde
+ * basicamente creamos varios metodos con el mismo nombre pero con diferentes
+ * parametros, porque para
+ * java no es lo mismo metodo(5) que metodo("hola"), pudiendo gestionar muy
+ * biien ciertas cosas del
+ * proyecto.
+ * </p>
  * 
  * @author BadLabs©️
  * @version 1.0
@@ -44,13 +57,13 @@ public class NavigationController {
 
     /** Ruta base dentro de los recursos donde se encuentran los archivos .fxml */
     private static final String VISTA_PATH = "/vista/";
-    
+
     /** Ruta del archivo CSS principal */
     private static final String CSS_PATH = "/vista/style.css";
-    
+
     /** Marca de tiempo para controlar el spam de teclas de pantalla completa */
     private static long lastToggleTime = 0;
-    
+
     /** Tiempo de espera (ms) entre cambios de pantalla completa */
     private static final long TOGGLE_COOLDOWN = 300;
 
@@ -61,13 +74,13 @@ public class NavigationController {
      */
     public static void logoutAndRestart(Stage currentStage) {
         System.out.println("► Reiniciando aplicación (Logout)...");
-        
+
         // 1. Limpiamos el contexto global para borrar jugadores, partida actual, etc.
         GameContext.getInstance().reset();
-        
+
         // 2. Cerramos la ventana de juego actual
         currentStage.close();
-        
+
         // 3. Lanzamos una nueva instancia de la aplicación directamente
         try {
             Stage newStage = new Stage();
@@ -96,9 +109,9 @@ public class NavigationController {
     /**
      * Cambia a una nueva escena con una transición animada.
      * 
-     * @param event El evento del botón que disparó la navegación.
+     * @param event    El evento del botón que disparó la navegación.
      * @param fxmlFile Nombre del archivo .fxml (ej: "MainMenuView.fxml").
-     * @param dir La dirección de la animación.
+     * @param dir      La dirección de la animación.
      */
     public static void navigateTo(ActionEvent event, String fxmlFile, int dir) {
         try {
@@ -114,7 +127,7 @@ public class NavigationController {
     /**
      * Cambia a una nueva escena sin transición animada.
      * 
-     * @param event El evento del botón que disparó la navegación.
+     * @param event    El evento del botón que disparó la navegación.
      * @param fxmlFile Nombre del archivo .fxml.
      */
     public static void navigateTo(ActionEvent event, String fxmlFile) {
@@ -124,9 +137,10 @@ public class NavigationController {
     /**
      * Navega a una escena permitiendo forzar el modo pantalla completa.
      * 
-     * @param event El evento del botón.
-     * @param fxmlFile Nombre del archivo .fxml.
-     * @param fullScreen True para activar pantalla completa, false para modo ventana.
+     * @param event      El evento del botón.
+     * @param fxmlFile   Nombre del archivo .fxml.
+     * @param fullScreen True para activar pantalla completa, false para modo
+     *                   ventana.
      */
     public static void navigateTo(ActionEvent event, String fxmlFile, boolean fullScreen) {
         try {
@@ -141,7 +155,7 @@ public class NavigationController {
     /**
      * Navega a una escena directamente usando el Stage (sin evento de botón).
      * 
-     * @param stage La ventana principal.
+     * @param stage    La ventana principal.
      * @param fxmlFile Nombre del archivo .fxml.
      */
     public static void navigateTo(Stage stage, String fxmlFile) {
@@ -163,9 +177,11 @@ public class NavigationController {
     /**
      * Carga el tablero de forma síncrona.
      * 
-     * <p>NOTA: Se ha eliminado la carga asíncrona por requisitos del proyecto.</p>
+     * <p>
+     * NOTA: Se ha eliminado la carga asíncrona por requisitos del proyecto.
+     * </p>
      * 
-     * @param event El evento que dispara la carga.
+     * @param event    El evento que dispara la carga.
      * @param fxmlFile El archivo del tablero.
      */
     public static void navigateToBoardAsync(ActionEvent event, String fxmlFile) {
@@ -174,12 +190,12 @@ public class NavigationController {
             String fullPath = VISTA_PATH + fxmlFile;
             FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
             Parent root = loader.load();
-            
+
             Scene scene = stage.getScene();
             scene.setRoot(root);
             ensureCssLoaded(scene);
             applyGlobalEffects(root, fxmlFile);
-            
+
             stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
             setupGlobalHotkeys(scene);
             System.out.println("► Tablero cargado síncronamente.");
@@ -189,12 +205,13 @@ public class NavigationController {
         }
     }
 
-
     /**
      * Lógica interna para manejar las transiciones animadas entre escenas.
      * 
-     * <p>Detecta si las vistas usan la estructura de "glass-panel" para animar
-     * solo el contenido interno y no el fondo.</p>
+     * <p>
+     * Detecta si las vistas usan la estructura de "glass-panel" para animar
+     * solo el contenido interno y no el fondo.
+     * </p>
      */
     private static void loadAndSetWithTransition(Stage stage, String fxmlFile, int dir) throws IOException {
         // Si no hay dirección, cargamos de forma normal
@@ -203,21 +220,23 @@ public class NavigationController {
         } else {
             String fullPath = VISTA_PATH + fxmlFile;
             System.out.println("► Cargando escena con transición: " + fullPath);
-            
+
             FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
             Parent newRoot = loader.load();
             Scene scene = stage.getScene();
 
             // Verificamos que tanto la escena actual como la nueva sean válidas para animar
-            if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane) || !(newRoot instanceof javafx.scene.layout.Pane)) {
+            if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane)
+                    || !(newRoot instanceof javafx.scene.layout.Pane)) {
                 loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
             } else {
                 javafx.scene.layout.Pane currentRoot = (javafx.scene.layout.Pane) scene.getRoot();
                 javafx.scene.layout.Pane nextRoot = (javafx.scene.layout.Pane) newRoot;
 
-                // Comprobamos si ambos tienen el mismo tipo de fondo (por la clase CSS) para evitar saltos visuales
-                boolean sameBg = currentRoot.getStyleClass().contains("root-plain-bg") && 
-                                nextRoot.getStyleClass().contains("root-plain-bg");
+                // Comprobamos si ambos tienen el mismo tipo de fondo (por la clase CSS) para
+                // evitar saltos visuales
+                boolean sameBg = currentRoot.getStyleClass().contains("root-plain-bg") &&
+                        nextRoot.getStyleClass().contains("root-plain-bg");
 
                 if (!sameBg) {
                     loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
@@ -225,11 +244,11 @@ public class NavigationController {
                     ensureCssLoaded(scene);
 
                     // TRANSICIÓN ESPECIAL: Entrada al Tablero
-                if (dir == Direction.TO_BOARD) {
+                    if (dir == Direction.TO_BOARD) {
                         currentRoot.getChildren().add(newRoot);
                         newRoot.setOpacity(0);
                         applyGlobalEffects(newRoot, fxmlFile);
-                        
+
                         // Buscamos el contenido viejo para deslizarlo hacia abajo (el menú "cae")
                         Node oldContentToSlide = null;
                         for (Node n : currentRoot.getChildren()) {
@@ -237,22 +256,23 @@ public class NavigationController {
                                 oldContentToSlide = n;
                             }
                         }
-                        
+
                         double height = scene.getHeight();
                         ParallelTransition pt = new ParallelTransition();
                         pt.setInterpolator(Interpolator.EASE_BOTH);
-                        
+
                         if (oldContentToSlide != null) {
-                            TranslateTransition slideDown = new TranslateTransition(Duration.millis(500), oldContentToSlide);
+                            TranslateTransition slideDown = new TranslateTransition(Duration.millis(500),
+                                    oldContentToSlide);
                             slideDown.setToY(height);
                             pt.getChildren().add(slideDown);
                         }
-                        
+
                         // El tablero aparece con un fundido suave
                         FadeTransition fadeIn = new FadeTransition(Duration.millis(600), newRoot);
                         fadeIn.setToValue(1.0);
                         pt.getChildren().add(fadeIn);
-                        
+
                         pt.setOnFinished(e -> {
                             currentRoot.getChildren().remove(newRoot);
                             scene.setRoot(newRoot);
@@ -294,7 +314,8 @@ public class NavigationController {
                             switch (dir) {
                                 case Direction.LEFT:
                                     newContent.setTranslateX(width);
-                                    TranslateTransition outL = new TranslateTransition(Duration.millis(350), oldContent);
+                                    TranslateTransition outL = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
                                     outL.setToX(-width);
                                     TranslateTransition inL = new TranslateTransition(Duration.millis(350), newContent);
                                     inL.setToX(0);
@@ -302,7 +323,8 @@ public class NavigationController {
                                     break;
                                 case Direction.RIGHT:
                                     newContent.setTranslateX(-width);
-                                    TranslateTransition outR = new TranslateTransition(Duration.millis(350), oldContent);
+                                    TranslateTransition outR = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
                                     outR.setToX(width);
                                     TranslateTransition inR = new TranslateTransition(Duration.millis(350), newContent);
                                     inR.setToX(0);
@@ -311,7 +333,8 @@ public class NavigationController {
                                 case Direction.FORWARD:
                                     newContent.setTranslateY(height);
                                     newContent.setOpacity(0);
-                                    TranslateTransition slideUp = new TranslateTransition(Duration.millis(400), newContent);
+                                    TranslateTransition slideUp = new TranslateTransition(Duration.millis(400),
+                                            newContent);
                                     slideUp.setToY(0);
                                     FadeTransition fadeInNew = new FadeTransition(Duration.millis(400), newContent);
                                     fadeInNew.setToValue(1.0);
@@ -322,7 +345,8 @@ public class NavigationController {
                                 case Direction.BACKWARD:
                                     newContent.setOpacity(0);
                                     newContent.setTranslateY(0);
-                                    TranslateTransition slideDown = new TranslateTransition(Duration.millis(400), oldContent);
+                                    TranslateTransition slideDown = new TranslateTransition(Duration.millis(400),
+                                            oldContent);
                                     slideDown.setToY(height);
                                     FadeTransition fadeInOlder = new FadeTransition(Duration.millis(400), newContent);
                                     fadeInOlder.setToValue(1.0);
@@ -330,7 +354,8 @@ public class NavigationController {
                                     break;
                                 case Direction.UP:
                                     newContent.setTranslateY(height);
-                                    TranslateTransition outU = new TranslateTransition(Duration.millis(350), oldContent);
+                                    TranslateTransition outU = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
                                     outU.setToY(-height);
                                     TranslateTransition inU = new TranslateTransition(Duration.millis(350), newContent);
                                     inU.setToY(0);
@@ -338,7 +363,8 @@ public class NavigationController {
                                     break;
                                 case Direction.DOWN:
                                     newContent.setTranslateY(-height);
-                                    TranslateTransition outD = new TranslateTransition(Duration.millis(350), oldContent);
+                                    TranslateTransition outD = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
                                     outD.setToY(height);
                                     TranslateTransition inD = new TranslateTransition(Duration.millis(350), newContent);
                                     inD.setToY(0);
@@ -351,15 +377,16 @@ public class NavigationController {
                             final Node contentToMoveBack = newContent;
                             final Node contentToRemove = oldContent;
                             pt.setOnFinished(e -> {
-                                // Al terminar la animación, limpiamos los nodos temporales y cambiamos el Root de la escena
+                                // Al terminar la animación, limpiamos los nodos temporales y cambiamos el Root
+                                // de la escena
                                 currentRoot.getChildren().remove(contentToMoveBack);
                                 currentRoot.getChildren().remove(contentToRemove);
-                                
+
                                 contentToMoveBack.setTranslateX(0);
                                 contentToMoveBack.setTranslateY(0);
                                 contentToMoveBack.setOpacity(1.0);
                                 nextRoot.getChildren().add(contentToMoveBack);
-                                
+
                                 scene.setRoot(nextRoot);
                                 nextRoot.layout();
                             });
@@ -374,22 +401,25 @@ public class NavigationController {
     /**
      * Carga física del archivo FXML y configuración inicial de la escena.
      * 
-     * <p>Este método es la base de toda la carga. Se asegura de:</p>
+     * <p>
+     * Este método es la base de toda la carga. Se asegura de:
+     * </p>
      * <ul>
- *   <li>Cargar el FXML.</li>
- *   <li>Configurar o actualizar la escena del Stage.</li>
- *   <li>Limpiar y reaplicar hojas de estilo.</li>
- *   <li>Configurar atajos de teclado y persistencia de pantalla completa.</li>
- *   <li>Aplicar la resolución configurada si no estamos en pantalla completa.</li>
- * </ul>
+     * <li>Cargar el FXML.</li>
+     * <li>Configurar o actualizar la escena del Stage.</li>
+     * <li>Limpiar y reaplicar hojas de estilo.</li>
+     * <li>Configurar atajos de teclado y persistencia de pantalla completa.</li>
+     * <li>Aplicar la resolución configurada si no estamos en pantalla
+     * completa.</li>
+     * </ul>
      */
     private static void loadAndSet(Stage stage, String fxmlFile, boolean fullScreen) throws IOException {
         String fullPath = VISTA_PATH + fxmlFile;
         System.out.println("► Cargando escena: " + fullPath);
-        
+
         FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
         Parent root = loader.load();
-        
+
         Scene scene = stage.getScene();
         if (scene == null) {
             scene = new Scene(root);
@@ -403,11 +433,12 @@ public class NavigationController {
         ensureCssLoaded(scene);
         applyGlobalEffects(root, fxmlFile);
         setupGlobalHotkeys(scene);
-        
+
         util.SettingsManager sm = util.SettingsManager.getInstance();
         stage.setFullScreen(fullScreen);
-        
-        // Listener para sincronizar el estado de pantalla completa con el archivo de configuración
+
+        // Listener para sincronizar el estado de pantalla completa con el archivo de
+        // configuración
         if (stage.getUserData() == null || !stage.getUserData().equals("LISTENER_ADDED")) {
             stage.fullScreenProperty().addListener((obs, wasFull, isFull) -> {
                 if (sm.isFullscreen() != isFull) {
@@ -419,7 +450,8 @@ public class NavigationController {
             stage.setUserData("LISTENER_ADDED");
         }
 
-        // Si no estamos en pantalla completa, aplicamos la resolución guardada en opciones
+        // Si no estamos en pantalla completa, aplicamos la resolución guardada en
+        // opciones
         if (!isFullWindowed(stage)) {
             applyResolution(stage, sm);
         }
@@ -458,7 +490,7 @@ public class NavigationController {
                         event.consume();
                     }
                 });
-                
+
                 scene.getProperties().put("HOTKEYS_ADDED", true);
             }
         }
@@ -500,33 +532,40 @@ public class NavigationController {
     }
 
     /**
-     * Aplica automáticamente animaciones de hover y sonidos a todos los botones de una vista.
+     * Aplica automáticamente animaciones de hover y sonidos a todos los botones de
+     * una vista.
      * 
-     * <p>Este método usa selectores CSS (.button, .add-player-button, etc.) para inyectar
-     * comportamiento sin tener que escribir código en cada controlador.</p>
+     * <p>
+     * Este método usa selectores CSS (.button, .add-player-button, etc.) para
+     * inyectar
+     * comportamiento sin tener que escribir código en cada controlador.
+     * </p>
      */
     private static void applyGlobalEffects(Parent root, String fxmlFile) {
         if (root != null) {
             // Desactivamos sonidos en pantallas específicas para evitar ruidos molestos
-            boolean menuSoundsEnabled = fxmlFile != null && 
-                                       !fxmlFile.equalsIgnoreCase("LoginView.fxml") && 
-                                       !fxmlFile.equalsIgnoreCase("TableroJuego.fxml") &&
-                                       !fxmlFile.equalsIgnoreCase("Intro.fxml");
+            boolean menuSoundsEnabled = fxmlFile != null &&
+                    !fxmlFile.equalsIgnoreCase("LoginView.fxml") &&
+                    !fxmlFile.equalsIgnoreCase("TableroJuego.fxml") &&
+                    !fxmlFile.equalsIgnoreCase("Intro.fxml");
 
             // Buscamos todos los botones y aplicamos lógica
             root.lookupAll(".button").forEach(node -> {
                 util.UIUtils.applyHoverAnimation(node);
-                if (menuSoundsEnabled) attachMenuSounds(node);
+                if (menuSoundsEnabled)
+                    attachMenuSounds(node);
             });
 
             root.lookupAll(".remove-slot-button").forEach(node -> {
                 util.UIUtils.applyHoverAnimation(node);
-                if (menuSoundsEnabled) attachMenuSounds(node);
+                if (menuSoundsEnabled)
+                    attachMenuSounds(node);
             });
 
             root.lookupAll(".add-player-button").forEach(node -> {
                 util.UIUtils.applyHoverAnimation(node);
-                if (menuSoundsEnabled) attachMenuSounds(node);
+                if (menuSoundsEnabled)
+                    attachMenuSounds(node);
             });
         }
     }
@@ -545,22 +584,20 @@ public class NavigationController {
             // Acciones afirmativas / avance
             if (text.equals("SALIR") || text.contains("SÍ") || text.contains("CONFIRMAR")) {
                 util.SoundManager.playConfirm();
-            } 
+            }
             // Acciones negativas / retroceso
             else if (text.contains("VOLVER") || text.contains("ATRÁS") || text.contains("NO")) {
                 util.SoundManager.playBack();
             }
             // Por clase CSS si no hay texto claro
-            else if (node.getStyleClass().contains("button-primary") || 
-                     node.getStyleClass().contains("button-danger") ||
-                     node.getStyleClass().contains("add-player-button")) {
+            else if (node.getStyleClass().contains("button-primary") ||
+                    node.getStyleClass().contains("button-danger") ||
+                    node.getStyleClass().contains("add-player-button")) {
                 util.SoundManager.playConfirm();
-            } 
-            else if (node.getStyleClass().contains("button-secondary") || 
-                       node.getStyleClass().contains("remove-slot-button")) {
+            } else if (node.getStyleClass().contains("button-secondary") ||
+                    node.getStyleClass().contains("remove-slot-button")) {
                 util.SoundManager.playBack();
-            } 
-            else {
+            } else {
                 util.SoundManager.playConfirm();
             }
         });
@@ -585,4 +622,3 @@ public class NavigationController {
         LoadingOverlay.hide();
     }
 }
-
