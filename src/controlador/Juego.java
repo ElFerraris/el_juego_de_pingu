@@ -339,7 +339,6 @@ public class Juego {
 
     /**
      * Cambia al siguiente turno. Si un jugador está bloqueado, lo salta.
-     * Usa un bucle con contador de seguridad para evitar StackOverflowError.
      * @return true si se ha completado una ronda completa.
      */
     public boolean cambiarTurno() {

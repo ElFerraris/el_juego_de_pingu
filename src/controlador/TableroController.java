@@ -159,26 +159,26 @@ public class TableroController {
         initOptionsOverlay();
         initCamera();
         
-        // Esconder panel de log al inicio directamente (320 es el prefWidth de logContentBox)
+        // Esconder panel de log al inicio
         logPanelContainer.setTranslateX(-320);
         
         this.tablero = new Tablero();
         String seed = GameContext.getInstance().getSeed();
         tablero.introducirSeed(seed);
         
-        // Asignamos el nombre de la partida al modelo
+        // Asignamos el nombre de la partida
         juegoSimulado.setNombrePartida(GameContext.getInstance().getGameName());
         
         this.jugadores = GameContext.getInstance().getConfiguredPlayers();
         
-        // Centrar en el primer jugador al inicio (ahora que sabemos quiénes son)
+        // Centrar en el primer jugador
         if (jugadores != null && !jugadores.isEmpty()) {
             smoothCenterOnPlayer(jugadores.get(0), 1.0);
         } else {
             centrarTablero();
         }
 
-        // Centrar tablero automáticamente cuando se conozcan las dimensiones reales
+        // Centrar tablero automáticamente al conocer el tamaño
         cameraViewport.widthProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() > 0) this.centrarTablero();
         });
@@ -214,7 +214,6 @@ public class TableroController {
             log("Partida #" + tablero.getIdPartida() + " restaurada.");
             log("Es el turno de " + jugadores.get(this.turnoActual).getNombre());
             
-            // Limpiamos la bandera para futuras partidas en la misma sesión
             GameContext.getInstance().setIdPartidaCargar(-1);
         }
         
@@ -224,10 +223,9 @@ public class TableroController {
         
         actualizarUI();
         
-        // OCULTAR GIF DE CARGA (Andrei Style)
+        // OCULTAR GIF DE CARGA
         NavigationController.hideLoading();
         
-        // Verificamos si el primer jugador está ya bloqueado (raro pero por si acaso)
         comprobarBloqueoInicioTurno();
     }
 
@@ -237,11 +235,9 @@ public class TableroController {
         
         List<StackPane> sortedNodes = new java.util.ArrayList<>();
         
-        // El boardPane ahora es de 2400x2000. Usamos el centro (1200, 1000)
         double centerX = 1200.0; 
-        double bottomY = 1100.0; // Un poco más abajo del centro para que el rombo suba
+        double bottomY = 1100.0; 
         
-        // Espacios reducidos proporcionalmente al nuevo tamaño (50px) para que quepa en la pantalla
         double xOffset = 56.0; 
         double yOffset = 31.0; 
         
@@ -255,29 +251,25 @@ public class TableroController {
                 int zOrder;
                 
                 if (i < 49) {
-                    // Patrón Boustrophedon 7x7 (Isométrico)
                     int gy = i / 7;
                     int gx;
                     if (gy % 2 == 0) {
-                        gx = i % 7; // Izquierda a derecha
+                        gx = i % 7;
                     } else {
-                        gx = 6 - (i % 7); // Derecha a izquierda
+                        gx = 6 - (i % 7);
                     }
                     
                     zOrder = gx + gy;
                     
-                    // Calcular posiciones absolutas en isométrico adaptado al tamaño de 50px
                     layoutX = centerX + (gx - gy) * xOffset - 25;
                     layoutY = bottomY - (gx + gy) * yOffset - 25;
                 } else {
-                    // Casilla 49 o 50 (La Meta / Igloo)
                     zOrder = 7 + 7;
                     layoutX = centerX + (7 - 7) * xOffset - 25;
-                    // Ajustada para que no pase de la parte superior del todo
                     layoutY = bottomY - (7 + 7) * yOffset - 25 - 12;
                 }
                 
-                cellNode.setUserData(-zOrder); // Guardar Z-Order negativo para fácil ordenación
+                cellNode.setUserData(-zOrder);
                 
                 cellNode.setLayoutX(layoutX);
                 cellNode.setLayoutY(layoutY);
@@ -287,8 +279,6 @@ public class TableroController {
             }
         }
         
-        // Ordenar nodos. El menor zOrder negativo significa mayor Z (más atrás), 
-        // así que los que están más atrás tienen un valor numérico menor aquí y van primero
         sortedNodes.sort((a, b) -> Integer.compare((int) a.getUserData(), (int) b.getUserData()));
         
         boardPane.getChildren().addAll(sortedNodes);
@@ -297,10 +287,8 @@ public class TableroController {
     private StackPane crearNodoCasilla(Casilla c) {
         StackPane pane = new StackPane();
         pane.getStyleClass().add("casilla-base");
-        // Hemos reducido el bloque de 64 a 50 para que el rombo quepa entero en pantalla
         pane.setPrefSize(50, 50);
         
-        // Cargar Sprite (Fondo de la casilla)
         try {
             Image img = new Image(getClass().getResourceAsStream(c.getSpritePath()));
             ImageView view = new ImageView(img);
@@ -310,10 +298,9 @@ public class TableroController {
             pane.getChildren().add(view);
         } catch (Exception e) {
             System.err.println("Error cargando sprite para " + c.getTipo() + ": " + e.getMessage());
-            pane.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #ccc;"); // Fallback
+            pane.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #ccc;");
         }
         
-        // Número de casilla
         Label numLabel = new Label(String.valueOf(c.getPosicion()));
         numLabel.getStyleClass().add("label-num-casilla");
         StackPane.setAlignment(numLabel, Pos.TOP_LEFT);
@@ -397,7 +384,7 @@ public class TableroController {
                     finalizarTurno();
                 }
             } else {
-                int cantidadAIntentar = (int)(Math.random() * 3) + 1; // 1 a 3
+                int cantidadAIntentar = (int)(Math.random() * 3) + 1; 
                 int recolectadas = 0;
                 
                 for (int i = 0; i < cantidadAIntentar; i++) {
@@ -413,7 +400,6 @@ public class TableroController {
                     util.SoundManager.playConfirm();
                     actualizarUI();
                     
-                    // Pausa breve para que el jugador vea el cambio antes de pasar turno
                     setControlesBloqueados(true);
                     PauseTransition pause = new PauseTransition(Duration.seconds(1));
                     pause.setOnFinished(e -> finalizarTurno());
@@ -453,7 +439,7 @@ public class TableroController {
 
     private void ejecutarTurno(int pasos) {
         if (!animacionEnCurso) {
-            animacionEnCurso = true; // Bloqueamos para evitar clics dobles
+            animacionEnCurso = true; 
             
             Jugador jActual = jugadores.get(turnoActual);
             dadoResultadoLabel.setText("Último dado: " + pasos);
@@ -461,7 +447,6 @@ public class TableroController {
             
             setControlesBloqueados(true);
 
-            // --- ANIMACIÓN DE DADO (MARIO PARTY STYLE) ---
             try {
                 Image rollingGif = new Image(getClass().getResource("/assets/tablero/dados/dado_rodando.gif").toExternalForm());
                 diceImageView.setImage(rollingGif);
@@ -472,25 +457,21 @@ public class TableroController {
             diceImageView.setVisible(true);
             diceNumberLabel.setVisible(false);
             diceAnimationContainer.setOpacity(0);
-            diceAnimationContainer.setTranslateY(0); // Empezamos en el centro
+            diceAnimationContainer.setTranslateY(0); 
             diceAnimationContainer.setVisible(true);
             
-            // Aparece el contenedor
             FadeTransition fadeIn = new FadeTransition(Duration.millis(300), diceAnimationContainer);
             fadeIn.setToValue(1.0);
             fadeIn.play();
 
-            // Pausa de 2.0s para la animación del dado rodando
             PauseTransition rollPause = new PauseTransition(Duration.seconds(2.0));
             rollPause.setOnFinished(e -> {
                 diceImageView.setVisible(false);
                 diceNumberLabel.setText(String.valueOf(pasos));
                 diceNumberLabel.setVisible(true);
                 
-                // Pequeña pausa con el número fijo antes de empezar a andar
                 PauseTransition moveDelay = new PauseTransition(Duration.seconds(1.0));
                 moveDelay.setOnFinished(e2 -> {
-                    // Mario Party Style: El número se mueve a la parte superior cuando el jugador empieza a andar
                     TranslateTransition moveUp = new TranslateTransition(Duration.millis(500), diceAnimationContainer);
                     moveUp.setToY(-280);
                     moveUp.setInterpolator(Interpolator.EASE_BOTH);
@@ -506,15 +487,10 @@ public class TableroController {
         }
     }
 
-    /**
-     * Mueve al jugador de 1 en 1 con animación recursiva.
-     */
     private void moverJugadorAnimado(Jugador j, int pasosRestantes, Runnable onComplete) {
         if (pasosRestantes <= 0 || j.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
-            // Aseguramos que el número llegue a 0 antes de desaparecer
             diceNumberLabel.setText("0");
             
-            // El número desaparece rápido desvaneciéndose
             FadeTransition fadeOut = new FadeTransition(Duration.millis(400), diceAnimationContainer);
             fadeOut.setToValue(0);
             fadeOut.setOnFinished(e -> {
@@ -524,7 +500,6 @@ public class TableroController {
             fadeOut.play();
         } else {
             animacionEnCurso = true;
-            // Actualizamos el número en pantalla (Countdown)
             diceNumberLabel.setText(String.valueOf(pasosRestantes));
 
             int posAntigua = j.getPosicion();
@@ -532,18 +507,15 @@ public class TableroController {
             
             j.setPosicion(posNueva);
             
-            // Actualización Visual
             StackPane cellAntigua = casillaNodes.get(posAntigua);
             
             cellAntigua.getChildren().remove(playerTokens.get(j));
             posicionarToken(j);
 
-            // Seguimiento de cámara si está en modo automático
             if (cameraAutoMode) {
                 smoothCenterOnPlayer(j, 0.4);
             }
 
-            // Pequeña pausa antes del siguiente paso
             PauseTransition pause = new PauseTransition(Duration.millis(350));
             pause.setOnFinished(e -> {
                 moverJugadorAnimado(j, pasosRestantes - 1, onComplete);
@@ -553,7 +525,6 @@ public class TableroController {
     }
 
     private void procesarEfectosCasilla(Jugador j) {
-        // Pausa de 1 segundo antes de ejecutar el efecto para que el usuario vea dónde ha caído
         PauseTransition effectDelay = new PauseTransition(Duration.seconds(1));
         effectDelay.setOnFinished(ev -> {
             int posAntes = j.getPosicion();
@@ -570,10 +541,8 @@ public class TableroController {
                 mostrarNotificacionEvento("¡" + tipo + "!", j);
                 
                 log("¡Efecto! " + j.getNombre() + " se mueve a la casilla " + posDespues);
-                // Animación secundaria rápida para el efecto (trineo/agujero)
                 moverFichaDirecta(j, posAntes, posDespues);
                 
-                // Esperamos un poco después del efecto antes de comprobar batalla
                 PauseTransition wait = new PauseTransition(Duration.seconds(1));
                 wait.setOnFinished(e -> comprobarBatallaYFinalizarTurno(j));
                 wait.play();
@@ -667,7 +636,6 @@ public class TableroController {
                 mensaje.append("¡Empate técnico! Nadie tiene más bolas. Se quedan donde están.");
             }
             
-            // Vaciar inventarios
             while (atacante.getInventario().getCantidad("BolaNieve") > 0) atacante.getInventario().eliminarObjeto("BolaNieve");
             while (defensor.getInventario().getCantidad("BolaNieve") > 0) defensor.getInventario().eliminarObjeto("BolaNieve");
         }
@@ -684,7 +652,6 @@ public class TableroController {
         Node token = playerTokens.get(j);
         
         if (tipo.contains("AGUJERO")) {
-            // --- EFECTO AGUJERO: Se desvanece (cae) y reaparece ---
             FadeTransition fo = new FadeTransition(Duration.millis(500), token);
             fo.setToValue(0);
             fo.setOnFinished(e -> {
@@ -697,7 +664,6 @@ public class TableroController {
             });
             fo.play();
         } else if (tipo.contains("TRINEO")) {
-            // --- EFECTO TRINEO: Deslizamiento rápido ---
             double dx = casillaNodes.get(hasta).getLayoutX() - casillaNodes.get(desde).getLayoutX();
             double dy = casillaNodes.get(hasta).getLayoutY() - casillaNodes.get(desde).getLayoutY();
             
@@ -713,7 +679,6 @@ public class TableroController {
             });
             tt.play();
         } else {
-            // --- EFECTO OSO / COMBATE: Salto parabólico ---
             animarSalto(j, desde, hasta, 1000);
         }
     }
@@ -723,13 +688,11 @@ public class TableroController {
         double dx = casillaNodes.get(hasta).getLayoutX() - casillaNodes.get(desde).getLayoutX();
         double dy = casillaNodes.get(hasta).getLayoutY() - casillaNodes.get(desde).getLayoutY();
 
-        // Movimiento X/Y
         TranslateTransition move = new TranslateTransition(Duration.millis(duracionMs), token);
         move.setByX(dx);
         move.setByY(dy);
         move.setInterpolator(Interpolator.LINEAR);
         
-        // El arco del salto (Arriba/Abajo)
         TranslateTransition jump = new TranslateTransition(Duration.millis(duracionMs / 2.0), token);
         jump.setByY(-120);
         jump.setCycleCount(2);
@@ -752,13 +715,11 @@ public class TableroController {
         juegoSimulado.setTurnoActual(turnoActual);
         juegoSimulado.comprobarGanador();
         
-        // Guardar estado en BBDD
         int idPartida = tablero.getIdPartida();
         if (idPartida > 0) {
             bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
         }
         
-        // Comprobar Victoria
         if (jugadores.get(turnoActual).getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
             log("¡" + jugadores.get(turnoActual).getNombre() + " HA GANADO LA PARTIDA!");
             mostrarAlertaVictoria(jugadores.get(turnoActual).getNombre());
@@ -767,12 +728,10 @@ public class TableroController {
             actualizarUI();
             setControlesBloqueados(false);
             
-            // Al cambiar de turno, centramos en el nuevo jugador si estamos en modo auto
             if (cameraAutoMode) {
                 smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
             }
             
-            // Comprobamos si el nuevo turno es de la CPU o está bloqueado
             comprobarBloqueoInicioTurno();
         }
     }
@@ -787,7 +746,6 @@ public class TableroController {
             pause.setOnFinished(e -> finalizarTurno());
             pause.play();
         } else if (j instanceof Foca) {
-            // Es el turno de la CPU
             setControlesBloqueados(true);
             ejecutarTurnoCPU((Foca) j);
         }
@@ -796,7 +754,6 @@ public class TableroController {
     private void ejecutarTurnoCPU(Foca foca) {
         log("La CPU (" + foca.getNombre() + ") está pensando...");
         
-        // Pequeña pausa para que el usuario vea el cambio de turno y el overlay
         PauseTransition delay = new PauseTransition(Duration.seconds(2));
         delay.setOnFinished(e -> {
             int accion = Cpu.decidirAccion(foca, tablero);
@@ -821,12 +778,10 @@ public class TableroController {
     private void actualizarUI() {
         Jugador jActual = jugadores.get(turnoActual);
         
-        // Mostrar/Ocultar overlay de CPU con animación
         mostrarOverlayCPU(jActual instanceof Foca);
 
         turnCircles.forEach((j, circle) -> {
             if (j == jActual) {
-                // Iluminar para el turno actual
                 circle.setStroke(Color.YELLOW);
                 circle.setStrokeWidth(4);
                 
@@ -835,7 +790,6 @@ public class TableroController {
                 glow.setColor(Color.YELLOW);
                 circle.setEffect(glow);
             } else {
-                // Estado normal
                 circle.setStroke(Color.WHITE);
                 circle.setStrokeWidth(2);
                 
@@ -849,13 +803,10 @@ public class TableroController {
         
         secondaryStatusContainer.getChildren().clear();
         
-        // 1. Panel Principal de Inventario (Flotante)
         actualizarInventarioFlotante(jActual);
         
-        // 2. Colores Dinámicos
         aplicarEstiloPorJugador(jActual);
         
-        // 3. Panel de Estado Secundario (Todos los jugadores en el Log)
         for (Jugador p : jugadores) {
             VBox secondaryCard = crearTarjetaEstadoSecundaria(p);
             secondaryStatusContainer.getChildren().add(secondaryCard);
@@ -865,10 +816,9 @@ public class TableroController {
     private void aplicarEstiloPorJugador(Jugador j) {
         Color c = getColorFromString(j.getColor());
         
-        // Versiones de color para legibilidad
         Color border = c;
-        Color fill = c.deriveColor(0, 1.0, 0.6, 1.0); // 40% más oscuro que el original para que resalte el texto blanco
-        Color hover = c.deriveColor(0, 1.0, 0.8, 1.0); // Un poco más claro que el relleno para el hover
+        Color fill = c.deriveColor(0, 1.0, 0.6, 1.0);
+        Color hover = c.deriveColor(0, 1.0, 0.8, 1.0);
         
         String hexBorder = String.format("#%02X%02X%02X",
             (int)(border.getRed() * 255), (int)(border.getGreen() * 255), (int)(border.getBlue() * 255));
@@ -882,7 +832,6 @@ public class TableroController {
         String shadowHex = String.format("rgba(%d, %d, %d, 0.5)",
             (int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
         
-        // Usamos variables CSS para no machacar el estilo del borde pixelado
         String style = "-fx-player-color-border: " + hexBorder + "; " +
                       "-fx-player-color-fill: " + hexFill + "; " +
                       "-fx-player-color-hover: " + hexHover + "; " +
@@ -892,7 +841,6 @@ public class TableroController {
         btnRecolectar.setStyle(style);
         btnInventario.setStyle(style);
         
-        // Borde del panel de inventario
         inventoryOverlayPanel.lookup(".inventory-floating-panel")
                 .setStyle("-fx-border-color: " + hexBorder + "; -fx-border-width: 8 0 0 0;");
     }
@@ -940,7 +888,7 @@ public class TableroController {
             itemNode.setSpacing(10);
             itemNode.setPadding(new Insets(5, 10, 5, 10));
             itemNode.getStyleClass().addAll("inventory-item", styleClass);
-            itemNode.setPrefWidth(240); // Ajustar para que quepa en el panel lateral
+            itemNode.setPrefWidth(240); 
             
             Label nameLabel = new Label(nombre);
             nameLabel.getStyleClass().add("inventory-item-name");
@@ -980,7 +928,7 @@ public class TableroController {
             if (!esDado) {
                 itemConfirmSubMessage.setText("Este objeto se usa automáticamente en eventos.");
                 itemConfirmSubMessage.setVisible(true);
-                btnItemConfirmYes.setDisable(true); // No se puede usar manualmente
+                btnItemConfirmYes.setDisable(true);
                 btnItemConfirmYes.setOpacity(0.5);
             } else {
                 itemConfirmSubMessage.setVisible(false);
@@ -998,10 +946,8 @@ public class TableroController {
             util.SoundManager.playConfirm();
             String tipo = selectedItemType;
             animateOut(itemConfirmOverlay, () -> {
-                // Si estábamos usando un objeto, cerramos el inventario
                 if (isInventoryOpen) handleCloseInventory();
                 
-                // Cerramos también el fondo oscuro si no hay otro panel abriéndose
                 FadeTransition fadeBg = new FadeTransition(Duration.millis(300), overlayPane);
                 fadeBg.setToValue(0);
                 fadeBg.setOnFinished(ev -> overlayPane.setVisible(false));
@@ -1060,7 +1006,7 @@ public class TableroController {
     @FXML
     private void handleToggleMenu(ActionEvent event) {
         util.SoundManager.playConfirm();
-        syncOptionsOverlayValues(); // Precarga opciones por si acaso
+        syncOptionsOverlayValues();
         animateIn(menuPausa);
     }
 

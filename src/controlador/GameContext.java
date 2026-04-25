@@ -5,19 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <h1>GameContext</h1>
+ * GameContext
  * 
- * <p>Esta clase actúa como el <b>Contenedor de Estado Global</b> de la aplicación. 
- * Su función principal es permitir el intercambio de información entre diferentes 
- * controladores de vista sin necesidad de pasar objetos manualmente en cada transición.</p>
+ * Esta clase guarda los datos importantes que necesitan compartir las diferentes pantallas
+ * (como el usuario que ha entrado, la semilla del tablero, etc.).
  * 
- * <h1>Patrón Singleton</h1>
- * <p>Utiliza el patrón de diseño <b>Singleton</b>, lo que garantiza que en toda la 
- * ejecución del programa solo exista una única instancia de esta clase. Esto es ideal 
- * para gestionar datos centralizados como el usuario logueado o la configuración de la partida.</p>
- * 
- * @author BadLabs©️
- * @version 1.1
+ * Se usa el patrón Singleton para que solo haya una copia de estos datos en todo el programa.
  */
 public class GameContext {
     

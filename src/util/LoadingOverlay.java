@@ -11,7 +11,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 /**
- * Utility to show a loading GIF in the bottom right corner of the screen.
+ * Utilidad para mostrar un GIF de carga en la esquina inferior derecha.
  */
 public class LoadingOverlay {
 
@@ -25,18 +25,18 @@ public class LoadingOverlay {
 
             if (container == null) {
                 container = new StackPane();
-                container.setMouseTransparent(true); // Don't block clicks if possible
+                container.setMouseTransparent(true); // No bloquea los clics
                 
                 try {
                     Image gif = new Image(LoadingOverlay.class.getResourceAsStream(GIF_PATH));
                     gifView = new ImageView(gif);
-                    gifView.setFitWidth(100); // Fit size as needed
+                    gifView.setFitWidth(100); // Ajustar tamaño según sea necesario
                     gifView.setPreserveRatio(true);
                     
                     StackPane.setAlignment(gifView, Pos.BOTTOM_RIGHT);
                     container.getChildren().add(gifView);
                 } catch (Exception e) {
-                    System.err.println("Error loading GIF: " + e.getMessage());
+                    System.err.println("Error cargando el GIF: " + e.getMessage());
                 }
             }
 

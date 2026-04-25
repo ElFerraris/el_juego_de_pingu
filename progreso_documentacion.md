@@ -7,8 +7,8 @@ Este archivo sirve para llevar el seguimiento de los archivos comentados con Jav
 - [ ] `Main.java`
 
 ## 🎮 Controladores (`src.controlador`)
-- [x] `MainMenuController.java`
-- [x] `NavigationController.java`
+- [] `MainMenuController.java`
+- [ ] `NavigationController.java`
 - [ ] `GameContext.java`
 - [ ] `PlayerConfigController.java`
 - [ ] `LoadGameController.java`

@@ -194,7 +194,7 @@ public class NavigationController {
      * Lógica interna para manejar las transiciones animadas entre escenas.
      * 
      * <p>Detecta si las vistas usan la estructura de "glass-panel" para animar
-     * solo el contenido interno y no el fondo, creando un efecto más <b>premium</b>.</p>
+     * solo el contenido interno y no el fondo.</p>
      */
     private static void loadAndSetWithTransition(Stage stage, String fxmlFile, int dir) throws IOException {
         // Si no hay dirección, cargamos de forma normal

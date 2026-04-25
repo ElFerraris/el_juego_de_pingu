@@ -155,12 +155,12 @@ public class Login {
 			int id = BBDD.obtenerIdJugador(con, username);
 			if (con != null) con.close();
 
-			// 2. Guardamos en el contexto global (Andrei Style)
+			// 2. Guardamos en el contexto global
 			Pinguino jugadorActual = new Pinguino(id, username, "Azul"); // Azul por defecto
 			GameContext.getInstance().setCurrentUser(jugadorActual);
 			System.out.println("► Sesión iniciada para: " + username + " (ID: " + id + ")");
 
-			// 3. Navegamos a la intro respetando el modo pantalla completa de las opciones (Andrei Style)
+			// 3. Navegamos a la intro respetando el modo pantalla completa de las opciones
 			NavigationController.navigateTo(event, "Intro.fxml", util.SettingsManager.getInstance().isFullscreen());
 			
 		} catch (Exception e) {
