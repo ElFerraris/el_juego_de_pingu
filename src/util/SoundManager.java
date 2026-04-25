@@ -3,6 +3,10 @@ package util;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import java.net.URL;
 
 /**
@@ -168,19 +172,29 @@ public class SoundManager {
         }
     }
 
+    private static Timeline fadeTimeline;
+
     private static void updateGameMusicLevel(int level) {
         currentLevel = level;
+
+        if (fadeTimeline != null) {
+            fadeTimeline.stop();
+        }
+
+        fadeTimeline = new Timeline();
+
         for (int i = 0; i < 7; i++) {
             if (gameMusicLayers[i] != null) {
-                // Si el nivel coincide, subimos volumen; si no, a 0.
-                // (Si fueran capas acumulativas, sería i < level)
-                if ((i + 1) == level) {
-                    gameMusicLayers[i].setVolume(musicVolume);
-                } else {
-                    gameMusicLayers[i].setVolume(0);
-                }
+                // El nivel que toca sube a musicVolume, los demás bajan a 0.0
+                double targetVol = ((i + 1) == level) ? musicVolume : 0.0;
+
+                // Animamos la propiedad de volumen de cada MediaPlayer
+                KeyValue kv = new KeyValue(gameMusicLayers[i].volumeProperty(), targetVol);
+                KeyFrame kf = new KeyFrame(Duration.millis(1500), kv); // 1.5 segundos de fundido
+                fadeTimeline.getKeyFrames().add(kf);
             }
         }
+        fadeTimeline.play();
     }
 
     /**
