@@ -33,6 +33,6 @@ public class CasillaRompedizas extends Casilla {
 
     @Override
     public String getSpritePath() {
-        return "/assets/tablero/casillas/CasillaRompediza.png";
+        return "/assets/tablero/casillas/PilarRompediza.png";
     }
 }

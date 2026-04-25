@@ -28,6 +28,6 @@ public class CasillaTrineo extends Casilla {
 
     @Override
     public String getSpritePath() {
-        return "/assets/tablero/casillas/CasillaTrineo.png";
+        return "/assets/tablero/casillas/PilarTrineo.png";
     }
 }

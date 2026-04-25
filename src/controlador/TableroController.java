@@ -129,6 +129,7 @@ public class TableroController {
     private Map<Integer, StackPane> casillaNodes = new HashMap<>();
     private Map<Jugador, Circle> playerTokens = new HashMap<>(); // Fichas en el tablero
     private Map<Jugador, Circle> turnCircles = new HashMap<>();  // Círculos del indicador superior
+    private Pane tokensPane = new Pane(); // Capa superior para que los jugadores no queden detrás
     
     // ESTADO DE EVENTOS
     private Map<Jugador, Pane> highlightingBackups = new HashMap<>();
@@ -236,13 +237,17 @@ public class TableroController {
         boardPane.getChildren().clear();
         casillaNodes.clear();
         
+        // Inicializamos la capa de tokens y la añadimos al final (encima de todo)
+        tokensPane.getChildren().clear();
+        tokensPane.setPickOnBounds(false); // Para que no bloquee clics en el tablero
+        
         List<StackPane> sortedNodes = new java.util.ArrayList<>();
         
         double centerX = 1200.0; 
-        double bottomY = 1100.0; 
+        double bottomY = 1500.0; // Bajamos más el inicio para que quepa la escalera hacia arriba
         
-        double xOffset = 56.0; 
-        double yOffset = 31.0; 
+        double xOffset = 48.0; // Reducido más para forzar el solapamiento y evitar huecos
+        double yOffset = 24.0; // Manteniendo la proporción isométrica 2:1
         
         for (int i = 0; i < Tablero.TAMANYO_TABLERO; i++) {
             Casilla c = tablero.getCasilla(i);
@@ -264,16 +269,19 @@ public class TableroController {
                     
                     zOrder = gx + gy;
                     
-                    layoutX = centerX + (gx - gy) * xOffset - 25;
-                    layoutY = bottomY - (gx + gy) * yOffset - 25;
+                    // ESCALERA MUY SUAVE: Diferencia casi imperceptible (2px por casilla)
+                    double stepHeight = i * 2.0; 
+                    
+                    layoutX = centerX + (gx - gy) * xOffset - 55;
+                    layoutY = bottomY - (gx + gy) * yOffset - stepHeight - 150;
                 } else {
                     zOrder = 7 + 7;
-                    layoutX = centerX + (7 - 7) * xOffset - 25;
-                    layoutY = bottomY - (7 + 7) * yOffset - 25 - 12;
+                    double stepHeight = 49 * 2.0;
+                    layoutX = centerX + (7 - 7) * xOffset - 55;
+                    layoutY = bottomY - (7 + 7) * yOffset - stepHeight - 150 - 12;
                 }
                 
-                cellNode.setUserData(-zOrder);
-                
+                cellNode.setUserData(zOrder);
                 cellNode.setLayoutX(layoutX);
                 cellNode.setLayoutY(layoutY);
                 
@@ -282,31 +290,35 @@ public class TableroController {
             }
         }
         
-        sortedNodes.sort((a, b) -> Integer.compare((int) a.getUserData(), (int) b.getUserData()));
+        sortedNodes.sort((a, b) -> Integer.compare((int) b.getUserData(), (int) a.getUserData()));
         
         boardPane.getChildren().addAll(sortedNodes);
+        boardPane.getChildren().add(tokensPane); // Los jugadores siempre encima
     }
 
     private StackPane crearNodoCasilla(Casilla c) {
         StackPane pane = new StackPane();
         pane.getStyleClass().add("casilla-base");
-        pane.setPrefSize(50, 50);
+        // Pilares más grandes
+        pane.setPrefSize(110, 300); 
+        pane.setAlignment(Pos.BOTTOM_CENTER);
         
         try {
             Image img = new Image(getClass().getResourceAsStream(c.getSpritePath()));
             ImageView view = new ImageView(img);
-            view.setFitWidth(50);
-            view.setFitHeight(50);
+            view.setFitWidth(110);
             view.setPreserveRatio(true);
             pane.getChildren().add(view);
         } catch (Exception e) {
-            System.err.println("Error cargando sprite para " + c.getTipo() + ": " + e.getMessage());
+            System.err.println("Error cargando pilar para " + c.getTipo() + ": " + e.getMessage());
             pane.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #ccc;");
         }
         
         Label numLabel = new Label(String.valueOf(c.getPosicion()));
         numLabel.getStyleClass().add("label-num-casilla");
-        StackPane.setAlignment(numLabel, Pos.TOP_LEFT);
+        StackPane.setAlignment(numLabel, Pos.TOP_RIGHT);
+        numLabel.setTranslateY(35); // Ajustado para el nuevo tamaño
+        numLabel.setTranslateX(-10);
         
         pane.getChildren().add(numLabel);
         return pane;
@@ -320,19 +332,76 @@ public class TableroController {
             token.setStroke(Color.WHITE);
             token.getStyleClass().add("player-token");
             playerTokens.put(j, token);
-            posicionarToken(j);
+        }
+        // Posicionamos a todos (por si hay varios en la 0)
+        for (int i = 0; i < Tablero.TAMANYO_TABLERO; i++) {
+            actualizarPosicionesJugadoresEnCasilla(i);
         }
     }
 
     private void posicionarToken(Jugador j) {
-        StackPane cell = casillaNodes.get(j.getPosicion());
-        if (cell != null) {
+        actualizarPosicionesJugadoresEnCasilla(j.getPosicion());
+    }
+
+    private void actualizarPosicionesJugadoresEnCasilla(int pos) {
+        List<Jugador> jugadoresEnCasilla = new ArrayList<>();
+        for (Jugador j : jugadores) {
+            if (j.getPosicion() == pos) {
+                jugadoresEnCasilla.add(j);
+            }
+        }
+
+        StackPane cell = casillaNodes.get(pos);
+        if (cell == null || jugadoresEnCasilla.isEmpty()) return;
+
+        double cellX = cell.getLayoutX();
+        double cellY = cell.getLayoutY();
+
+        int num = jugadoresEnCasilla.size();
+        for (int k = 0; k < num; k++) {
+            Jugador j = jugadoresEnCasilla.get(k);
             Circle token = playerTokens.get(j);
-            int index = jugadores.indexOf(j);
-            token.setTranslateX(index * 6 - 8); 
-            token.setTranslateY(index * 4 - 4);
-            if (!cell.getChildren().contains(token)) {
-                cell.getChildren().add(token);
+
+            double offsetX = 0;
+            double offsetY = 0;
+
+            // PATRONES DE DISPERSIÓN SEGÚN BORRADOR DEL USUARIO
+            switch (num) {
+                case 1:
+                    // Un solo jugador: Centrado
+                    offsetX = 0;
+                    offsetY = 0;
+                    break;
+                case 2:
+                    // Dos jugadores: Uno a cada lado
+                    offsetX = (k == 0) ? -18 : 18;
+                    offsetY = -5;
+                    break;
+                case 3:
+                    // Tres jugadores: Formación de triángulo
+                    if (k == 0) { offsetX = 0; offsetY = -15; }
+                    else if (k == 1) { offsetX = -18; offsetY = 5; }
+                    else { offsetX = 18; offsetY = 5; }
+                    break;
+                case 4:
+                    // Cuatro jugadores: Cuadrado / Diamante
+                    if (k == 0) { offsetX = -18; offsetY = -12; }
+                    else if (k == 1) { offsetX = 18; offsetY = -12; }
+                    else if (k == 2) { offsetX = -18; offsetY = 12; }
+                    else { offsetX = 18; offsetY = 12; }
+                    break;
+            }
+
+            // 55 es el centro horizontal del pilar (110/2)
+            // 35 es el ajuste de altura para que los pingüinos queden centrados en la parte superior
+            double targetX = cellX + 55 + offsetX;
+            double targetY = cellY + 35 + offsetY;
+
+            token.setTranslateX(targetX);
+            token.setTranslateY(targetY);
+
+            if (!tokensPane.getChildren().contains(token)) {
+                tokensPane.getChildren().add(token);
             }
         }
     }

@@ -41,6 +41,6 @@ public class CasillaInterrogante extends Casilla {
 
     @Override
     public String getSpritePath() {
-        return "/assets/tablero/casillas/CasillaInterrogante.png";
+        return "/assets/tablero/casillas/PilarInterrogante.png";
     }
 }

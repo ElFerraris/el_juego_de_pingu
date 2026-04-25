@@ -16,6 +16,6 @@ public class CasillaNormal extends Casilla {
 
     @Override
     public String getSpritePath() {
-        return "/assets/tablero/casillas/CasillaNormal.png";
+        return "/assets/tablero/casillas/PilarNormal.png";
     }
 }

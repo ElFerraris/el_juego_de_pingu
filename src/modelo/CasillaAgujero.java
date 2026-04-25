@@ -25,6 +25,6 @@ public class CasillaAgujero extends Casilla {
 
     @Override
     public String getSpritePath() {
-        return "/assets/tablero/casillas/CasillaAgujero.png";
+        return "/assets/tablero/casillas/PilarAgujero.png";
     }
 }
