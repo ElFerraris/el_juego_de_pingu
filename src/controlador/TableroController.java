@@ -1370,6 +1370,10 @@ public class TableroController {
 
     @FXML
     private void handleCloseEvent() {
+        if (!eventOverlay.isVisible() || eventOverlay.getOpacity() < 1.0) {
+            return; // Ya se está cerrando, ignorar múltiples clics
+        }
+        
         util.SoundManager.playBack();
         
         // Restaurar fichas
@@ -1380,16 +1384,23 @@ public class TableroController {
             
             highlightLayer.getChildren().remove(token);
             token.setEffect(null);
-            originalParent.getChildren().add(token);
+            if (!originalParent.getChildren().contains(token)) {
+                originalParent.getChildren().add(token);
+            }
             posicionarToken(j);
         }
+        highlightingBackups.clear();
         
         FadeTransition ft = new FadeTransition(Duration.millis(300), eventOverlay);
         ft.setFromValue(1);
         ft.setToValue(0);
         ft.setOnFinished(e -> {
             eventOverlay.setVisible(false);
-            if (onEventContinue != null) onEventContinue.run();
+            if (onEventContinue != null) {
+                Runnable action = onEventContinue;
+                onEventContinue = null; // Prevenir doble ejecución
+                action.run();
+            }
         });
         ft.play();
         
