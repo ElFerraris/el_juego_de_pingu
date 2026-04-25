@@ -81,44 +81,49 @@ public class PlayerConfigController {
     private boolean isUpdatingAll = false;
 
     private void updateAllComboCells() {
-        if (isUpdatingAll) return;
-        isUpdatingAll = true;
-        try {
-            for (Slot s : slots) {
-                if (s.getType() != SlotType.NONE) {
-                    s.refreshCombo();
+        if (!isUpdatingAll) {
+            isUpdatingAll = true;
+            try {
+                for (Slot s : slots) {
+                    if (s.getType() != SlotType.NONE) {
+                        s.refreshCombo();
+                    }
                 }
+            } finally {
+                isUpdatingAll = false;
             }
-        } finally {
-            isUpdatingAll = false;
         }
     }
 
     @FXML
     private void showSeedSelection(ActionEvent event) {
         List<Jugador> configured = new ArrayList<>();
+        boolean errorEncontrado = false;
+
         for (Slot s : slots) {
-            if (s.getType() != SlotType.NONE) {
+            if (!errorEncontrado && s.getType() != SlotType.NONE) {
                 if (s.getType() == SlotType.PLAYER) {
                     String name = s.getName();
                     if (name == null || name.trim().isEmpty()) {
                         errorLabel.setText("Todos los jugadores seleccionados deben tener nombre");
-                        return;
+                        errorEncontrado = true;
+                    } else {
+                        configured.add(new Pinguino(-1, name, s.getColor()));
                     }
-                    configured.add(new Pinguino(-1, name, s.getColor()));
                 } else if (s.getType() == SlotType.FOCA) {
                     configured.add(new Foca(-1, "FOCA LOCA"));
                 }
             }
         }
         
-        if (configured.size() < 2) {
-            errorLabel.setText("Mínimo 2 jugadores (incluyendo CPU) para empezar");
-            return;
+        if (!errorEncontrado) {
+            if (configured.size() < 2) {
+                errorLabel.setText("Mínimo 2 jugadores (incluyendo CPU) para empezar");
+            } else {
+                GameContext.getInstance().setConfiguredPlayers(configured);
+                NavigationController.navigateTo(event, "SeedSelectionView.fxml", NavigationController.Direction.FORWARD);
+            }
         }
-
-        GameContext.getInstance().setConfiguredPlayers(configured);
-        NavigationController.navigateTo(event, "SeedSelectionView.fxml", NavigationController.Direction.FORWARD);
     }
 
     @FXML
@@ -317,10 +322,11 @@ public class PlayerConfigController {
         public String getColor() { return selectedColor; }
         
         public void refreshCombo() {
-            if (nameCombo == null) return;
-            var factory = nameCombo.getCellFactory();
-            nameCombo.setCellFactory(null);
-            nameCombo.setCellFactory(factory);
+            if (nameCombo != null) {
+                var factory = nameCombo.getCellFactory();
+                nameCombo.setCellFactory(null);
+                nameCombo.setCellFactory(factory);
+            }
         }
 
         private void populateColorGrid(ContextMenu parent) {

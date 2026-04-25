@@ -379,128 +379,131 @@ public class TableroController {
 
     @FXML
     private void handleRollDice(ActionEvent event) {
-        if (animacionEnCurso) return;
-        int pasos = (int)(Math.random() * 6) + 1;
-        ejecutarTurno(pasos);
+        if (!animacionEnCurso) {
+            int pasos = (int)(Math.random() * 6) + 1;
+            ejecutarTurno(pasos);
+        }
     }
 
     @FXML
     private void handleCollectSnowballs(ActionEvent event) {
-        if (animacionEnCurso) return;
-        
-        Jugador jActual = jugadores.get(turnoActual);
-        int actuales = jActual.getInventario().getCantidad("BolaNieve");
-        
-        if (actuales >= Inventario.MAX_BOLAS_NIEVE) {
-            log(jActual.getNombre() + " ya tiene el máximo de bolas de nieve (" + Inventario.MAX_BOLAS_NIEVE + ").");
-            if (jActual instanceof Foca) {
-                finalizarTurno();
-            }
-            return;
-        }
-        
-        int cantidadAIntentar = (int)(Math.random() * 3) + 1; // 1 a 3
-        int recolectadas = 0;
-        
-        for (int i = 0; i < cantidadAIntentar; i++) {
-            if (jActual.getInventario().agregarObjeto("BolaNieve")) {
-                recolectadas++;
-            }
-        }
-        
-        if (recolectadas > 0) {
-            String msg = "¡+" + recolectadas + " BOLAS NIEVE!";
-            log(jActual.getNombre() + " se queda quieto y recolecta " + recolectadas + " bolas de nieve ❄");
-            mostrarNotificacionEvento(msg, jActual);
-            util.SoundManager.playConfirm();
-            actualizarUI();
+        if (!animacionEnCurso) {
+            Jugador jActual = jugadores.get(turnoActual);
+            int actuales = jActual.getInventario().getCantidad("BolaNieve");
             
-            // Pausa breve para que el jugador vea el cambio antes de pasar turno
-            setControlesBloqueados(true);
-            PauseTransition pause = new PauseTransition(Duration.seconds(1));
-            pause.setOnFinished(e -> finalizarTurno());
-            pause.play();
+            if (actuales >= Inventario.MAX_BOLAS_NIEVE) {
+                log(jActual.getNombre() + " ya tiene el máximo de bolas de nieve (" + Inventario.MAX_BOLAS_NIEVE + ").");
+                if (jActual instanceof Foca) {
+                    finalizarTurno();
+                }
+            } else {
+                int cantidadAIntentar = (int)(Math.random() * 3) + 1; // 1 a 3
+                int recolectadas = 0;
+                
+                for (int i = 0; i < cantidadAIntentar; i++) {
+                    if (jActual.getInventario().agregarObjeto("BolaNieve")) {
+                        recolectadas++;
+                    }
+                }
+                
+                if (recolectadas > 0) {
+                    String msg = "¡+" + recolectadas + " BOLAS NIEVE!";
+                    log(jActual.getNombre() + " se queda quieto y recolecta " + recolectadas + " bolas de nieve ❄");
+                    mostrarNotificacionEvento(msg, jActual);
+                    util.SoundManager.playConfirm();
+                    actualizarUI();
+                    
+                    // Pausa breve para que el jugador vea el cambio antes de pasar turno
+                    setControlesBloqueados(true);
+                    PauseTransition pause = new PauseTransition(Duration.seconds(1));
+                    pause.setOnFinished(e -> finalizarTurno());
+                    pause.play();
+                }
+            }
         }
     }
 
     @FXML
     private void handleUseDadoLento(ActionEvent event) {
-        if (animacionEnCurso) return;
-        Jugador jActual = jugadores.get(turnoActual);
-        if (jActual.getInventario().tieneObjeto("DadoLento")) {
-            jActual.getInventario().usarDadoEspecifico("Lento", jActual);
-            int pasos = (int)(Math.random() * 3) + 1;
-            ejecutarTurno(pasos);
-        } else {
-            log(jActual.getNombre() + " no tiene Dados Lentos.");
+        if (!animacionEnCurso) {
+            Jugador jActual = jugadores.get(turnoActual);
+            if (jActual.getInventario().tieneObjeto("DadoLento")) {
+                jActual.getInventario().usarDadoEspecifico("Lento", jActual);
+                int pasos = (int)(Math.random() * 3) + 1;
+                ejecutarTurno(pasos);
+            } else {
+                log(jActual.getNombre() + " no tiene Dados Lentos.");
+            }
         }
     }
 
     @FXML
     private void handleUseDadoRapido(ActionEvent event) {
-        if (animacionEnCurso) return;
-        Jugador jActual = jugadores.get(turnoActual);
-        if (jActual.getInventario().tieneObjeto("DadoRapido")) {
-            jActual.getInventario().usarDadoEspecifico("Rapido", jActual);
-            int pasos = (int)(Math.random() * 6) + 3;
-            ejecutarTurno(pasos);
-        } else {
-            log(jActual.getNombre() + " no tiene Dados Rápidos.");
+        if (!animacionEnCurso) {
+            Jugador jActual = jugadores.get(turnoActual);
+            if (jActual.getInventario().tieneObjeto("DadoRapido")) {
+                jActual.getInventario().usarDadoEspecifico("Rapido", jActual);
+                int pasos = (int)(Math.random() * 6) + 3;
+                ejecutarTurno(pasos);
+            } else {
+                log(jActual.getNombre() + " no tiene Dados Rápidos.");
+            }
         }
     }
 
     private void ejecutarTurno(int pasos) {
-        if (animacionEnCurso) return;
-        animacionEnCurso = true; // Bloqueamos para evitar clics dobles
-        
-        Jugador jActual = jugadores.get(turnoActual);
-        dadoResultadoLabel.setText("Último dado: " + pasos);
-        log(jActual.getNombre() + " saca un " + pasos);
-        
-        setControlesBloqueados(true);
-
-        // --- ANIMACIÓN DE DADO (MARIO PARTY STYLE) ---
-        try {
-            Image rollingGif = new Image(getClass().getResource("/assets/tablero/dados/dado_rodando.gif").toExternalForm());
-            diceImageView.setImage(rollingGif);
-        } catch (Exception e) {
-            System.err.println("No se pudo cargar el GIF del dado: " + e.getMessage());
-        }
-
-        diceImageView.setVisible(true);
-        diceNumberLabel.setVisible(false);
-        diceAnimationContainer.setOpacity(0);
-        diceAnimationContainer.setTranslateY(0); // Empezamos en el centro
-        diceAnimationContainer.setVisible(true);
-        
-        // Aparece el contenedor
-        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), diceAnimationContainer);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-
-        // Pausa de 2.0s para la animación del dado rodando
-        PauseTransition rollPause = new PauseTransition(Duration.seconds(2.0));
-        rollPause.setOnFinished(e -> {
-            diceImageView.setVisible(false);
-            diceNumberLabel.setText(String.valueOf(pasos));
-            diceNumberLabel.setVisible(true);
+        if (!animacionEnCurso) {
+            animacionEnCurso = true; // Bloqueamos para evitar clics dobles
             
-            // Pequeña pausa con el número fijo antes de empezar a andar
-            PauseTransition moveDelay = new PauseTransition(Duration.seconds(1.0));
-            moveDelay.setOnFinished(e2 -> {
-                // Mario Party Style: El número se mueve a la parte superior cuando el jugador empieza a andar
-                TranslateTransition moveUp = new TranslateTransition(Duration.millis(500), diceAnimationContainer);
-                moveUp.setToY(-280);
-                moveUp.setInterpolator(Interpolator.EASE_BOTH);
-                moveUp.play();
+            Jugador jActual = jugadores.get(turnoActual);
+            dadoResultadoLabel.setText("Último dado: " + pasos);
+            log(jActual.getNombre() + " saca un " + pasos);
+            
+            setControlesBloqueados(true);
 
-                moverJugadorAnimado(jActual, pasos, () -> {
-                    procesarEfectosCasilla(jActual);
+            // --- ANIMACIÓN DE DADO (MARIO PARTY STYLE) ---
+            try {
+                Image rollingGif = new Image(getClass().getResource("/assets/tablero/dados/dado_rodando.gif").toExternalForm());
+                diceImageView.setImage(rollingGif);
+            } catch (Exception e) {
+                System.err.println("No se pudo cargar el GIF del dado: " + e.getMessage());
+            }
+
+            diceImageView.setVisible(true);
+            diceNumberLabel.setVisible(false);
+            diceAnimationContainer.setOpacity(0);
+            diceAnimationContainer.setTranslateY(0); // Empezamos en el centro
+            diceAnimationContainer.setVisible(true);
+            
+            // Aparece el contenedor
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), diceAnimationContainer);
+            fadeIn.setToValue(1.0);
+            fadeIn.play();
+
+            // Pausa de 2.0s para la animación del dado rodando
+            PauseTransition rollPause = new PauseTransition(Duration.seconds(2.0));
+            rollPause.setOnFinished(e -> {
+                diceImageView.setVisible(false);
+                diceNumberLabel.setText(String.valueOf(pasos));
+                diceNumberLabel.setVisible(true);
+                
+                // Pequeña pausa con el número fijo antes de empezar a andar
+                PauseTransition moveDelay = new PauseTransition(Duration.seconds(1.0));
+                moveDelay.setOnFinished(e2 -> {
+                    // Mario Party Style: El número se mueve a la parte superior cuando el jugador empieza a andar
+                    TranslateTransition moveUp = new TranslateTransition(Duration.millis(500), diceAnimationContainer);
+                    moveUp.setToY(-280);
+                    moveUp.setInterpolator(Interpolator.EASE_BOTH);
+                    moveUp.play();
+
+                    moverJugadorAnimado(jActual, pasos, () -> {
+                        procesarEfectosCasilla(jActual);
+                    });
                 });
+                moveDelay.play();
             });
-            moveDelay.play();
-        });
-        rollPause.play();
+            rollPause.play();
+        }
     }
 
     /**
@@ -519,35 +522,34 @@ public class TableroController {
                 onComplete.run();
             });
             fadeOut.play();
-            return;
+        } else {
+            animacionEnCurso = true;
+            // Actualizamos el número en pantalla (Countdown)
+            diceNumberLabel.setText(String.valueOf(pasosRestantes));
+
+            int posAntigua = j.getPosicion();
+            int posNueva = posAntigua + 1;
+            
+            j.setPosicion(posNueva);
+            
+            // Actualización Visual
+            StackPane cellAntigua = casillaNodes.get(posAntigua);
+            
+            cellAntigua.getChildren().remove(playerTokens.get(j));
+            posicionarToken(j);
+
+            // Seguimiento de cámara si está en modo automático
+            if (cameraAutoMode) {
+                smoothCenterOnPlayer(j, 0.4);
+            }
+
+            // Pequeña pausa antes del siguiente paso
+            PauseTransition pause = new PauseTransition(Duration.millis(350));
+            pause.setOnFinished(e -> {
+                moverJugadorAnimado(j, pasosRestantes - 1, onComplete);
+            });
+            pause.play();
         }
-
-        animacionEnCurso = true;
-        // Actualizamos el número en pantalla (Countdown)
-        diceNumberLabel.setText(String.valueOf(pasosRestantes));
-
-        int posAntigua = j.getPosicion();
-        int posNueva = posAntigua + 1;
-        
-        j.setPosicion(posNueva);
-        
-        // Actualización Visual
-        StackPane cellAntigua = casillaNodes.get(posAntigua);
-        
-        cellAntigua.getChildren().remove(playerTokens.get(j));
-        posicionarToken(j);
-
-        // Seguimiento de cámara si está en modo automático
-        if (cameraAutoMode) {
-            smoothCenterOnPlayer(j, 0.4);
-        }
-
-        // Pequeña pausa antes del siguiente paso
-        PauseTransition pause = new PauseTransition(Duration.millis(350));
-        pause.setOnFinished(e -> {
-            moverJugadorAnimado(j, pasosRestantes - 1, onComplete);
-        });
-        pause.play();
     }
 
     private void procesarEfectosCasilla(Jugador j) {
@@ -585,22 +587,21 @@ public class TableroController {
     private void comprobarBatallaYFinalizarTurno(Jugador jActual) {
         if (jActual.getPosicion() <= 0 || jActual.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
             finalizarTurno();
-            return;
-        }
-
-        Jugador oponente = null;
-        for (Jugador p : jugadores) {
-            if (oponente == null && p != jActual && p.getPosicion() == jActual.getPosicion()) {
-                oponente = p;
-            }
-        }
-
-        if (oponente != null) {
-            log("¡COLISIÓN en casilla " + jActual.getPosicion() + "!");
-            mostrarNotificacionEvento("¡COLISIÓN!", jActual);
-            resolverCombate(jActual, oponente);
         } else {
-            finalizarTurno();
+            Jugador oponente = null;
+            for (Jugador p : jugadores) {
+                if (oponente == null && p != jActual && p.getPosicion() == jActual.getPosicion()) {
+                    oponente = p;
+                }
+            }
+
+            if (oponente != null) {
+                log("¡COLISIÓN en casilla " + jActual.getPosicion() + "!");
+                mostrarNotificacionEvento("¡COLISIÓN!", jActual);
+                resolverCombate(jActual, oponente);
+            } else {
+                finalizarTurno();
+            }
         }
     }
 
@@ -939,86 +940,86 @@ public class TableroController {
     }
 
     private void agregarIconoObjeto(FlowPane container, String tipo, int cantidad, String nombre, String styleClass) {
-        if (cantidad <= 0) return;
-
-        HBox itemNode = new HBox();
-        itemNode.setAlignment(Pos.CENTER_LEFT);
-        itemNode.setSpacing(10);
-        itemNode.setPadding(new Insets(5, 10, 5, 10));
-        itemNode.getStyleClass().addAll("inventory-item", styleClass);
-        itemNode.setPrefWidth(240); // Ajustar para que quepa en el panel lateral
-        
-        Label nameLabel = new Label(nombre);
-        nameLabel.getStyleClass().add("inventory-item-name");
-        
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        Label countLabel = new Label("x" + cantidad);
-        countLabel.getStyleClass().add("inventory-item-count-text");
-        
-        itemNode.getChildren().addAll(nameLabel, spacer, countLabel);
-        
-        itemNode.setOnMouseClicked(e -> prepararUsoObjeto(tipo));
-        
-        container.getChildren().add(itemNode);
+        if (cantidad > 0) {
+            HBox itemNode = new HBox();
+            itemNode.setAlignment(Pos.CENTER_LEFT);
+            itemNode.setSpacing(10);
+            itemNode.setPadding(new Insets(5, 10, 5, 10));
+            itemNode.getStyleClass().addAll("inventory-item", styleClass);
+            itemNode.setPrefWidth(240); // Ajustar para que quepa en el panel lateral
+            
+            Label nameLabel = new Label(nombre);
+            nameLabel.getStyleClass().add("inventory-item-name");
+            
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            
+            Label countLabel = new Label("x" + cantidad);
+            countLabel.getStyleClass().add("inventory-item-count-text");
+            
+            itemNode.getChildren().addAll(nameLabel, spacer, countLabel);
+            
+            itemNode.setOnMouseClicked(e -> prepararUsoObjeto(tipo));
+            
+            container.getChildren().add(itemNode);
+        }
     }
 
     private void prepararUsoObjeto(String tipo) {
-        if (animacionEnCurso) return;
-        
-        this.selectedItemType = tipo;
-        util.SoundManager.playConfirm();
-        
-        String nombreMsg = tipo;
-        boolean esDado = tipo.startsWith("Dado");
-        
-        switch(tipo) {
-            case "Pez": nombreMsg = "un PEZ"; break;
-            case "BolaNieve": nombreMsg = "una BOLA DE NIEVE"; break;
-            case "DadoRapido": nombreMsg = "un DADO RÁPIDO"; break;
-            case "DadoLento": nombreMsg = "un DADO LENTO"; break;
-        }
+        if (!animacionEnCurso) {
+            this.selectedItemType = tipo;
+            util.SoundManager.playConfirm();
+            
+            String nombreMsg = tipo;
+            boolean esDado = tipo.startsWith("Dado");
+            
+            switch(tipo) {
+                case "Pez": nombreMsg = "un PEZ"; break;
+                case "BolaNieve": nombreMsg = "una BOLA DE NIEVE"; break;
+                case "DadoRapido": nombreMsg = "un DADO RÁPIDO"; break;
+                case "DadoLento": nombreMsg = "un DADO LENTO"; break;
+            }
 
-        itemConfirmTitle.setText("USAR " + tipo.toUpperCase());
-        itemConfirmMessage.setText("¿Quieres usar " + nombreMsg + "?");
-        
-        if (!esDado) {
-            itemConfirmSubMessage.setText("Este objeto se usa automáticamente en eventos.");
-            itemConfirmSubMessage.setVisible(true);
-            btnItemConfirmYes.setDisable(true); // No se puede usar manualmente
-            btnItemConfirmYes.setOpacity(0.5);
-        } else {
-            itemConfirmSubMessage.setVisible(false);
-            btnItemConfirmYes.setDisable(false);
-            btnItemConfirmYes.setOpacity(1.0);
+            itemConfirmTitle.setText("USAR " + tipo.toUpperCase());
+            itemConfirmMessage.setText("¿Quieres usar " + nombreMsg + "?");
+            
+            if (!esDado) {
+                itemConfirmSubMessage.setText("Este objeto se usa automáticamente en eventos.");
+                itemConfirmSubMessage.setVisible(true);
+                btnItemConfirmYes.setDisable(true); // No se puede usar manualmente
+                btnItemConfirmYes.setOpacity(0.5);
+            } else {
+                itemConfirmSubMessage.setVisible(false);
+                btnItemConfirmYes.setDisable(false);
+                btnItemConfirmYes.setOpacity(1.0);
+            }
+            
+            animateIn(itemConfirmOverlay);
         }
-        
-        animateIn(itemConfirmOverlay);
     }
 
     @FXML
     private void handleItemConfirmYes(ActionEvent event) {
-        if (selectedItemType == null) return;
-        
-        util.SoundManager.playConfirm();
-        String tipo = selectedItemType;
-        animateOut(itemConfirmOverlay, () -> {
-            // Si estábamos usando un objeto, cerramos el inventario
-            if (isInventoryOpen) handleCloseInventory();
-            
-            // Cerramos también el fondo oscuro si no hay otro panel abriéndose
-            FadeTransition fadeBg = new FadeTransition(Duration.millis(300), overlayPane);
-            fadeBg.setToValue(0);
-            fadeBg.setOnFinished(ev -> overlayPane.setVisible(false));
-            fadeBg.play();
+        if (selectedItemType != null) {
+            util.SoundManager.playConfirm();
+            String tipo = selectedItemType;
+            animateOut(itemConfirmOverlay, () -> {
+                // Si estábamos usando un objeto, cerramos el inventario
+                if (isInventoryOpen) handleCloseInventory();
+                
+                // Cerramos también el fondo oscuro si no hay otro panel abriéndose
+                FadeTransition fadeBg = new FadeTransition(Duration.millis(300), overlayPane);
+                fadeBg.setToValue(0);
+                fadeBg.setOnFinished(ev -> overlayPane.setVisible(false));
+                fadeBg.play();
 
-            if (tipo.equals("DadoRapido")) {
-                handleUseDadoRapido(null);
-            } else if (tipo.equals("DadoLento")) {
-                handleUseDadoLento(null);
-            }
-        });
+                if (tipo.equals("DadoRapido")) {
+                    handleUseDadoRapido(null);
+                } else if (tipo.equals("DadoLento")) {
+                    handleUseDadoLento(null);
+                }
+            });
+        }
     }
 
     @FXML
@@ -1181,69 +1182,69 @@ public class TableroController {
      * Centra la cámara suavemente sobre un jugador específico.
      */
     private void smoothCenterOnPlayer(Jugador j, double durationSeconds) {
-        if (boardPane == null || cameraViewport == null || j == null) return;
-        
-        StackPane cell = casillaNodes.get(j.getPosicion());
-        if (cell == null) return;
+        if (boardPane != null && cameraViewport != null && j != null) {
+            StackPane cell = casillaNodes.get(j.getPosicion());
+            if (cell != null) {
+                double viewWidth = cameraViewport.getWidth();
+                double viewHeight = cameraViewport.getHeight();
+                if (viewWidth <= 0) viewWidth = 1280;
+                if (viewHeight <= 0) viewHeight = 720;
 
-        double viewWidth = cameraViewport.getWidth();
-        double viewHeight = cameraViewport.getHeight();
-        if (viewWidth <= 0) viewWidth = 1280;
-        if (viewHeight <= 0) viewHeight = 720;
+                // Calculamos el centro visual (restando los 300px del panel derecho)
+                double visualCenterX = (viewWidth - 300) / 2.0;
+                double visualCenterY = viewHeight / 2.0;
 
-        // Calculamos el centro visual (restando los 300px del panel derecho)
-        double visualCenterX = (viewWidth - 300) / 2.0;
-        double visualCenterY = viewHeight / 2.0;
+                // Centro de la casilla en coordenadas del boardPane
+                double targetX = cell.getLayoutX() + (cell.getPrefWidth() / 2.0);
+                double targetY = cell.getLayoutY() + (cell.getPrefHeight() / 2.0);
 
-        // Centro de la casilla en coordenadas del boardPane
-        double targetX = cell.getLayoutX() + (cell.getPrefWidth() / 2.0);
-        double targetY = cell.getLayoutY() + (cell.getPrefHeight() / 2.0);
+                double newTX = visualCenterX - targetX;
+                double newTY = visualCenterY - targetY;
 
-        double newTX = visualCenterX - targetX;
-        double newTY = visualCenterY - targetY;
+                if (cameraTransition != null) cameraTransition.stop();
 
-        if (cameraTransition != null) cameraTransition.stop();
-
-        cameraTransition = new TranslateTransition(Duration.seconds(durationSeconds), boardPane);
-        cameraTransition.setToX(newTX);
-        cameraTransition.setToY(newTY);
-        cameraTransition.setInterpolator(Interpolator.EASE_BOTH);
-        cameraTransition.play();
+                cameraTransition = new TranslateTransition(Duration.seconds(durationSeconds), boardPane);
+                cameraTransition.setToX(newTX);
+                cameraTransition.setToY(newTY);
+                cameraTransition.setInterpolator(Interpolator.EASE_BOTH);
+                cameraTransition.play();
+            }
+        }
     }
 
     private void mostrarNotificacionEvento(String mensaje, Jugador j) {
-        if (eventNotificationLabel == null) return;
-        
-        Color c = getColorFromString(j.getColor());
-        String hex = String.format("#%02X%02X%02X",
-            (int)(c.getRed() * 255),
-            (int)(c.getGreen() * 255),
-            (int)(c.getBlue() * 255));
+        if (eventNotificationLabel != null) {
+            Color c = getColorFromString(j.getColor());
+            String hex = String.format("#%02X%02X%02X",
+                (int)(c.getRed() * 255),
+                (int)(c.getGreen() * 255),
+                (int)(c.getBlue() * 255));
+                
+            eventNotificationLabel.setText(mensaje.toUpperCase());
+            eventNotificationLabel.setStyle("-fx-effect: dropshadow(three-pass-box, " + hex + ", 15, 0.5, 0, 0);");
+            eventNotificationLabel.setVisible(true);
+            eventNotificationLabel.setOpacity(0);
+            eventNotificationLabel.setTranslateY(-50);
             
-        eventNotificationLabel.setText(mensaje.toUpperCase());
-        eventNotificationLabel.setStyle("-fx-effect: dropshadow(three-pass-box, " + hex + ", 15, 0.5, 0, 0);");
-        eventNotificationLabel.setVisible(true);
-        eventNotificationLabel.setOpacity(0);
-        eventNotificationLabel.setTranslateY(-50);
-        
-        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), eventNotificationLabel);
-        fadeIn.setToValue(1);
-        
-        TranslateTransition slideDown = new TranslateTransition(Duration.millis(300), eventNotificationLabel);
-        slideDown.setToY(0);
-        
-        PauseTransition stay = new PauseTransition(Duration.seconds(2));
-        
-        FadeTransition fadeOut = new FadeTransition(Duration.millis(500), eventNotificationLabel);
-        fadeOut.setToValue(0);
-        
-        SequentialTransition seq = new SequentialTransition(
-            new ParallelTransition(fadeIn, slideDown),
-            stay,
-            fadeOut
-        );
-        seq.setOnFinished(e -> eventNotificationLabel.setVisible(false));
-        seq.play();
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), eventNotificationLabel);
+            fadeIn.setToValue(1);
+            
+            TranslateTransition slideDown = new TranslateTransition(Duration.millis(300), eventNotificationLabel);
+            slideDown.setToY(0);
+            
+            PauseTransition stay = new PauseTransition(Duration.seconds(2));
+            
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(500), eventNotificationLabel);
+            fadeOut.setToValue(0);
+            
+            SequentialTransition seq = new SequentialTransition(
+                new ParallelTransition(fadeIn, slideDown),
+                stay,
+                fadeOut
+            );
+            seq.setOnFinished(e -> eventNotificationLabel.setVisible(false));
+            seq.play();
+        }
     }
 
     private void mostrarEventoDialogo(String titulo, String mensaje, Runnable onComplete, Jugador... involucrados) {
@@ -1317,28 +1318,28 @@ public class TableroController {
     }
 
     private void centrarTablero() {
-        if (boardPane == null || cameraViewport == null) return;
-        
-        double viewWidth = cameraViewport.getWidth();
-        double viewHeight = cameraViewport.getHeight();
-        
-        if (viewWidth <= 0) viewWidth = 1280;
-        if (viewHeight <= 0) viewHeight = 720;
-        
-        // Reseteamos zoom
-        zoomFactor = 1.0;
-        zoomGroup.setScaleX(1.0);
-        zoomGroup.setScaleY(1.0);
-        
-        // Calculamos el centro visual (ventana completa, ya no hay panel derecho)
-        double visualCenterX = viewWidth / 2.0;
-        double visualCenterY = viewHeight / 2.0;
-        
-        // El punto de dibujo central es (1200, 1100), pero el isométrico 
-        // desplaza el "centro visual" del rombo un poco hacia arriba.
-        // Ajustamos para que se vea perfectamente centrado.
-        boardPane.setTranslateX(visualCenterX - 1200);
-        boardPane.setTranslateY(visualCenterY - 950);
+        if (boardPane != null && cameraViewport != null) {
+            double viewWidth = cameraViewport.getWidth();
+            double viewHeight = cameraViewport.getHeight();
+            
+            if (viewWidth <= 0) viewWidth = 1280;
+            if (viewHeight <= 0) viewHeight = 720;
+            
+            // Reseteamos zoom
+            zoomFactor = 1.0;
+            zoomGroup.setScaleX(1.0);
+            zoomGroup.setScaleY(1.0);
+            
+            // Calculamos el centro visual (ventana completa, ya no hay panel derecho)
+            double visualCenterX = viewWidth / 2.0;
+            double visualCenterY = viewHeight / 2.0;
+            
+            // El punto de dibujo central es (1200, 1100), pero el isométrico 
+            // desplaza el "centro visual" del rombo un poco hacia arriba.
+            // Ajustamos para que se vea perfectamente centrado.
+            boardPane.setTranslateX(visualCenterX - 1200);
+            boardPane.setTranslateY(visualCenterY - 950);
+        }
     }
 
     private void animateIn(Node content) {
@@ -1497,67 +1498,64 @@ public class TableroController {
     }
     @FXML
     private void handleOpenInventory() {
-        if (isInventoryOpen) return;
-        
-        util.SoundManager.playConfirm();
-        isInventoryOpen = true;
-        
-        inventoryOverlayPanel.setVisible(true);
-        inventoryOverlayPanel.setTranslateY(400); // Empezamos desde abajo (fuera de vista)
-        inventoryOverlayPanel.setOpacity(0);
-        
-        FadeTransition fadeIn = new FadeTransition(Duration.millis(350), inventoryOverlayPanel);
-        fadeIn.setToValue(1);
-        
-        TranslateTransition slideUp = new TranslateTransition(Duration.millis(350), inventoryOverlayPanel);
-        slideUp.setToY(0);
-        
-        ParallelTransition pt = new ParallelTransition(fadeIn, slideUp);
-        pt.setInterpolator(Interpolator.EASE_OUT);
-        pt.setOnFinished(e -> setControlesBloqueados(true)); // Bloqueamos los de abajo para que no se pisen
-        pt.play();
-        
-        // Pero el botón de inventario en sí mismo ya está bloqueado por setControlesBloqueados
-        // Aunque el panel flotante TIENE su propio botón de cerrar (X)
+        if (!isInventoryOpen) {
+            util.SoundManager.playConfirm();
+            isInventoryOpen = true;
+            
+            inventoryOverlayPanel.setVisible(true);
+            inventoryOverlayPanel.setTranslateY(400); // Empezamos desde abajo (fuera de vista)
+            inventoryOverlayPanel.setOpacity(0);
+            
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(350), inventoryOverlayPanel);
+            fadeIn.setToValue(1);
+            
+            TranslateTransition slideUp = new TranslateTransition(Duration.millis(350), inventoryOverlayPanel);
+            slideUp.setToY(0);
+            
+            ParallelTransition pt = new ParallelTransition(fadeIn, slideUp);
+            pt.setInterpolator(Interpolator.EASE_OUT);
+            pt.setOnFinished(e -> setControlesBloqueados(true)); // Bloqueamos los de abajo para que no se pisen
+            pt.play();
+        }
     }
 
     @FXML
     private void handleCloseInventory() {
-        if (!isInventoryOpen) return;
-        
-        util.SoundManager.playBack();
-        isInventoryOpen = false;
-        
-        setControlesBloqueados(false); // Desbloqueamos antes de la animación para mejor respuesta
-        
-        FadeTransition fadeOut = new FadeTransition(Duration.millis(300), inventoryOverlayPanel);
-        fadeOut.setToValue(0);
-        
-        TranslateTransition slideDown = new TranslateTransition(Duration.millis(300), inventoryOverlayPanel);
-        slideDown.setToY(400);
-        
-        ParallelTransition pt = new ParallelTransition(fadeOut, slideDown);
-        pt.setInterpolator(Interpolator.EASE_IN);
-        pt.setOnFinished(e -> inventoryOverlayPanel.setVisible(false));
-        pt.play();
+        if (isInventoryOpen) {
+            util.SoundManager.playBack();
+            isInventoryOpen = false;
+            
+            setControlesBloqueados(false); // Desbloqueamos antes de la animación para mejor respuesta
+            
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(300), inventoryOverlayPanel);
+            fadeOut.setToValue(0);
+            
+            TranslateTransition slideDown = new TranslateTransition(Duration.millis(300), inventoryOverlayPanel);
+            slideDown.setToY(400);
+            
+            ParallelTransition pt = new ParallelTransition(fadeOut, slideDown);
+            pt.setInterpolator(Interpolator.EASE_IN);
+            pt.setOnFinished(e -> inventoryOverlayPanel.setVisible(false));
+            pt.play();
+        }
     }
 
     private void mostrarOverlayCPU(boolean mostrar) {
-        if (cpuTurnOverlay == null) return;
-
-        if (mostrar && !cpuTurnOverlay.isVisible()) {
-            cpuTurnOverlay.setVisible(true);
-            cpuTurnOverlay.setOpacity(0);
-            FadeTransition ft = new FadeTransition(Duration.millis(400), cpuTurnOverlay);
-            ft.setFromValue(0);
-            ft.setToValue(1);
-            ft.play();
-        } else if (!mostrar && cpuTurnOverlay.isVisible()) {
-            FadeTransition ft = new FadeTransition(Duration.millis(400), cpuTurnOverlay);
-            ft.setFromValue(cpuTurnOverlay.getOpacity());
-            ft.setToValue(0);
-            ft.setOnFinished(e -> cpuTurnOverlay.setVisible(false));
-            ft.play();
+        if (cpuTurnOverlay != null) {
+            if (mostrar && !cpuTurnOverlay.isVisible()) {
+                cpuTurnOverlay.setVisible(true);
+                cpuTurnOverlay.setOpacity(0);
+                FadeTransition ft = new FadeTransition(Duration.millis(400), cpuTurnOverlay);
+                ft.setFromValue(0);
+                ft.setToValue(1);
+                ft.play();
+            } else if (!mostrar && cpuTurnOverlay.isVisible()) {
+                FadeTransition ft = new FadeTransition(Duration.millis(400), cpuTurnOverlay);
+                ft.setFromValue(cpuTurnOverlay.getOpacity());
+                ft.setToValue(0);
+                ft.setOnFinished(e -> cpuTurnOverlay.setVisible(false));
+                ft.play();
+            }
         }
     }
 }

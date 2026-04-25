@@ -142,26 +142,26 @@ public class LoadGameController {
     @FXML
     private void handleJugar(ActionEvent event) {
         PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
-        if (seleccionada == null) return;
+        if (seleccionada != null) {
+            try {
+                Juego juegoTemp = new Juego();
+                boolean ok = bbdd.cargarDatosPartida(seleccionada.getIdPartida(), juegoTemp);
 
-        try {
-            Juego juegoTemp = new Juego();
-            boolean ok = bbdd.cargarDatosPartida(seleccionada.getIdPartida(), juegoTemp);
-
-            if (ok) {
-                System.out.println("► Partida cargada con éxito. Redirigiendo a tablero...");
-                GameContext context = GameContext.getInstance();
-                context.setIdPartidaCargar(seleccionada.getIdPartida());
-                context.setSeed(juegoTemp.getTablero().getSeed());
-                context.setConfiguredPlayers(juegoTemp.getJugadores());
-                context.setTurnoCargado(juegoTemp.getTurnoActual());
-                
-                NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
-            } else {
-                mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada.", Alert.AlertType.ERROR);
+                if (ok) {
+                    System.out.println("► Partida cargada con éxito. Redirigiendo a tablero...");
+                    GameContext context = GameContext.getInstance();
+                    context.setIdPartidaCargar(seleccionada.getIdPartida());
+                    context.setSeed(juegoTemp.getTablero().getSeed());
+                    context.setConfiguredPlayers(juegoTemp.getJugadores());
+                    context.setTurnoCargado(juegoTemp.getTurnoActual());
+                    
+                    NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
+                } else {
+                    mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada.", Alert.AlertType.ERROR);
+                }
+            } catch (Exception e) {
+                System.err.println("Error al jugar partida: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error al jugar partida: " + e.getMessage());
         }
     }
 
@@ -175,10 +175,10 @@ public class LoadGameController {
     @FXML
     private void handleEliminar(ActionEvent event) {
         PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
-        if (seleccionada == null) return;
-        
-        deleteConfirmOverlay.toFront();
-        deleteConfirmOverlay.setVisible(true);
+        if (seleccionada != null) {
+            deleteConfirmOverlay.toFront();
+            deleteConfirmOverlay.setVisible(true);
+        }
     }
     
     @FXML
@@ -190,14 +190,14 @@ public class LoadGameController {
     private void handleConfirmarEliminar(ActionEvent event) {
         deleteConfirmOverlay.setVisible(false);
         PartidaGuardada seleccionada = listaPartidas.getSelectionModel().getSelectedItem();
-        if (seleccionada == null) return;
-        
-        boolean exito = bbdd.eliminarPartida(seleccionada.getIdPartida());
-        if (exito) {
-            // Refrescamos la lista
-            cargarListaDeBD();
-        } else {
-            mostrarAlerta("Error", "No se pudo eliminar la partida.", Alert.AlertType.ERROR);
+        if (seleccionada != null) {
+            boolean exito = bbdd.eliminarPartida(seleccionada.getIdPartida());
+            if (exito) {
+                // Refrescamos la lista
+                cargarListaDeBD();
+            } else {
+                mostrarAlerta("Error", "No se pudo eliminar la partida.", Alert.AlertType.ERROR);
+            }
         }
     }
     

@@ -391,7 +391,9 @@ public class Juego {
      * Comprueba si hay un conflicto en la casilla actual del jugador.
      */
     public void comprobarGuerra(Jugador jugadorActual) {
-        for (Jugador oponente : jugadores) {
+        boolean guerraEncontrada = false;
+        for (int i = 0; i < jugadores.size() && !guerraEncontrada; i++) {
+            Jugador oponente = jugadores.get(i);
             if (!oponente.equals(jugadorActual)
                 && oponente.getPosicion() == jugadorActual.getPosicion()
                 && jugadorActual.getPosicion() != 0) {
@@ -419,7 +421,7 @@ public class Juego {
                     Guerra combate = new Guerra();
                     combate.iniciarGuerra(jugadorActual, oponente);
                 }
-                return;
+                guerraEncontrada = true;
             }
         }
     }

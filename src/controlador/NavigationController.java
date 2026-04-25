@@ -193,180 +193,175 @@ public class NavigationController {
         // Si no hay dirección, cargamos de forma normal
         if (dir == Direction.NONE) {
             loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
-        }
-
-        String fullPath = VISTA_PATH + fxmlFile;
-        System.out.println("► Cargando escena con transición: " + fullPath);
-        
-        FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
-        Parent newRoot = loader.load();
-        Scene scene = stage.getScene();
-
-        // Verificamos que tanto la escena actual como la nueva sean válidas para animar
-        if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane) || !(newRoot instanceof javafx.scene.layout.Pane)) {
-            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
-        }
-
-        javafx.scene.layout.Pane currentRoot = (javafx.scene.layout.Pane) scene.getRoot();
-        javafx.scene.layout.Pane nextRoot = (javafx.scene.layout.Pane) newRoot;
-
-        // Comprobamos si ambos tienen el mismo tipo de fondo (por la clase CSS) para evitar saltos visuales
-        boolean sameBg = currentRoot.getStyleClass().contains("root-plain-bg") && 
-                        nextRoot.getStyleClass().contains("root-plain-bg");
-
-        if (!sameBg) {
-            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
-        }
-
-        ensureCssLoaded(scene);
-
-        // TRANSICIÓN ESPECIAL: Entrada al Tablero
-        if (dir == Direction.TO_BOARD) {
-            currentRoot.getChildren().add(newRoot);
-            newRoot.setOpacity(0);
-            applyGlobalEffects(newRoot, fxmlFile);
+        } else {
+            String fullPath = VISTA_PATH + fxmlFile;
+            System.out.println("► Cargando escena con transición: " + fullPath);
             
-            // Buscamos el contenido viejo para deslizarlo hacia abajo (el menú "cae")
-            Node oldContentToSlide = null;
-            for (Node n : currentRoot.getChildren()) {
-                if (oldContentToSlide == null && n.getStyleClass().contains("glass-panel")) {
-                    oldContentToSlide = n;
+            FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
+            Parent newRoot = loader.load();
+            Scene scene = stage.getScene();
+
+            // Verificamos que tanto la escena actual como la nueva sean válidas para animar
+            if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane) || !(newRoot instanceof javafx.scene.layout.Pane)) {
+                loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
+            } else {
+                javafx.scene.layout.Pane currentRoot = (javafx.scene.layout.Pane) scene.getRoot();
+                javafx.scene.layout.Pane nextRoot = (javafx.scene.layout.Pane) newRoot;
+
+                // Comprobamos si ambos tienen el mismo tipo de fondo (por la clase CSS) para evitar saltos visuales
+                boolean sameBg = currentRoot.getStyleClass().contains("root-plain-bg") && 
+                                nextRoot.getStyleClass().contains("root-plain-bg");
+
+                if (!sameBg) {
+                    loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
+                } else {
+                    ensureCssLoaded(scene);
+
+                    // TRANSICIÓN ESPECIAL: Entrada al Tablero
+                    if (dir == Direction.TO_BOARD) {
+                        currentRoot.getChildren().add(newRoot);
+                        newRoot.setOpacity(0);
+                        applyGlobalEffects(newRoot, fxmlFile);
+                        
+                        // Buscamos el contenido viejo para deslizarlo hacia abajo (el menú "cae")
+                        Node oldContentToSlide = null;
+                        for (Node n : currentRoot.getChildren()) {
+                            if (oldContentToSlide == null && n.getStyleClass().contains("glass-panel")) {
+                                oldContentToSlide = n;
+                            }
+                        }
+                        
+                        double height = scene.getHeight();
+                        ParallelTransition pt = new ParallelTransition();
+                        pt.setInterpolator(Interpolator.EASE_BOTH);
+                        
+                        if (oldContentToSlide != null) {
+                            TranslateTransition slideDown = new TranslateTransition(Duration.millis(500), oldContentToSlide);
+                            slideDown.setToY(height);
+                            pt.getChildren().add(slideDown);
+                        }
+                        
+                        // El tablero aparece con un fundido suave
+                        FadeTransition fadeIn = new FadeTransition(Duration.millis(600), newRoot);
+                        fadeIn.setToValue(1.0);
+                        pt.getChildren().add(fadeIn);
+                        
+                        pt.setOnFinished(e -> {
+                            currentRoot.getChildren().remove(newRoot);
+                            scene.setRoot(newRoot);
+                            newRoot.setOpacity(1.0);
+                            newRoot.layout();
+                        });
+                        pt.play();
+                    } else {
+                        // --- LÓGICA ESTÁNDAR PARA MENÚS (Estructura glass-panel) ---
+                        Node oldContent = null;
+                        for (Node n : currentRoot.getChildren()) {
+                            if (oldContent == null && n.getStyleClass().contains("glass-panel")) {
+                                oldContent = n;
+                            }
+                        }
+
+                        Node newContent = null;
+                        for (Node n : nextRoot.getChildren()) {
+                            if (newContent == null && n.getStyleClass().contains("glass-panel")) {
+                                newContent = n;
+                            }
+                        }
+
+                        // Si no encontramos los paneles internos, cargamos sin animación
+                        if (oldContent == null || newContent == null) {
+                            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
+                        } else {
+                            // Añadimos el nuevo contenido temporalmente a la escena actual para animarlo
+                            currentRoot.getChildren().add(newContent);
+                            applyGlobalEffects(newContent, fxmlFile);
+
+                            double width = scene.getWidth();
+                            double height = scene.getHeight();
+
+                            ParallelTransition pt = new ParallelTransition();
+                            pt.setInterpolator(Interpolator.EASE_BOTH);
+
+                            // Definimos las animaciones según la dirección solicitada
+                            switch (dir) {
+                                case LEFT:
+                                    newContent.setTranslateX(width);
+                                    TranslateTransition outL = new TranslateTransition(Duration.millis(350), oldContent);
+                                    outL.setToX(-width);
+                                    TranslateTransition inL = new TranslateTransition(Duration.millis(350), newContent);
+                                    inL.setToX(0);
+                                    pt.getChildren().addAll(outL, inL);
+                                    break;
+                                case RIGHT:
+                                    newContent.setTranslateX(-width);
+                                    TranslateTransition outR = new TranslateTransition(Duration.millis(350), oldContent);
+                                    outR.setToX(width);
+                                    TranslateTransition inR = new TranslateTransition(Duration.millis(350), newContent);
+                                    inR.setToX(0);
+                                    pt.getChildren().addAll(outR, inR);
+                                    break;
+                                case FORWARD:
+                                    newContent.setTranslateY(height);
+                                    newContent.setOpacity(0);
+                                    TranslateTransition slideUp = new TranslateTransition(Duration.millis(400), newContent);
+                                    slideUp.setToY(0);
+                                    FadeTransition fadeInNew = new FadeTransition(Duration.millis(400), newContent);
+                                    fadeInNew.setToValue(1.0);
+                                    FadeTransition fadeOutOld = new FadeTransition(Duration.millis(300), oldContent);
+                                    fadeOutOld.setToValue(0.0);
+                                    pt.getChildren().addAll(slideUp, fadeInNew, fadeOutOld);
+                                    break;
+                                case BACKWARD:
+                                    newContent.setOpacity(0);
+                                    newContent.setTranslateY(0);
+                                    TranslateTransition slideDown = new TranslateTransition(Duration.millis(400), oldContent);
+                                    slideDown.setToY(height);
+                                    FadeTransition fadeInOlder = new FadeTransition(Duration.millis(400), newContent);
+                                    fadeInOlder.setToValue(1.0);
+                                    pt.getChildren().addAll(slideDown, fadeInOlder);
+                                    break;
+                                case UP:
+                                    newContent.setTranslateY(height);
+                                    TranslateTransition outU = new TranslateTransition(Duration.millis(350), oldContent);
+                                    outU.setToY(-height);
+                                    TranslateTransition inU = new TranslateTransition(Duration.millis(350), newContent);
+                                    inU.setToY(0);
+                                    pt.getChildren().addAll(outU, inU);
+                                    break;
+                                case DOWN:
+                                    newContent.setTranslateY(-height);
+                                    TranslateTransition outD = new TranslateTransition(Duration.millis(350), oldContent);
+                                    outD.setToY(height);
+                                    TranslateTransition inD = new TranslateTransition(Duration.millis(350), newContent);
+                                    inD.setToY(0);
+                                    pt.getChildren().addAll(outD, inD);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            final Node contentToMoveBack = newContent;
+                            final Node contentToRemove = oldContent;
+                            pt.setOnFinished(e -> {
+                                // Al terminar la animación, limpiamos los nodos temporales y cambiamos el Root de la escena
+                                currentRoot.getChildren().remove(contentToMoveBack);
+                                currentRoot.getChildren().remove(contentToRemove);
+                                
+                                contentToMoveBack.setTranslateX(0);
+                                contentToMoveBack.setTranslateY(0);
+                                contentToMoveBack.setOpacity(1.0);
+                                nextRoot.getChildren().add(contentToMoveBack);
+                                
+                                scene.setRoot(nextRoot);
+                                nextRoot.layout();
+                            });
+                            pt.play();
+                        }
+                    }
                 }
             }
-            
-            double height = scene.getHeight();
-            ParallelTransition pt = new ParallelTransition();
-            pt.setInterpolator(Interpolator.EASE_BOTH);
-            
-            if (oldContentToSlide != null) {
-                TranslateTransition slideDown = new TranslateTransition(Duration.millis(500), oldContentToSlide);
-                slideDown.setToY(height);
-                pt.getChildren().add(slideDown);
-            }
-            
-            // El tablero aparece con un fundido suave
-            FadeTransition fadeIn = new FadeTransition(Duration.millis(600), newRoot);
-            fadeIn.setToValue(1.0);
-            pt.getChildren().add(fadeIn);
-            
-            pt.setOnFinished(e -> {
-                currentRoot.getChildren().remove(newRoot);
-                scene.setRoot(newRoot);
-                newRoot.setOpacity(1.0);
-                newRoot.layout();
-            });
-            pt.play();
-            return;
         }
-
-        // --- LÓGICA ESTÁNDAR PARA MENÚS (Estructura glass-panel) ---
-        Node oldContent = null;
-        for (Node n : currentRoot.getChildren()) {
-            if (oldContent == null && n.getStyleClass().contains("glass-panel")) {
-                oldContent = n;
-            }
-        }
-
-        Node newContent = null;
-        for (Node n : nextRoot.getChildren()) {
-            if (newContent == null && n.getStyleClass().contains("glass-panel")) {
-                newContent = n;
-            }
-        }
-
-        // Si no encontramos los paneles internos, cargamos sin animación
-        if (oldContent == null || newContent == null) {
-            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
-        }
-
-        // Añadimos el nuevo contenido temporalmente a la escena actual para animarlo
-        currentRoot.getChildren().add(newContent);
-        applyGlobalEffects(newContent, fxmlFile);
-
-        double width = scene.getWidth();
-        double height = scene.getHeight();
-
-        ParallelTransition pt = new ParallelTransition();
-        pt.setInterpolator(Interpolator.EASE_BOTH);
-
-        // Definimos las animaciones según la dirección solicitada
-        switch (dir) {
-            case LEFT:
-                newContent.setTranslateX(width);
-                TranslateTransition outL = new TranslateTransition(Duration.millis(350), oldContent);
-                outL.setToX(-width);
-                TranslateTransition inL = new TranslateTransition(Duration.millis(350), newContent);
-                inL.setToX(0);
-                pt.getChildren().addAll(outL, inL);
-                break;
-            case RIGHT:
-                newContent.setTranslateX(-width);
-                TranslateTransition outR = new TranslateTransition(Duration.millis(350), oldContent);
-                outR.setToX(width);
-                TranslateTransition inR = new TranslateTransition(Duration.millis(350), newContent);
-                inR.setToX(0);
-                pt.getChildren().addAll(outR, inR);
-                break;
-            case FORWARD:
-                newContent.setTranslateY(height);
-                newContent.setOpacity(0);
-                TranslateTransition slideUp = new TranslateTransition(Duration.millis(400), newContent);
-                slideUp.setToY(0);
-                FadeTransition fadeInNew = new FadeTransition(Duration.millis(400), newContent);
-                fadeInNew.setToValue(1.0);
-                FadeTransition fadeOutOld = new FadeTransition(Duration.millis(300), oldContent);
-                fadeOutOld.setToValue(0.0);
-                pt.getChildren().addAll(slideUp, fadeInNew, fadeOutOld);
-                break;
-            case BACKWARD:
-                newContent.setOpacity(0);
-                newContent.setTranslateY(0);
-                TranslateTransition slideDown = new TranslateTransition(Duration.millis(400), oldContent);
-                slideDown.setToY(height);
-                FadeTransition fadeInOlder = new FadeTransition(Duration.millis(400), newContent);
-                fadeInOlder.setToValue(1.0);
-                pt.getChildren().addAll(slideDown, fadeInOlder);
-                break;
-            case UP:
-                newContent.setTranslateY(height);
-                TranslateTransition outU = new TranslateTransition(Duration.millis(350), oldContent);
-                outU.setToY(-height);
-                TranslateTransition inU = new TranslateTransition(Duration.millis(350), newContent);
-                inU.setToY(0);
-                pt.getChildren().addAll(outU, inU);
-                break;
-            case DOWN:
-                newContent.setTranslateY(-height);
-                TranslateTransition outD = new TranslateTransition(Duration.millis(350), oldContent);
-                outD.setToY(height);
-                TranslateTransition inD = new TranslateTransition(Duration.millis(350), newContent);
-                inD.setToY(0);
-                pt.getChildren().addAll(outD, inD);
-                break;
-            default:
-                break;
-        }
-
-        final Node contentToMoveBack = newContent;
-        final Node contentToRemove = oldContent;
-        pt.setOnFinished(e -> {
-            // Al terminar la animación, limpiamos los nodos temporales y cambiamos el Root de la escena
-            currentRoot.getChildren().remove(contentToMoveBack);
-            currentRoot.getChildren().remove(contentToRemove);
-            
-            contentToMoveBack.setTranslateX(0);
-            contentToMoveBack.setTranslateY(0);
-            contentToMoveBack.setOpacity(1.0);
-            nextRoot.getChildren().add(contentToMoveBack);
-            
-            scene.setRoot(nextRoot);
-            nextRoot.layout();
-        });
-        pt.play();
     }
 
     /**
@@ -429,9 +424,10 @@ public class NavigationController {
      * @param stage La ventana a modificar.
      */
     public static void toggleFullscreen(Stage stage) {
-        if (stage == null) return;
-        boolean newState = !stage.isFullScreen();
-        stage.setFullScreen(newState);
+        if (stage != null) {
+            boolean newState = !stage.isFullScreen();
+            stage.setFullScreen(newState);
+        }
     }
 
     /**
@@ -440,25 +436,25 @@ public class NavigationController {
      * @param scene La escena donde se aplicarán los hotkeys.
      */
     public static void setupGlobalHotkeys(Scene scene) {
-        if (scene == null) return;
-        
-        // Evitamos añadir el filtro más de una vez a la misma Scene
-        if (scene.getProperties().containsKey("HOTKEYS_ADDED")) return;
-        
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.F11) {
-                long now = System.currentTimeMillis();
-                // Control de spam para evitar parpadeos
-                if (now - lastToggleTime > TOGGLE_COOLDOWN) {
-                    lastToggleTime = now;
-                    Stage stage = (Stage) scene.getWindow();
-                    toggleFullscreen(stage);
-                }
-                event.consume();
+        if (scene != null) {
+            // Evitamos añadir el filtro más de una vez a la misma Scene
+            if (!scene.getProperties().containsKey("HOTKEYS_ADDED")) {
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                    if (event.getCode() == KeyCode.F11) {
+                        long now = System.currentTimeMillis();
+                        // Control de spam para evitar parpadeos
+                        if (now - lastToggleTime > TOGGLE_COOLDOWN) {
+                            lastToggleTime = now;
+                            Stage stage = (Stage) scene.getWindow();
+                            toggleFullscreen(stage);
+                        }
+                        event.consume();
+                    }
+                });
+                
+                scene.getProperties().put("HOTKEYS_ADDED", true);
             }
-        });
-        
-        scene.getProperties().put("HOTKEYS_ADDED", true);
+        }
     }
 
     /** Verifica si la ventana está actualmente en pantalla completa. */
@@ -484,14 +480,15 @@ public class NavigationController {
      * Asegura que el archivo CSS principal esté cargado en la escena.
      */
     private static void ensureCssLoaded(Scene scene) {
-        if (scene == null) return;
-        try {
-            String cssPath = NavigationController.class.getResource(CSS_PATH).toExternalForm();
-            if (!scene.getStylesheets().contains(cssPath)) {
-                scene.getStylesheets().add(cssPath);
+        if (scene != null) {
+            try {
+                String cssPath = NavigationController.class.getResource(CSS_PATH).toExternalForm();
+                if (!scene.getStylesheets().contains(cssPath)) {
+                    scene.getStylesheets().add(cssPath);
+                }
+            } catch (Exception e) {
+                System.err.println("Error cargando CSS: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error cargando CSS: " + e.getMessage());
         }
     }
 
@@ -502,29 +499,29 @@ public class NavigationController {
      * comportamiento sin tener que escribir código en cada controlador.</p>
      */
     private static void applyGlobalEffects(Parent root, String fxmlFile) {
-        if (root == null) return;
+        if (root != null) {
+            // Desactivamos sonidos en pantallas específicas para evitar ruidos molestos
+            boolean menuSoundsEnabled = fxmlFile != null && 
+                                       !fxmlFile.equalsIgnoreCase("LoginView.fxml") && 
+                                       !fxmlFile.equalsIgnoreCase("TableroJuego.fxml") &&
+                                       !fxmlFile.equalsIgnoreCase("Intro.fxml");
 
-        // Desactivamos sonidos en pantallas específicas para evitar ruidos molestos
-        boolean menuSoundsEnabled = fxmlFile != null && 
-                                   !fxmlFile.equalsIgnoreCase("LoginView.fxml") && 
-                                   !fxmlFile.equalsIgnoreCase("TableroJuego.fxml") &&
-                                   !fxmlFile.equalsIgnoreCase("Intro.fxml");
+            // Buscamos todos los botones y aplicamos lógica
+            root.lookupAll(".button").forEach(node -> {
+                util.UIUtils.applyHoverAnimation(node);
+                if (menuSoundsEnabled) attachMenuSounds(node);
+            });
 
-        // Buscamos todos los botones y aplicamos lógica
-        root.lookupAll(".button").forEach(node -> {
-            util.UIUtils.applyHoverAnimation(node);
-            if (menuSoundsEnabled) attachMenuSounds(node);
-        });
+            root.lookupAll(".remove-slot-button").forEach(node -> {
+                util.UIUtils.applyHoverAnimation(node);
+                if (menuSoundsEnabled) attachMenuSounds(node);
+            });
 
-        root.lookupAll(".remove-slot-button").forEach(node -> {
-            util.UIUtils.applyHoverAnimation(node);
-            if (menuSoundsEnabled) attachMenuSounds(node);
-        });
-
-        root.lookupAll(".add-player-button").forEach(node -> {
-            util.UIUtils.applyHoverAnimation(node);
-            if (menuSoundsEnabled) attachMenuSounds(node);
-        });
+            root.lookupAll(".add-player-button").forEach(node -> {
+                util.UIUtils.applyHoverAnimation(node);
+                if (menuSoundsEnabled) attachMenuSounds(node);
+            });
+        }
     }
 
     /**
