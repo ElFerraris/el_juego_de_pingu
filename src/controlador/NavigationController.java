@@ -82,8 +82,15 @@ public class NavigationController {
     /**
      * Direcciones posibles para las transiciones entre pantallas.
      */
-    public enum Direction {
-        LEFT, RIGHT, UP, DOWN, FORWARD, BACKWARD, TO_BOARD, NONE
+    public static class Direction {
+        public static final int LEFT = 0;
+        public static final int RIGHT = 1;
+        public static final int UP = 2;
+        public static final int DOWN = 3;
+        public static final int FORWARD = 4;
+        public static final int BACKWARD = 5;
+        public static final int TO_BOARD = 6;
+        public static final int NONE = 7;
     }
 
     /**
@@ -93,7 +100,7 @@ public class NavigationController {
      * @param fxmlFile Nombre del archivo .fxml (ej: "MainMenuView.fxml").
      * @param dir La dirección de la animación.
      */
-    public static void navigateTo(ActionEvent event, String fxmlFile, Direction dir) {
+    public static void navigateTo(ActionEvent event, String fxmlFile, int dir) {
         try {
             // Obtenemos la ventana (Stage) a partir del componente que disparó el evento
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -189,7 +196,7 @@ public class NavigationController {
      * <p>Detecta si las vistas usan la estructura de "glass-panel" para animar
      * solo el contenido interno y no el fondo, creando un efecto más <b>premium</b>.</p>
      */
-    private static void loadAndSetWithTransition(Stage stage, String fxmlFile, Direction dir) throws IOException {
+    private static void loadAndSetWithTransition(Stage stage, String fxmlFile, int dir) throws IOException {
         // Si no hay dirección, cargamos de forma normal
         if (dir == Direction.NONE) {
             loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
@@ -218,7 +225,7 @@ public class NavigationController {
                     ensureCssLoaded(scene);
 
                     // TRANSICIÓN ESPECIAL: Entrada al Tablero
-                    if (dir == Direction.TO_BOARD) {
+                if (dir == Direction.TO_BOARD) {
                         currentRoot.getChildren().add(newRoot);
                         newRoot.setOpacity(0);
                         applyGlobalEffects(newRoot, fxmlFile);
@@ -285,7 +292,7 @@ public class NavigationController {
 
                             // Definimos las animaciones según la dirección solicitada
                             switch (dir) {
-                                case LEFT:
+                                case Direction.LEFT:
                                     newContent.setTranslateX(width);
                                     TranslateTransition outL = new TranslateTransition(Duration.millis(350), oldContent);
                                     outL.setToX(-width);
@@ -293,7 +300,7 @@ public class NavigationController {
                                     inL.setToX(0);
                                     pt.getChildren().addAll(outL, inL);
                                     break;
-                                case RIGHT:
+                                case Direction.RIGHT:
                                     newContent.setTranslateX(-width);
                                     TranslateTransition outR = new TranslateTransition(Duration.millis(350), oldContent);
                                     outR.setToX(width);
@@ -301,7 +308,7 @@ public class NavigationController {
                                     inR.setToX(0);
                                     pt.getChildren().addAll(outR, inR);
                                     break;
-                                case FORWARD:
+                                case Direction.FORWARD:
                                     newContent.setTranslateY(height);
                                     newContent.setOpacity(0);
                                     TranslateTransition slideUp = new TranslateTransition(Duration.millis(400), newContent);
@@ -312,7 +319,7 @@ public class NavigationController {
                                     fadeOutOld.setToValue(0.0);
                                     pt.getChildren().addAll(slideUp, fadeInNew, fadeOutOld);
                                     break;
-                                case BACKWARD:
+                                case Direction.BACKWARD:
                                     newContent.setOpacity(0);
                                     newContent.setTranslateY(0);
                                     TranslateTransition slideDown = new TranslateTransition(Duration.millis(400), oldContent);
@@ -321,7 +328,7 @@ public class NavigationController {
                                     fadeInOlder.setToValue(1.0);
                                     pt.getChildren().addAll(slideDown, fadeInOlder);
                                     break;
-                                case UP:
+                                case Direction.UP:
                                     newContent.setTranslateY(height);
                                     TranslateTransition outU = new TranslateTransition(Duration.millis(350), oldContent);
                                     outU.setToY(-height);
@@ -329,7 +336,7 @@ public class NavigationController {
                                     inU.setToY(0);
                                     pt.getChildren().addAll(outU, inU);
                                     break;
-                                case DOWN:
+                                case Direction.DOWN:
                                     newContent.setTranslateY(-height);
                                     TranslateTransition outD = new TranslateTransition(Duration.millis(350), oldContent);
                                     outD.setToY(height);

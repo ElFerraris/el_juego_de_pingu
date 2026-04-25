@@ -13,11 +13,11 @@ import java.util.Random;
  */
 public class Cpu {
 
-    public enum Accion {
-        LANZAR_DADO,
-        RECOLECTAR_BOLAS,
-        USAR_DADO_RAPIDO,
-        USAR_DADO_LENTO
+    public static class Accion {
+        public static final int LANZAR_DADO = 0;
+        public static final int RECOLECTAR_BOLAS = 1;
+        public static final int USAR_DADO_RAPIDO = 2;
+        public static final int USAR_DADO_LENTO = 3;
     }
 
     private static final Random random = new Random();
@@ -28,7 +28,7 @@ public class Cpu {
      * @param tablero El tablero actual para analizar casillas próximas.
      * @return La acción decidida.
      */
-    public static Accion decidirAccion(Foca foca, Tablero tablero) {
+    public static int decidirAccion(Foca foca, Tablero tablero) {
         Inventario inv = foca.getInventario();
         int posActual = foca.getPosicion();
         int bolas = inv.getCantidad("BolaNieve");

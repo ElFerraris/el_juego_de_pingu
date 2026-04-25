@@ -25,13 +25,17 @@ public class GameContext {
     private static GameContext instance;
 
     /** 
-     * Enumeración para definir qué tipo de acción requiere una confirmación 
+     * Clase para definir qué tipo de acción requiere una confirmación 
      * por parte del usuario en los diálogos emergentes.
      */
-    public enum ActionConfirmType { LOGOUT, QUIT }
+    public static class ActionConfirmType {
+        public static final int LOGOUT = 0;
+        public static final int QUIT = 1;
+        public static final int NONE = -1;
+    }
     
     /** Almacena la acción que está pendiente de confirmación. */
-    private ActionConfirmType actionToConfirm;
+    private int actionToConfirm = ActionConfirmType.NONE;
 
     /** El usuario (Jugador) que ha iniciado sesión actualmente en el sistema. */
     private Jugador currentUser;
@@ -92,7 +96,7 @@ public class GameContext {
         gameName = null;
         idPartidaCargar = -1;
         turnoModoFuga = 0;
-        actionToConfirm = null;
+        actionToConfirm = ActionConfirmType.NONE;
         System.out.println("► GameContext: Datos reiniciados.");
     }
 
@@ -133,8 +137,8 @@ public class GameContext {
     public void setTurnoCargado(int t) { this.turnoModoFuga = t; }
 
     /** @return La acción que requiere confirmación actualmente. */
-    public ActionConfirmType getActionToConfirm() { return actionToConfirm; }
+    public int getActionToConfirm() { return actionToConfirm; }
     /** @param action Define qué acción debe validar el diálogo de confirmación. */
-    public void setActionToConfirm(ActionConfirmType action) { this.actionToConfirm = action; }
+    public void setActionToConfirm(int action) { this.actionToConfirm = action; }
 }
 

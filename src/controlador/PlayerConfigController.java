@@ -131,7 +131,15 @@ public class PlayerConfigController {
         NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
     }
 
-    private enum SlotType { PLAYER, FOCA, NONE }
+    private static class SlotType {
+        public static final SlotType PLAYER = new SlotType("JUGADOR");
+        public static final SlotType FOCA = new SlotType("FOCA (CPU)");
+        public static final SlotType NONE = new SlotType("VACÍO");
+        
+        private final String label;
+        private SlotType(String label) { this.label = label; }
+        @Override public String toString() { return label; }
+    }
 
     private class Slot {
         private StackPane root;

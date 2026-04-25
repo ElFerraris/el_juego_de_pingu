@@ -18,7 +18,7 @@ public class ConfirmDialogController {
 
     @FXML
     public void initialize() {
-        GameContext.ActionConfirmType action = GameContext.getInstance().getActionToConfirm();
+        int action = GameContext.getInstance().getActionToConfirm();
         
         if (action == GameContext.ActionConfirmType.LOGOUT) {
             titleLabel.setText("CERRAR SESIÓN");
@@ -31,7 +31,7 @@ public class ConfirmDialogController {
 
     @FXML
     private void handleYes(ActionEvent event) {
-        GameContext.ActionConfirmType action = GameContext.getInstance().getActionToConfirm();
+        int action = GameContext.getInstance().getActionToConfirm();
         
         if (action == GameContext.ActionConfirmType.LOGOUT) {
             // Cerramos sesión y reiniciamos

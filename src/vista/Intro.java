@@ -134,20 +134,21 @@ public class Intro {
     }
 
     private void finalizarIntro() {
-        if (yaFinalizado) return;
-        yaFinalizado = true;
-        
-        // Limpiamos el filtro de la escena para que no persista en el menú
-        if (rootPane != null && rootPane.getScene() != null && skipFilter != null) {
-            rootPane.getScene().removeEventFilter(KeyEvent.KEY_PRESSED, skipFilter);
+        if (!yaFinalizado) {
+            yaFinalizado = true;
+            
+            // Limpiamos el filtro de la escena para que no persista en el menú
+            if (rootPane != null && rootPane.getScene() != null && skipFilter != null) {
+                rootPane.getScene().removeEventFilter(KeyEvent.KEY_PRESSED, skipFilter);
+            }
+            
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
+                mediaPlayer.dispose();
+                mediaPlayer = null;
+            }
+            cargarMenuPrincipal();
         }
-        
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.dispose();
-            mediaPlayer = null;
-        }
-        cargarMenuPrincipal();
     }
 
     private void cargarMenuPrincipal() {

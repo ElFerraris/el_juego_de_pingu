@@ -119,7 +119,7 @@ public class TableroController {
     private double initialSfx;
     
     // Estado de confirmación actual
-    private GameContext.ActionConfirmType pendingAction;
+    private int pendingAction;
 
     private Tablero tablero;
     private List<Jugador> jugadores;
@@ -762,20 +762,19 @@ public class TableroController {
         if (jugadores.get(turnoActual).getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
             log("¡" + jugadores.get(turnoActual).getNombre() + " HA GANADO LA PARTIDA!");
             mostrarAlertaVictoria(jugadores.get(turnoActual).getNombre());
-            return;
+        } else {
+            turnoActual = (turnoActual + 1) % jugadores.size();
+            actualizarUI();
+            setControlesBloqueados(false);
+            
+            // Al cambiar de turno, centramos en el nuevo jugador si estamos en modo auto
+            if (cameraAutoMode) {
+                smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
+            }
+            
+            // Comprobamos si el nuevo turno es de la CPU o está bloqueado
+            comprobarBloqueoInicioTurno();
         }
-
-        turnoActual = (turnoActual + 1) % jugadores.size();
-        actualizarUI();
-        setControlesBloqueados(false);
-        
-        // Al cambiar de turno, centramos en el nuevo jugador si estamos en modo auto
-        if (cameraAutoMode) {
-            smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
-        }
-        
-        // Comprobamos si el nuevo turno es de la CPU o está bloqueado
-        comprobarBloqueoInicioTurno();
     }
 
     private void comprobarBloqueoInicioTurno() {
@@ -800,25 +799,20 @@ public class TableroController {
         // Pequeña pausa para que el usuario vea el cambio de turno y el overlay
         PauseTransition delay = new PauseTransition(Duration.seconds(2));
         delay.setOnFinished(e -> {
-            Cpu.Accion accion = Cpu.decidirAccion(foca, tablero);
+            int accion = Cpu.decidirAccion(foca, tablero);
             
-            switch (accion) {
-                case LANZAR_DADO:
-                    log("La CPU decide lanzar el dado.");
-                    handleRollDice(null);
-                    break;
-                case RECOLECTAR_BOLAS:
-                    log("La CPU decide recolectar bolas de nieve.");
-                    handleCollectSnowballs(null);
-                    break;
-                case USAR_DADO_RAPIDO:
-                    log("La CPU decide usar un DADO RÁPIDO.");
-                    handleUseDadoRapido(null);
-                    break;
-                case USAR_DADO_LENTO:
-                    log("La CPU decide usar un DADO LENTO.");
-                    handleUseDadoLento(null);
-                    break;
+            if (accion == Cpu.Accion.LANZAR_DADO) {
+                log("La CPU decide lanzar el dado.");
+                handleRollDice(null);
+            } else if (accion == Cpu.Accion.RECOLECTAR_BOLAS) {
+                log("La CPU decide recolectar bolas de nieve.");
+                handleCollectSnowballs(null);
+            } else if (accion == Cpu.Accion.USAR_DADO_RAPIDO) {
+                log("La CPU decide usar un DADO RÁPIDO.");
+                handleUseDadoRapido(null);
+            } else if (accion == Cpu.Accion.USAR_DADO_LENTO) {
+                log("La CPU decide usar un DADO LENTO.");
+                handleUseDadoLento(null);
             }
         });
         delay.play();

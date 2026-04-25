@@ -10,11 +10,12 @@ Este documento detalla las prácticas de programación que **NO** están permiti
 *   **No usar** la palabra clave `synchronized`.
 *   **Razón**: El proyecto debe seguir un flujo de ejecución lineal y síncrono.
 
-### 2. Saltos de Control (Unstructured Control Flow)
+### 2. Saltos de Control y Tipos Específicos
 *   **No usar** `continue`.
 *   **No usar** `break` (excepto dentro de bloques `switch`).
 *   **No usar** `return` dentro de métodos de tipo `void`.
-*   **Razón**: Se considera "mala práctica" académica porque rompe el flujo estructurado del código.
+*   **No usar** `enum` (tipos enumerados).
+*   **Razón**: Se consideran construcciones que ocultan la lógica subyacente o rompen el flujo estructurado según los criterios académicos aplicados.
 
 ### 3. Alternativas Permitidas
 *   En lugar de `continue`, envolver el cuerpo del bucle en un bloque `if`.

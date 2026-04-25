@@ -83,13 +83,12 @@ public class Login {
 			} else {
 				mostrarError("Falta la contraseña", false, true);
 			}
-			return;
-		}
-
-		if (modoRegistro) {
-			registrarUsuario(user, pswd, event);
 		} else {
-			iniciarSesion(user, pswd, event);
+			if (modoRegistro) {
+				registrarUsuario(user, pswd, event);
+			} else {
+				iniciarSesion(user, pswd, event);
+			}
 		}
 	}
 

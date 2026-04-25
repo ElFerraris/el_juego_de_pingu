@@ -107,27 +107,24 @@ public class SeedSelectionController {
         if (name == null || name.trim().isEmpty()) {
             errorLabel.setText("¡Falta el nombre de la partida!");
             nameField.requestFocus();
-            return;
+        } else {
+            // 2. Validar semilla
+            if (seed == null || seed.trim().isEmpty()) {
+                errorLabel.setText("¡Falta la semilla del mundo!");
+            } else {
+                Tablero validador = new Tablero();
+                if (!validador.validarSeed(seed)) {
+                    errorLabel.setText("Semilla inválida: Faltan trineos o agujeros.");
+                } else {
+                    // Guardar en el contexto global
+                    GameContext.getInstance().setGameName(name.trim());
+                    GameContext.getInstance().setSeed(seed.trim());
+                    
+                    System.out.println("► Partida: " + name + " | Seed: " + seed);
+
+                    NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
+                }
+            }
         }
-
-        // 2. Validar semilla
-        if (seed == null || seed.trim().isEmpty()) {
-            errorLabel.setText("¡Falta la semilla del mundo!");
-            return;
-        }
-
-        Tablero validador = new Tablero();
-        if (!validador.validarSeed(seed)) {
-            errorLabel.setText("Semilla inválida: Faltan trineos o agujeros.");
-            return;
-        }
-
-        // Guardar en el contexto global
-        GameContext.getInstance().setGameName(name.trim());
-        GameContext.getInstance().setSeed(seed.trim());
-        
-        System.out.println("► Partida: " + name + " | Seed: " + seed);
-
-        NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
     }
 }
