@@ -130,7 +130,8 @@ public class OptionsController {
         }
         
         // 3. Audio inmediatos
-        SoundManager.setVolume(sm.getSfxVolume());
+        SoundManager.setSfxVolume(sm.getSfxVolume());
+        SoundManager.setMusicVolume(sm.getMusicVolume());
         
         System.out.println("► Cambios aplicados y guardados correctamente.");
     }

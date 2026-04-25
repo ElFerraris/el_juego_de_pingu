@@ -1,13 +1,15 @@
 package util;
 
 import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import java.net.URL;
 
 /**
  * SoundManager
  * 
- * Gestiona la carga y reproducción de efectos de sonido (SFX).
- * Utiliza AudioClip para una reproducción instantánea ideal para botones.
+ * Gestiona la carga y reproducción de efectos de sonido (SFX) y música de fondo.
+ * Utiliza AudioClip para efectos rápidos y MediaPlayer para la música.
  */
 public class SoundManager {
 
@@ -15,12 +17,17 @@ public class SoundManager {
     private static AudioClip confirmSound;
     private static AudioClip backSound;
     
-    private static double volume = 0.8; // Volumen por defecto (0.0 a 1.0)
+    private static MediaPlayer musicPlayer;
+    
+    private static double sfxVolume = 0.5;
+    private static double musicVolume = 0.5;
 
     static {
-        // Cargamos el volumen guardado si existe al iniciar
+        // Cargamos los volúmenes guardados
         try {
-            volume = SettingsManager.getInstance().getSfxVolume();
+            SettingsManager sm = SettingsManager.getInstance();
+            sfxVolume = sm.getSfxVolume();
+            musicVolume = sm.getMusicVolume();
         } catch (Exception e) {}
         
         try {
@@ -36,18 +43,19 @@ public class SoundManager {
         URL resource = SoundManager.class.getResource(path);
         if (resource != null) {
             AudioClip clip = new AudioClip(resource.toExternalForm());
-            clip.setVolume(volume); // Aplicamos el volumen actual
+            clip.setVolume(sfxVolume);
             return clip;
         }
-        System.err.println("No se pudo encontrar el sonido: " + path);
         return null;
     }
 
-    public static void setVolume(double newVolume) {
-        volume = newVolume;
-        if (hoverSound != null) hoverSound.setVolume(volume);
-        if (confirmSound != null) confirmSound.setVolume(volume);
-        if (backSound != null) backSound.setVolume(volume);
+    // ==================== GESTIÓN DE SFX ====================
+
+    public static void setSfxVolume(double volume) {
+        sfxVolume = volume;
+        if (hoverSound != null) hoverSound.setVolume(sfxVolume);
+        if (confirmSound != null) confirmSound.setVolume(sfxVolume);
+        if (backSound != null) backSound.setVolume(sfxVolume);
     }
 
     public static void playHover() {
@@ -60,5 +68,61 @@ public class SoundManager {
 
     public static void playBack() {
         if (backSound != null) backSound.play();
+    }
+
+    // ==================== GESTIÓN DE MÚSICA ====================
+
+    private static String currentMusicPath = "";
+
+    public static void setMusicVolume(double volume) {
+        musicVolume = volume;
+        if (musicPlayer != null) {
+            musicPlayer.setVolume(musicVolume);
+        }
+    }
+
+    /**
+     * Reproduce la música del menú en bucle.
+     */
+    public static void playMenuMusic() {
+        playMusic("/assets/music/Menu/menu.mp3");
+    }
+
+    /**
+     * Carga y reproduce un archivo de música.
+     */
+    public static void playMusic(String path) {
+        // Si ya está sonando esta misma música, no hacemos nada para evitar cortes
+        if (currentMusicPath.equals(path) && musicPlayer != null) {
+            return;
+        }
+
+        stopMusic();
+
+        try {
+            URL resource = SoundManager.class.getResource(path);
+            if (resource != null) {
+                currentMusicPath = path;
+                Media media = new Media(resource.toExternalForm());
+                musicPlayer = new MediaPlayer(media);
+                musicPlayer.setVolume(musicVolume);
+                musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+                musicPlayer.play();
+            }
+        } catch (Exception e) {
+            System.err.println("Error al reproducir música: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Detiene la música actual.
+     */
+    public static void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+            musicPlayer.dispose();
+            musicPlayer = null;
+            currentMusicPath = "";
+        }
     }
 }

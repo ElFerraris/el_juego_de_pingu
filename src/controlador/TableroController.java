@@ -155,6 +155,9 @@ public class TableroController {
 
     @FXML
     public void initialize() {
+        // Detenemos la música de los menús al entrar a la partida
+        util.SoundManager.stopMusic();
+
         // Inicialización de Opciones Overlay
         initOptionsOverlay();
         initCamera();
@@ -1409,7 +1412,8 @@ public class TableroController {
             stage.setHeight(Double.parseDouble(res[1]));
             stage.centerOnScreen();
         }
-        SoundManager.setVolume(sm.getSfxVolume());
+        util.SoundManager.setSfxVolume(sm.getSfxVolume());
+        util.SoundManager.setMusicVolume(sm.getMusicVolume());
     }
 
     @FXML

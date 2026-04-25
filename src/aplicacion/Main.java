@@ -12,7 +12,7 @@ import util.SoundManager;
 public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
-		// REGISTRO GLOBAL DE FUENTES (Andrei Style)
+		// REGISTRO GLOBAL DE FUENTES
 		try {
 			Font.loadFont(getClass().getResourceAsStream("/assets/fuentes/GrapeSoda.ttf"), 12);
 			Font.loadFont(getClass().getResourceAsStream("/assets/fuentes/upheavtt.ttf"), 12);
@@ -36,7 +36,8 @@ public class Main extends Application {
 
 			primaryStage.show();
 
-			SoundManager.setVolume(sm.getSfxVolume());
+			SoundManager.setSfxVolume(sm.getSfxVolume());
+			SoundManager.setMusicVolume(sm.getMusicVolume());
 
 		} catch (Exception e) {
 			e.printStackTrace();

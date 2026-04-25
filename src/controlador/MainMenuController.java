@@ -34,6 +34,9 @@ public class MainMenuController {
      */
     @FXML
     public void initialize() {
+        // Iniciar la música del menú
+        util.SoundManager.playMenuMusic();
+
         // Obtenemos el usuario del contexto global (Singleton) para personalizar el saludo
         Jugador current = GameContext.getInstance().getCurrentUser();
 

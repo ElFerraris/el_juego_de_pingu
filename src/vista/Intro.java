@@ -32,6 +32,9 @@ public class Intro {
 
     @FXML
     public void initialize() {
+        // Paramos la música de menús para que no se solape con el audio del video
+        util.SoundManager.stopMusic();
+
         // Configuramos la ruta del vídeo
         String path = "src/assets/BadLabsIntro/BadLabsIntro.mp4";
         File file = new File(path);
