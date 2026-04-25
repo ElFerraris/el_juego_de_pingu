@@ -8,7 +8,8 @@ import java.net.URL;
 /**
  * SoundManager
  * 
- * Gestiona la carga y reproducción de efectos de sonido (SFX) y música de fondo.
+ * Gestiona la carga y reproducción de efectos de sonido (SFX) y música de
+ * fondo.
  * Utiliza AudioClip para efectos rápidos y MediaPlayer para la música.
  */
 public class SoundManager {
@@ -16,9 +17,9 @@ public class SoundManager {
     private static AudioClip hoverSound;
     private static AudioClip confirmSound;
     private static AudioClip backSound;
-    
+
     private static MediaPlayer musicPlayer;
-    
+
     private static double sfxVolume = 0.5;
     private static double musicVolume = 0.5;
 
@@ -28,8 +29,9 @@ public class SoundManager {
             SettingsManager sm = SettingsManager.getInstance();
             sfxVolume = sm.getSfxVolume();
             musicVolume = sm.getMusicVolume();
-        } catch (Exception e) {}
-        
+        } catch (Exception e) {
+        }
+
         try {
             hoverSound = loadSound("/assets/sfx/button-hover.wav");
             confirmSound = loadSound("/assets/sfx/button-confirm.wav");
@@ -53,21 +55,27 @@ public class SoundManager {
 
     public static void setSfxVolume(double volume) {
         sfxVolume = volume;
-        if (hoverSound != null) hoverSound.setVolume(sfxVolume);
-        if (confirmSound != null) confirmSound.setVolume(sfxVolume);
-        if (backSound != null) backSound.setVolume(sfxVolume);
+        if (hoverSound != null)
+            hoverSound.setVolume(sfxVolume);
+        if (confirmSound != null)
+            confirmSound.setVolume(sfxVolume);
+        if (backSound != null)
+            backSound.setVolume(sfxVolume);
     }
 
     public static void playHover() {
-        if (hoverSound != null) hoverSound.play();
+        if (hoverSound != null)
+            hoverSound.play();
     }
 
     public static void playConfirm() {
-        if (confirmSound != null) confirmSound.play();
+        if (confirmSound != null)
+            confirmSound.play();
     }
 
     public static void playBack() {
-        if (backSound != null) backSound.play();
+        if (backSound != null)
+            backSound.play();
     }
 
     // ==================== GESTIÓN DE MÚSICA ====================
@@ -125,10 +133,10 @@ public class SoundManager {
     public static void startGameMusic() {
         stopMusic(); // Paramos la música de menú
         stopGameMusic(); // Limpiamos por si acaso
-        
+
         for (int i = 0; i < 7; i++) {
             try {
-                String path = "/assets/music/Partida/" + (i + 1) + ".mp3";
+                String path = "/assets/music/Partida/" + (i + 1) + ".wav";
                 URL resource = SoundManager.class.getResource(path);
                 if (resource != null) {
                     Media media = new Media(resource.toExternalForm());
@@ -138,7 +146,7 @@ public class SoundManager {
                     gameMusicLayers[i].play();
                 }
             } catch (Exception e) {
-                System.err.println("Error cargando capa " + (i+1) + ": " + e.getMessage());
+                System.err.println("Error cargando capa " + (i + 1) + ": " + e.getMessage());
             }
         }
         updateGameMusicLevel(1); // Empezamos con el nivel 1
@@ -146,13 +154,15 @@ public class SoundManager {
 
     /**
      * Actualiza qué capa de música suena según la posición más avanzada.
+     * 
      * @param maxPos La posición del jugador más adelantado.
      */
     public static void updateGameMusicByPosition(int maxPos) {
         // Nivel = posición / 7 + 1 (máximo 7)
         int level = (maxPos / 7) + 1;
-        if (level > 7) level = 7;
-        
+        if (level > 7)
+            level = 7;
+
         if (level != currentLevel) {
             updateGameMusicLevel(level);
         }
