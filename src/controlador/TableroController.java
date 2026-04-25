@@ -282,8 +282,30 @@ public class TableroController {
                 }
                 
                 cellNode.setUserData(zOrder);
+                
+                // La posición layout es la FINAL
                 cellNode.setLayoutX(layoutX);
                 cellNode.setLayoutY(layoutY);
+                
+                // Animación de caída (modifica translateY desde muy arriba hasta 0)
+                double dropDistance = -1000.0;
+                
+                TranslateTransition drop = new TranslateTransition(Duration.seconds(0.2), cellNode);
+                drop.setFromY(dropDistance);
+                drop.setToY(0);
+                drop.setInterpolator(Interpolator.EASE_IN);
+                
+                // Efecto de rebote sutil
+                TranslateTransition bounce = new TranslateTransition(Duration.seconds(0.15), cellNode);
+                bounce.setByY(-10);
+                bounce.setAutoReverse(true);
+                bounce.setCycleCount(2);
+                bounce.setInterpolator(Interpolator.EASE_OUT);
+                
+                SequentialTransition seq = new SequentialTransition(drop, bounce);
+                // Retardo muy corto para que la ola sea rápida
+                seq.setDelay(Duration.millis(i * 15));
+                seq.play();
                 
                 casillaNodes.put(i, cellNode);
                 sortedNodes.add(cellNode);
@@ -293,7 +315,31 @@ public class TableroController {
         sortedNodes.sort((a, b) -> Integer.compare((int) b.getUserData(), (int) a.getUserData()));
         
         boardPane.getChildren().addAll(sortedNodes);
-        boardPane.getChildren().add(tokensPane); // Los jugadores siempre encima
+        
+        tokensPane.setOpacity(0); // Ocultamos los pinguinos al principio
+        boardPane.getChildren().add(tokensPane); 
+        
+        // Animamos la aparición de los jugadores cuando terminen de caer los pilares
+        double totalAnimDuration = 0.2 + 0.15 + (Tablero.TAMANYO_TABLERO * 0.015);
+        PauseTransition showPlayers = new PauseTransition(Duration.seconds(totalAnimDuration));
+        showPlayers.setOnFinished(e -> {
+            FadeTransition fade = new FadeTransition(Duration.seconds(0.5), tokensPane);
+            fade.setToValue(1.0);
+            fade.play();
+            
+            // Animación extra: pequeño saltito de los pingüinos al aparecer
+            for (Node token : tokensPane.getChildren()) {
+                TranslateTransition jump = new TranslateTransition(Duration.seconds(0.2), token);
+                jump.setByY(-15);
+                jump.setAutoReverse(true);
+                jump.setCycleCount(2);
+                
+                // Retardo aleatorio para que no salten todos a la vez
+                jump.setDelay(Duration.millis(Math.random() * 200));
+                jump.play();
+            }
+        });
+        showPlayers.play();
     }
 
     private StackPane crearNodoCasilla(Casilla c) {
