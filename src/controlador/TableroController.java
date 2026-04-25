@@ -659,13 +659,21 @@ public class TableroController {
                 mostrarNotificacionEvento("¡" + tipo + "!", j);
                 
                 log("¡Efecto! " + j.getNombre() + " se mueve a la casilla " + posDespues);
-                moverFichaDirecta(j, posAntes, posDespues);
-                
-                PauseTransition wait = new PauseTransition(Duration.seconds(1));
-                wait.setOnFinished(e -> comprobarBatallaYFinalizarTurno(j));
-                wait.play();
+                moverFichaDirecta(j, posAntes, posDespues, () -> comprobarBatallaYFinalizarTurno(j));
             } else {
-                comprobarBatallaYFinalizarTurno(j);
+                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
+                if (tipo.equals("ROMPEDIZAS")) {
+                    // Animación de temblor
+                    Node pilar = casillaNodes.get(posAntes);
+                    TranslateTransition tiembla = new TranslateTransition(Duration.millis(50), pilar);
+                    tiembla.setByX(4);
+                    tiembla.setAutoReverse(true);
+                    tiembla.setCycleCount(6);
+                    tiembla.setOnFinished(e -> comprobarBatallaYFinalizarTurno(j));
+                    tiembla.play();
+                } else {
+                    comprobarBatallaYFinalizarTurno(j);
+                }
             }
         });
         effectDelay.play();
@@ -727,7 +735,7 @@ public class TableroController {
                     humano.setPosicion(0);
                     mensaje.append(humano.getNombre()).append(" sale volando hasta la SALIDA.");
                 }
-                moverFichaDirecta(humano, posAntigua, humano.getPosicion());
+                moverFichaDirecta(humano, posAntigua, humano.getPosicion(), null);
             }
         } else {
             int bolasAtacante = atacante.getInventario().getCantidad("BolaNieve");
@@ -742,14 +750,14 @@ public class TableroController {
                 defensor.setPosicion(Math.max(0, posAntigua - diff));
                 mensaje.append(atacante.getNombre()).append(" gana.\n");
                 mensaje.append(defensor.getNombre()).append(" retrocede ").append(posAntigua - defensor.getPosicion()).append(" casillas.");
-                moverFichaDirecta(defensor, posAntigua, defensor.getPosicion());
+                moverFichaDirecta(defensor, posAntigua, defensor.getPosicion(), null);
             } else if (bolasDefensor > bolasAtacante) {
                 int diff = bolasDefensor - bolasAtacante;
                 int posAntigua = atacante.getPosicion();
                 atacante.setPosicion(Math.max(0, posAntigua - diff));
                 mensaje.append(defensor.getNombre()).append(" se defiende y gana.\n");
                 mensaje.append(atacante.getNombre()).append(" retrocede ").append(posAntigua - atacante.getPosicion()).append(" casillas.");
-                moverFichaDirecta(atacante, posAntigua, atacante.getPosicion());
+                moverFichaDirecta(atacante, posAntigua, atacante.getPosicion(), null);
             } else {
                 mensaje.append("¡Empate técnico! Nadie tiene más bolas. Se quedan donde están.");
             }
@@ -764,47 +772,85 @@ public class TableroController {
         mostrarEventoDialogo(titulo, mensaje.toString(), this::finalizarTurno, atacante, defensor);
     }
     
-    private void moverFichaDirecta(Jugador j, int desde, int hasta) {
+    private void moverFichaDirecta(Jugador j, int desde, int hasta, Runnable onComplete) {
         Casilla cOrig = tablero.getCasilla(desde);
         String tipo = (cOrig != null) ? cOrig.getTipo().toUpperCase() : "";
         Node token = playerTokens.get(j);
+        Node pilar = casillaNodes.get(desde);
         
-        if (tipo.contains("AGUJERO")) {
-            FadeTransition fo = new FadeTransition(Duration.millis(500), token);
-            fo.setToValue(0);
-            fo.setOnFinished(e -> {
-                casillaNodes.get(desde).getChildren().remove(token);
-                posicionarToken(j);
-                token.setOpacity(0);
-                FadeTransition fi = new FadeTransition(Duration.millis(500), token);
-                fi.setToValue(1);
-                fi.play();
-            });
-            fo.play();
-        } else if (tipo.contains("TRINEO")) {
-            double dx = casillaNodes.get(hasta).getLayoutX() - casillaNodes.get(desde).getLayoutX();
-            double dy = casillaNodes.get(hasta).getLayoutY() - casillaNodes.get(desde).getLayoutY();
+        if (tipo.contains("AGUJERO") || tipo.contains("ROMPEDIZAS")) {
+            // Pilar se hunde
+            TranslateTransition hundirPilar = new TranslateTransition(Duration.millis(500), pilar);
+            hundirPilar.setByY(20);
+            hundirPilar.setInterpolator(Interpolator.EASE_IN);
             
-            TranslateTransition tt = new TranslateTransition(Duration.millis(800), token);
-            tt.setByX(dx);
-            tt.setByY(dy);
-            tt.setInterpolator(Interpolator.EASE_BOTH);
-            tt.setOnFinished(e -> {
-                casillaNodes.get(desde).getChildren().remove(token);
-                token.setTranslateX(0); 
-                token.setTranslateY(0);
+            // Jugador desaparece
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(500), token);
+            fadeOut.setToValue(0);
+            
+            ParallelTransition pt1 = new ParallelTransition(hundirPilar, fadeOut);
+            pt1.setOnFinished(e -> {
+                // Mover token a la nueva pos y que caiga del cielo
+                j.setPosicion(hasta);
                 posicionarToken(j);
+                double finalY = token.getTranslateY();
+                token.setTranslateY(finalY - 600); // Lo sube arriba del cielo
+                
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), token);
+                fadeIn.setToValue(1);
+                
+                TranslateTransition caerCielo = new TranslateTransition(Duration.millis(500), token);
+                caerCielo.setToY(finalY);
+                caerCielo.setInterpolator(Interpolator.EASE_OUT);
+                
+                ParallelTransition pt2 = new ParallelTransition(fadeIn, caerCielo);
+                pt2.setOnFinished(e2 -> {
+                    // Restaurar pilar silenciosamente
+                    TranslateTransition subirPilar = new TranslateTransition(Duration.millis(500), pilar);
+                    subirPilar.setByY(-20);
+                    subirPilar.play();
+                    
+                    if (onComplete != null) onComplete.run();
+                });
+                pt2.play();
             });
-            tt.play();
+            pt1.play();
+            
+        } else if (tipo.contains("TRINEO") || tipo.contains("OSO") || tipo.contains("MOTO")) {
+            // Pilar se mueve un poco hacia arriba para impulsar al jugador
+            TranslateTransition impulsarPilar = new TranslateTransition(Duration.millis(150), pilar);
+            impulsarPilar.setByY(-15);
+            impulsarPilar.setAutoReverse(true);
+            impulsarPilar.setCycleCount(2);
+            impulsarPilar.setInterpolator(Interpolator.EASE_OUT);
+            
+            impulsarPilar.setOnFinished(e -> {
+                animarSalto(j, desde, hasta, 800, onComplete);
+            });
+            impulsarPilar.play();
+            
         } else {
-            animarSalto(j, desde, hasta, 1000);
+            animarSalto(j, desde, hasta, 1000, onComplete);
         }
     }
 
-    private void animarSalto(Jugador j, int desde, int hasta, int duracionMs) {
+    private void animarSalto(Jugador j, int desde, int hasta, int duracionMs, Runnable onComplete) {
         Node token = playerTokens.get(j);
-        double dx = casillaNodes.get(hasta).getLayoutX() - casillaNodes.get(desde).getLayoutX();
-        double dy = casillaNodes.get(hasta).getLayoutY() - casillaNodes.get(desde).getLayoutY();
+        
+        // Calcular posiciones exactas usando posicionarToken para evitar errores de offset
+        double startX = token.getTranslateX();
+        double startY = token.getTranslateY();
+        
+        j.setPosicion(hasta);
+        posicionarToken(j);
+        double endX = token.getTranslateX();
+        double endY = token.getTranslateY();
+        
+        j.setPosicion(desde); // Volver temporalmente
+        posicionarToken(j);
+        
+        double dx = endX - startX;
+        double dy = endY - startY;
 
         TranslateTransition move = new TranslateTransition(Duration.millis(duracionMs), token);
         move.setByX(dx);
@@ -819,10 +865,9 @@ public class TableroController {
 
         ParallelTransition pt = new ParallelTransition(move, jump);
         pt.setOnFinished(e -> {
-            casillaNodes.get(desde).getChildren().remove(token);
-            token.setTranslateX(0);
-            token.setTranslateY(0);
+            j.setPosicion(hasta);
             posicionarToken(j);
+            if (onComplete != null) onComplete.run();
         });
         pt.play();
     }
