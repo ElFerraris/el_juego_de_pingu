@@ -9,7 +9,7 @@ Este archivo sirve para llevar el seguimiento de los archivos comentados con Jav
 ## 🎮 Controladores (`src.controlador`)
 - [x] `MainMenuController.java`
 - [x] `NavigationController.java`
-- [x] `GameContext.java`
+- [ ] `GameContext.java`
 - [ ] `PlayerConfigController.java`
 - [ ] `LoadGameController.java`
 - [ ] `OptionsController.java`
@@ -58,5 +58,5 @@ Este archivo sirve para llevar el seguimiento de los archivos comentados con Jav
 ---
 **Leyenda:**
 - `[ ]`: Pendiente de comentar/revisar.
-- `[/]`: En proceso.
-- `[x]`: Documentación completa y revisión técnica realizada.
+- `[ ]`: En proceso.
+- `[ ]`: Documentación completa y revisión técnica realizada.
