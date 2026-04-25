@@ -155,8 +155,8 @@ public class TableroController {
 
     @FXML
     public void initialize() {
-        // Detenemos la música de los menús al entrar a la partida
-        util.SoundManager.stopMusic();
+        // Iniciamos el sistema de música dinámica para la partida
+        util.SoundManager.startGameMusic();
 
         // Inicialización de Opciones Overlay
         initOptionsOverlay();
@@ -814,6 +814,21 @@ public class TableroController {
             VBox secondaryCard = crearTarjetaEstadoSecundaria(p);
             secondaryStatusContainer.getChildren().add(secondaryCard);
         }
+
+        // Actualizamos la música dinámica según el jugador más avanzado
+        recalcularMusicaDinamica();
+    }
+
+    private void recalcularMusicaDinamica() {
+        int maxPos = 0;
+        if (jugadores != null) {
+            for (Jugador j : jugadores) {
+                if (j.getPosicion() > maxPos) {
+                    maxPos = j.getPosicion();
+                }
+            }
+        }
+        util.SoundManager.updateGameMusicByPosition(maxPos);
     }
 
     private void aplicarEstiloPorJugador(Jugador j) {

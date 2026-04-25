@@ -73,26 +73,30 @@ public class SoundManager {
     // ==================== GESTIÓN DE MÚSICA ====================
 
     private static String currentMusicPath = "";
+    private static MediaPlayer[] gameMusicLayers = new MediaPlayer[7];
+    private static int currentLevel = -1;
 
     public static void setMusicVolume(double volume) {
         musicVolume = volume;
         if (musicPlayer != null) {
             musicPlayer.setVolume(musicVolume);
         }
+        // También actualizamos el volumen de las capas de la partida
+        updateGameMusicLevel(currentLevel);
     }
 
     /**
      * Reproduce la música del menú en bucle.
      */
     public static void playMenuMusic() {
+        stopGameMusic(); // Por si venimos de una partida
         playMusic("/assets/music/Menu/menu.mp3");
     }
 
     /**
-     * Carga y reproduce un archivo de música.
+     * Carga y reproduce un archivo de música normal (para menús).
      */
     public static void playMusic(String path) {
-        // Si ya está sonando esta misma música, no hacemos nada para evitar cortes
         if (currentMusicPath.equals(path) && musicPlayer != null) {
             return;
         }
@@ -115,7 +119,76 @@ public class SoundManager {
     }
 
     /**
-     * Detiene la música actual.
+     * Inicia el sistema de música dinámica para la partida.
+     * Carga las 7 pistas y las pone a reproducir sincronizadas a volumen 0.
+     */
+    public static void startGameMusic() {
+        stopMusic(); // Paramos la música de menú
+        stopGameMusic(); // Limpiamos por si acaso
+        
+        for (int i = 0; i < 7; i++) {
+            try {
+                String path = "/assets/music/Partida/" + (i + 1) + ".mp3";
+                URL resource = SoundManager.class.getResource(path);
+                if (resource != null) {
+                    Media media = new Media(resource.toExternalForm());
+                    gameMusicLayers[i] = new MediaPlayer(media);
+                    gameMusicLayers[i].setVolume(0); // Empezamos en silencio
+                    gameMusicLayers[i].setCycleCount(MediaPlayer.INDEFINITE);
+                    gameMusicLayers[i].play();
+                }
+            } catch (Exception e) {
+                System.err.println("Error cargando capa " + (i+1) + ": " + e.getMessage());
+            }
+        }
+        updateGameMusicLevel(1); // Empezamos con el nivel 1
+    }
+
+    /**
+     * Actualiza qué capa de música suena según la posición más avanzada.
+     * @param maxPos La posición del jugador más adelantado.
+     */
+    public static void updateGameMusicByPosition(int maxPos) {
+        // Nivel = posición / 7 + 1 (máximo 7)
+        int level = (maxPos / 7) + 1;
+        if (level > 7) level = 7;
+        
+        if (level != currentLevel) {
+            updateGameMusicLevel(level);
+        }
+    }
+
+    private static void updateGameMusicLevel(int level) {
+        currentLevel = level;
+        for (int i = 0; i < 7; i++) {
+            if (gameMusicLayers[i] != null) {
+                // Si el nivel coincide, subimos volumen; si no, a 0.
+                // (Si fueran capas acumulativas, sería i < level)
+                if ((i + 1) == level) {
+                    gameMusicLayers[i].setVolume(musicVolume);
+                } else {
+                    gameMusicLayers[i].setVolume(0);
+                }
+            }
+        }
+    }
+
+    /**
+     * Detiene toda la música de la partida.
+     */
+    public static void stopGameMusic() {
+        for (int i = 0; i < 7; i++) {
+            if (gameMusicLayers[i] != null) {
+                gameMusicLayers[i].stop();
+                gameMusicLayers[i].dispose();
+                gameMusicLayers[i] = null;
+            }
+        }
+        currentLevel = -1;
+    }
+
+    /**
+     * Detiene la música actual de menús.
      */
     public static void stopMusic() {
         if (musicPlayer != null) {
