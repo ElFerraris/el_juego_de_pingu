@@ -718,10 +718,8 @@ public class TableroController {
         juegoSimulado.setTurnoActual(turnoActual);
         juegoSimulado.comprobarGanador();
         
-        int idPartida = tablero.getIdPartida();
-        if (idPartida > 0) {
-            bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
-        }
+        // Se ha eliminado el auto-guardado por turno para optimizar rendimiento
+        // y por petición del usuario.
         
         if (jugadores.get(turnoActual).getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
             log("¡" + jugadores.get(turnoActual).getNombre() + " HA GANADO LA PARTIDA!");
@@ -1054,7 +1052,7 @@ public class TableroController {
         util.SoundManager.playConfirm();
         pendingAction = GameContext.ActionConfirmType.LOGOUT;
         confirmTitle.setText("VOLVER AL MENÚ");
-        confirmMessage.setText("¿Seguro que quieres volver al menú principal?");
+        confirmMessage.setText("¿Seguro que quieres volver al menú principal?\nSe guardará tu progreso automáticamente.");
         
         animateOut(menuPausa, () -> animateIn(confirmOverlay));
     }
@@ -1064,7 +1062,7 @@ public class TableroController {
         util.SoundManager.playConfirm();
         pendingAction = GameContext.ActionConfirmType.QUIT;
         confirmTitle.setText("SALIR DEL JUEGO");
-        confirmMessage.setText("¿Seguro que quieres cerrar el juego?");
+        confirmMessage.setText("¿Seguro que quieres cerrar el juego?\nSe guardará tu progreso antes de salir.");
         
         animateOut(menuPausa, () -> animateIn(confirmOverlay));
     }
@@ -1072,6 +1070,14 @@ public class TableroController {
     @FXML
     private void handleConfirmYes(ActionEvent event) {
         util.SoundManager.playConfirm();
+        
+        // GUARDADO MANUAL ANTES DE SALIR
+        int idPartida = tablero.getIdPartida();
+        if (idPartida > 0) {
+            System.out.println("► Guardando partida #" + idPartida + " antes de salir...");
+            bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
+        }
+
         if (pendingAction == GameContext.ActionConfirmType.LOGOUT) {
             NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
         } else if (pendingAction == GameContext.ActionConfirmType.QUIT) {
