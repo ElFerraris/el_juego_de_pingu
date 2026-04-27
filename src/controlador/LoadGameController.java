@@ -10,10 +10,11 @@ import javafx.scene.control.ListView;
 import javafx.application.Platform;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
-import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import modelo.PartidaGuardada;
 import datos.BBDD;
 import util.UIUtils;
@@ -114,11 +115,23 @@ public class LoadGameController {
                 playerIcons.getChildren().clear();
                 if (item.getColoresJugadores() != null) {
                     for (String colorName : item.getColoresJugadores()) {
-                        Circle c = new Circle(8);
-                        c.setFill(UIUtils.colorDesdeNombre(colorName));
-                        c.setStroke(Color.WHITE);
-                        c.setStrokeWidth(1.5);
-                        playerIcons.getChildren().add(c);
+                        ImageView icon = new ImageView();
+                        try {
+                            String colorNormalizado = (colorName != null && !colorName.trim().isEmpty()) ? colorName.toLowerCase() : "gris";
+                            Image img = new Image(getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorNormalizado + ".png"));
+                            icon.setImage(img);
+                        } catch (Exception e) {}
+                        icon.setFitWidth(16);
+                        icon.setFitHeight(16);
+                        icon.setPreserveRatio(true);
+                        
+                        javafx.scene.effect.DropShadow ds = new javafx.scene.effect.DropShadow();
+                        ds.setColor(Color.WHITE);
+                        ds.setRadius(2);
+                        ds.setSpread(1.0);
+                        icon.setEffect(ds);
+                        
+                        playerIcons.getChildren().add(icon);
                     }
                 }
                 

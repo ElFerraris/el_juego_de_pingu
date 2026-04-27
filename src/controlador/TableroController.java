@@ -127,8 +127,8 @@ public class TableroController {
     private boolean animacionEnCurso = false;
     
     private Map<Integer, StackPane> casillaNodes = new HashMap<>();
-    private Map<Jugador, Circle> playerTokens = new HashMap<>(); // Fichas en el tablero
-    private Map<Jugador, Circle> turnCircles = new HashMap<>();  // Círculos del indicador superior
+    private Map<Jugador, ImageView> playerTokens = new HashMap<>(); // Fichas en el tablero
+    private Map<Jugador, ImageView> turnCircles = new HashMap<>();  // Círculos del indicador superior
     private Pane tokensPane = new Pane(); // Capa superior para que los jugadores no queden detrás
     
     // ESTADO DE EVENTOS
@@ -373,10 +373,31 @@ public class TableroController {
 
     private void crearFichasJugadores() {
         for (Jugador j : jugadores) {
-            Circle token = new Circle(12);
-            token.setFill(getColorFromString(j.getColor()));
-            token.setStroke(Color.WHITE);
+            ImageView token = new ImageView();
+            try {
+                String colorName = j.getColor() != null ? j.getColor().toLowerCase() : "gris";
+                if (j instanceof Foca) colorName = "gris";
+                Image img = new Image(getClass().getResourceAsStream("/assets/jugadores/" + colorName + ".png"));
+                token.setImage(img);
+            } catch (Exception e) {
+                System.err.println("No se pudo cargar la imagen para " + j.getColor());
+            }
+            token.setFitWidth(36);
+            token.setFitHeight(36);
+            token.setPreserveRatio(true);
             token.getStyleClass().add("player-token");
+            
+            // Replicar el efecto visual del borde con el color del jugador
+            DropShadow ds = new DropShadow();
+            if (j instanceof Foca) {
+                ds.setColor(Color.web("#546e7a"));
+            } else {
+                ds.setColor(getColorFromString(j.getColor()));
+            }
+            ds.setRadius(3);
+            ds.setSpread(1.0);
+            token.setEffect(ds);
+            
             playerTokens.put(j, token);
         }
         // Posicionamos a todos (por si hay varios en la 0)
@@ -406,7 +427,7 @@ public class TableroController {
         int num = jugadoresEnCasilla.size();
         for (int k = 0; k < num; k++) {
             Jugador j = jugadoresEnCasilla.get(k);
-            Circle token = playerTokens.get(j);
+            ImageView token = playerTokens.get(j);
 
             double offsetX = 0;
             double offsetY = 0;
@@ -459,10 +480,18 @@ public class TableroController {
         for (int i = 0; i < jugadores.size(); i++) {
             Jugador j = jugadores.get(i);
             
-            Circle circle = new Circle(18);
-            circle.setFill(getColorFromString(j.getColor()));
-            circle.setStroke(Color.WHITE);
-            circle.setStrokeWidth(2);
+            ImageView circle = new ImageView();
+            try {
+                String colorName = j.getColor() != null ? j.getColor().toLowerCase() : "gris";
+                if (j instanceof Foca) colorName = "gris";
+                Image img = new Image(getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                circle.setImage(img);
+            } catch (Exception e) {
+                System.err.println("No se pudo cargar el icono para " + j.getColor());
+            }
+            circle.setFitWidth(36);
+            circle.setFitHeight(36);
+            circle.setPreserveRatio(true);
             
             DropShadow ds = new DropShadow();
             ds.setRadius(5);
@@ -943,17 +972,11 @@ public class TableroController {
 
         turnCircles.forEach((j, circle) -> {
             if (j == jActual) {
-                circle.setStroke(Color.YELLOW);
-                circle.setStrokeWidth(4);
-                
                 DropShadow glow = new DropShadow();
                 glow.setRadius(20);
                 glow.setColor(Color.YELLOW);
                 circle.setEffect(glow);
             } else {
-                circle.setStroke(Color.WHITE);
-                circle.setStrokeWidth(2);
-                
                 DropShadow ds = new DropShadow();
                 ds.setRadius(5);
                 ds.setColor(Color.BLACK);
@@ -1380,7 +1403,7 @@ public class TableroController {
         highlightLayer.getChildren().clear();
         
         for (Jugador j : involucrados) {
-            Circle token = playerTokens.get(j);
+            ImageView token = playerTokens.get(j);
             if (token != null) {
                 // Cast explícito a Pane para evitar que el compilador se queje de visibilidad
                 Pane originalParent = (Pane) token.getParent();
@@ -1395,8 +1418,8 @@ public class TableroController {
                 
                 // Reposicionar visualmente
                 javafx.geometry.Point2D localP = highlightLayer.sceneToLocal(bounds.getMinX(), bounds.getMinY());
-                token.setTranslateX(localP.getX() + token.getRadius());
-                token.setTranslateY(localP.getY() + token.getRadius());
+                token.setTranslateX(localP.getX() + token.getFitWidth() / 2);
+                token.setTranslateY(localP.getY() + token.getFitHeight() / 2);
                 
                 token.setEffect(new DropShadow(25, Color.WHITE));
             }
@@ -1425,7 +1448,7 @@ public class TableroController {
         for (Map.Entry<Jugador, Pane> entry : highlightingBackups.entrySet()) {
             Jugador j = entry.getKey();
             Pane originalParent = entry.getValue();
-            Circle token = playerTokens.get(j);
+            ImageView token = playerTokens.get(j);
             
             highlightLayer.getChildren().remove(token);
             token.setEffect(null);
@@ -1627,6 +1650,7 @@ public class TableroController {
             case "amarillo": return Color.YELLOW;
             case "naranja": return Color.ORANGE;
             case "morado": return Color.PURPLE;
+            case "rosa": return Color.PINK;
             default: 
                 try { return Color.web(colorRef); } 
                 catch (Exception e) { return Color.DARKBLUE; }

@@ -14,6 +14,8 @@ import javafx.scene.Node;
 import javafx.application.Platform;
 import javafx.animation.*;
 import javafx.util.Duration;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 import modelo.Jugador;
@@ -149,7 +151,7 @@ public class PlayerConfigController {
         private ComboBox<SlotType> typeCombo;
         private ComboBox<String> nameCombo;
         private Label fixedNameLabel;
-        private Circle colorCircle;
+        private ImageView colorIcon;
         private String selectedColor;
         private GridPane pickerGrid;
         private int index;
@@ -196,7 +198,7 @@ public class PlayerConfigController {
             selectedColor = "Azul";
             setupColorPicker();
 
-            card.getChildren().addAll(titleLabel, fixedNameLabel, colorCircle);
+            card.getChildren().addAll(titleLabel, fixedNameLabel, colorIcon);
         }
 
         private void setupWithDropdowns() {
@@ -227,21 +229,18 @@ public class PlayerConfigController {
                 updateCardStyle();
             });
 
-            card.getChildren().addAll(titleLabel, typeCombo, nameCombo, fixedNameLabel, colorCircle);
+            card.getChildren().addAll(titleLabel, typeCombo, nameCombo, fixedNameLabel, colorIcon);
             updateVisibility();
         }
 
         private void setupColorPicker() {
-            colorCircle = new Circle(30, colorDesdeNombre(selectedColor));
-            colorCircle.getStyleClass().add("color-circle");
-            colorCircle.setCursor(Cursor.HAND);
-            colorCircle.setStroke(Color.WHITE);
-            colorCircle.setStrokeWidth(3);
+            colorIcon = new ImageView();
+            colorIcon.setFitWidth(60);
+            colorIcon.setFitHeight(60);
+            colorIcon.setPreserveRatio(true);
+            colorIcon.setCursor(Cursor.HAND);
             
-            javafx.scene.effect.DropShadow glow = new javafx.scene.effect.DropShadow();
-            glow.setColor(colorDesdeNombre(selectedColor));
-            glow.setRadius(15);
-            colorCircle.setEffect(glow);
+            actualizarIcono();
 
             ContextMenu colorMenu = new ContextMenu();
             pickerGrid = new GridPane();
@@ -254,7 +253,26 @@ public class PlayerConfigController {
             colorMenu.getItems().add(customItem);
             colorMenu.setOnShowing(e -> populateColorGrid(colorMenu));
 
-            colorCircle.setOnMouseClicked(e -> colorMenu.show(colorCircle, Side.BOTTOM, 0, 0));
+            colorIcon.setOnMouseClicked(e -> {
+                if (getType() == SlotType.PLAYER) {
+                    colorMenu.show(colorIcon, Side.BOTTOM, 0, 0);
+                }
+            });
+        }
+        
+        private void actualizarIcono() {
+            try {
+                String colorName = (getType() == SlotType.FOCA) ? "gris" : selectedColor.toLowerCase();
+                Image img = new Image(getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                colorIcon.setImage(img);
+            } catch (Exception e) {
+                System.err.println("No se pudo cargar el icono");
+            }
+            
+            javafx.scene.effect.DropShadow glow = new javafx.scene.effect.DropShadow();
+            glow.setColor(getType() == SlotType.FOCA ? Color.web("#546e7a") : colorDesdeNombre(selectedColor));
+            glow.setRadius(15);
+            colorIcon.setEffect(glow);
         }
 
         private void flashCard() {
@@ -274,9 +292,10 @@ public class PlayerConfigController {
                 fixedNameLabel.setVisible(type == SlotType.FOCA);
                 fixedNameLabel.setManaged(type == SlotType.FOCA);
             }
-            if (colorCircle != null) {
-                colorCircle.setVisible(type == SlotType.PLAYER);
-                colorCircle.setManaged(type == SlotType.PLAYER);
+            if (colorIcon != null) {
+                colorIcon.setVisible(type != SlotType.NONE);
+                colorIcon.setManaged(type != SlotType.NONE);
+                actualizarIcono();
             }
         }
 
@@ -290,6 +309,9 @@ public class PlayerConfigController {
             } else if (type == SlotType.FOCA) {
                 card.getStyleClass().add("player-card-foca");
                 card.setStyle("-fx-border-color: #546e7a;");
+                if (colorIcon != null) {
+                   ((javafx.scene.effect.DropShadow)colorIcon.getEffect()).setColor(Color.web("#546e7a"));
+                }
             } else {
                 Color c = colorDesdeNombre(selectedColor);
                 String hex = String.format("#%02x%02x%02x", 
@@ -297,8 +319,8 @@ public class PlayerConfigController {
                     (int)(c.getGreen() * 255), 
                     (int)(c.getBlue() * 255));
                 card.setStyle("-fx-border-color: " + hex + ";");
-                if (colorCircle != null) {
-                   ((javafx.scene.effect.DropShadow)colorCircle.getEffect()).setColor(c);
+                if (colorIcon != null) {
+                   ((javafx.scene.effect.DropShadow)colorIcon.getEffect()).setColor(c);
                 }
             }
         }
@@ -341,8 +363,16 @@ public class PlayerConfigController {
             pickerGrid.getChildren().clear();
             int col = 0; int row = 0;
             for (String cName : COLORS) {
-                Color color = colorDesdeNombre(cName);
-                Circle c = new Circle(15, color);
+                ImageView c = new ImageView();
+                try {
+                    String colorName = cName.toLowerCase();
+                    Image img = new Image(getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                    c.setImage(img);
+                } catch (Exception e) {}
+                c.setFitWidth(30);
+                c.setFitHeight(30);
+                c.setPreserveRatio(true);
+                
                 boolean taken = false;
                 for (Slot s : slots) {
                     if (s != this && s.getType() == SlotType.PLAYER && cName.equals(s.getColor())) { taken = true; break; }
@@ -355,7 +385,7 @@ public class PlayerConfigController {
                     c.setOnMouseClicked(e -> {
                         flashCard();
                         selectedColor = cName;
-                        colorCircle.setFill(color);
+                        actualizarIcono();
                         updateCardStyle();
                         parent.hide();
                     });
