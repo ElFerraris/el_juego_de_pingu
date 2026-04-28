@@ -143,7 +143,11 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     @FXML
     private Slider musicSliderOverlay;
     @FXML
+    private Label musicLabelOverlay;
+    @FXML
     private Slider sfxSliderOverlay;
+    @FXML
+    private Label sfxLabelOverlay;
     @FXML
     private Button btnApplyOverlay;
 
@@ -1797,8 +1801,14 @@ public class TableroController implements GameFlowManager.GameUIHandler {
 
         resComboOverlay.valueProperty().addListener((o, old, n) -> checkOptionsDirty());
         fsCheckOverlay.selectedProperty().addListener((o, old, n) -> checkOptionsDirty());
-        musicSliderOverlay.valueProperty().addListener((o, old, n) -> checkOptionsDirty());
-        sfxSliderOverlay.valueProperty().addListener((o, old, n) -> checkOptionsDirty());
+        musicSliderOverlay.valueProperty().addListener((o, old, n) -> {
+            musicLabelOverlay.setText(Math.round(n.doubleValue()) + "%");
+            checkOptionsDirty();
+        });
+        sfxSliderOverlay.valueProperty().addListener((o, old, n) -> {
+            sfxLabelOverlay.setText(Math.round(n.doubleValue()) + "%");
+            checkOptionsDirty();
+        });
     }
 
     /**
@@ -1816,6 +1826,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         fsCheckOverlay.setSelected(initialFullscreen);
         musicSliderOverlay.setValue(initialMusic);
         sfxSliderOverlay.setValue(initialSfx);
+        musicLabelOverlay.setText(Math.round(initialMusic) + "%");
+        sfxLabelOverlay.setText(Math.round(initialSfx) + "%");
 
         btnApplyOverlay.setDisable(true);
         btnApplyOverlay.getStyleClass().remove("button-dirty");

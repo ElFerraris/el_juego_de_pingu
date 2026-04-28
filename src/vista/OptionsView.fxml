@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
 <?import java.net.URL?>
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
@@ -20,7 +21,7 @@
             <tabs>
                 <!-- PESTAÑA VÍDEO -->
                 <Tab text="VÍDEO">
-                    <VBox spacing="25" alignment="TOP_CENTER" style="-fx-padding: 50 40 0 40;">
+                    <VBox spacing="25" alignment="TOP_CENTER" styleClass="tab-content-area" style="-fx-padding: 50 40 0 40;">
                         <!-- Fila Resolución -->
                         <HBox alignment="CENTER_LEFT" spacing="20">
                             <Label text="RESOLUCIÓN" style="-fx-font-size: 24px; -fx-text-fill: #0d47a1; -fx-font-weight: bold;" />
@@ -39,20 +40,33 @@
                 
                 <!-- PESTAÑA AUDIO -->
                 <Tab text="AUDIO">
-                    <VBox spacing="25" alignment="TOP_CENTER" style="-fx-padding: 50 40 0 40;">
+                    <VBox spacing="25" alignment="TOP_CENTER" styleClass="tab-content-area" style="-fx-padding: 50 40 0 40;">
                         <!-- Fila Música -->
                         <HBox alignment="CENTER_LEFT" spacing="20">
                             <Label text="VOLUMEN MÚSICA" style="-fx-font-size: 24px; -fx-text-fill: #0d47a1; -fx-font-weight: bold;" />
                             <Region HBox.hgrow="ALWAYS" />
-                            <Slider fx:id="musicSlider" min="0" max="100" prefWidth="400" showTickLabels="false" showTickMarks="true" />
+                            <Label fx:id="musicLabel" text="100%" style="-fx-font-size: 20px; -fx-text-fill: #1a237e; -fx-min-width: 60;" />
+                            <Slider fx:id="musicSlider" min="0" max="100" prefWidth="350" showTickLabels="false" showTickMarks="true" />
                         </HBox>
                         
                         <!-- Fila SFX -->
                         <HBox alignment="CENTER_LEFT" spacing="20">
                             <Label text="VOLUMEN EFECTOS (SFX)" style="-fx-font-size: 24px; -fx-text-fill: #0d47a1; -fx-font-weight: bold;" />
                             <Region HBox.hgrow="ALWAYS" />
-                            <Slider fx:id="sfxSlider" min="0" max="100" prefWidth="400" showTickLabels="false" showTickMarks="true" />
+                            <Label fx:id="sfxLabel" text="100%" style="-fx-font-size: 20px; -fx-text-fill: #1a237e; -fx-min-width: 60;" />
+                            <Slider fx:id="sfxSlider" min="0" max="100" prefWidth="350" showTickLabels="false" showTickMarks="true" />
                         </HBox>
+                    </VBox>
+                </Tab>
+                
+                <!-- PESTAÑA CRÉDITOS -->
+                <Tab text="CRÉDITOS">
+                    <VBox alignment="CENTER" styleClass="tab-content-area" style="-fx-padding: 30;">
+                        <ImageView pickOnBounds="true" preserveRatio="true" fitHeight="320">
+                            <image>
+                                <Image url="@../assets/creditos/team.png" />
+                            </image>
+                        </ImageView>
                     </VBox>
                 </Tab>
             </tabs>

@@ -33,7 +33,11 @@ public class OptionsController {
     @FXML
     private Slider musicSlider;
     @FXML
+    private Label musicLabel;
+    @FXML
     private Slider sfxSlider;
+    @FXML
+    private Label sfxLabel;
     @FXML
     private Button applyButton;
 
@@ -70,6 +74,8 @@ public class OptionsController {
         fullscreenCheck.setSelected(initialFullscreen);
         musicSlider.setValue(initialMusic);
         sfxSlider.setValue(initialSfx);
+        musicLabel.setText(Math.round(initialMusic) + "%");
+        sfxLabel.setText(Math.round(initialSfx) + "%");
 
         // Deshabilitar botón por defecto
         applyButton.setDisable(true);
@@ -94,8 +100,14 @@ public class OptionsController {
     private void setupListeners() {
         resolutionCombo.valueProperty().addListener((obs, oldVal, newVal) -> checkChanges());
         fullscreenCheck.selectedProperty().addListener((obs, oldVal, newVal) -> checkChanges());
-        musicSlider.valueProperty().addListener((obs, oldVal, newVal) -> checkChanges());
-        sfxSlider.valueProperty().addListener((obs, oldVal, newVal) -> checkChanges());
+        musicSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            musicLabel.setText(Math.round(newVal.doubleValue()) + "%");
+            checkChanges();
+        });
+        sfxSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            sfxLabel.setText(Math.round(newVal.doubleValue()) + "%");
+            checkChanges();
+        });
 
         // Sincronización en tiempo real si el estado cambia externamente (tecla F11)
         applyButton.sceneProperty().addListener((obs, oldScene, newScene) -> {

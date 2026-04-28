@@ -244,6 +244,69 @@
 .premium-checkbox {
     -fx-font-size: 18px;
     -fx-text-fill: #0d47a1;
+    -fx-cursor: hand;
+}
+
+.premium-checkbox .box {
+    -fx-background-color: white;
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+}
+
+.premium-checkbox:selected .box {
+    -fx-background-color: #0d47a1;
+}
+
+.premium-checkbox .mark {
+    -fx-background-color: white;
+    -fx-shape: "M1.73,12.91 8.1,19.28 22.79,4.59";
+    -fx-scale-x: 1.2;
+    -fx-scale-y: 1.2;
+}
+
+/* TABPANE PREMIUM (OPCIONES) */
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 -2 0;
+}
+
+.tab-pane .tab-header-area .headers-region {
+    -fx-alignment: center;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #90caf9; /* Azul más destacado para pestañas inactivas */
+    -fx-padding: 10 40;
+    -fx-background-radius: 12 12 0 0;
+    -fx-cursor: hand;
+    -fx-background-insets: 0 2 -1 2;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #0d47a1;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #0d47a1; /* Azul oscuro vibrante para la seleccionada */
+    -fx-background-insets: 0 2 -2 2;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white; /* Texto blanco para máximo contraste */
+}
+
+/* Panel de contenido de la pestaña */
+.tab-content-area {
+    -fx-background-color: rgba(255, 255, 255, 0.9); /* Casi blanco pero con tinte */
+    -fx-background-radius: 0 0 15 15;
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 2;
 }
 
 /* CARDS DE JUGADOR (Panel lateral - Tablero) */
@@ -314,15 +377,54 @@
 }
 
 /* TABPANE PREMIUM (OPCIONES) */
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 -2 0; /* Unir con el cuadro */
+}
+
+.tab-pane .tab-header-area .headers-region {
+    -fx-alignment: center; /* Centrar botones de pestañas */
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
 .tab-pane .tab {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
-    -fx-padding: 10 30;
-    -fx-background-radius: 5 5 0 0;
+    -fx-background-color: #b3e5fc; /* Azul claro para no seleccionadas */
+    -fx-padding: 10 40;
+    -fx-background-radius: 12 12 0 0;
     -fx-cursor: hand;
+    -fx-background-insets: 0 2 -1 2; /* Pegado al borde inferior */
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #1a237e; /* Texto oscuro sobre azul claro */
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
 }
 
 .tab-pane .tab:selected {
-    -fx-background-color: #0d47a1;
+    -fx-background-color: #81d4fa; /* Un poco más oscuro que el fondo general pero claro */
+    -fx-background-insets: 0 2 -2 2; /* Solapar con el contenido para eliminar línea */
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #0d47a1;
+}
+
+/* Panel de contenido de la pestaña (Fondo un poco más oscuro que el panel blanco) */
+.tab-content-area {
+    -fx-background-color: rgba(13, 71, 161, 0.1); /* Azul translúcido oscuro */
+    -fx-background-radius: 15;
+    -fx-border-color: rgba(13, 71, 161, 0.2);
+    -fx-border-width: 2;
+    -fx-border-radius: 15;
+}
+
+.tab-content-area .label {
+    -fx-text-fill: #0d47a1;
+    -fx-font-weight: bold;
 }
 
 /* OVERLAYS IN-GAME */
