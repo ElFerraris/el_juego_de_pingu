@@ -41,7 +41,7 @@ public class BBDD {
      *         falla.
      */
     public static Connection conectarBD() {
-        System.out.println("►Estableciendo conexión con la Base de Datos...");
+        System.out.println("Estableciendo conexión con la Base de Datos...");
 
         // Datos para la conexión
         String url = "jdbc:oracle:thin:@//oracle.ilerna.com:1521/XEPDB2";
@@ -53,29 +53,22 @@ public class BBDD {
             Connection con = DriverManager.getConnection(url, usr, pwd);
 
             if (con.isValid(5)) {
-                // System.out.println("►Conexión establecida con BBDD!");
+                // System.out.println("Conexión establecida con BBDD!");
             } else {
-                System.out.println("►Conexión perdida (timeout 5s)");
+                System.out.println("Conexión perdida (timeout 5s)");
             }
 
             return con;
 
         } catch (ClassNotFoundException e) {
-            System.out.println("►No se ha encontrado el driver de Oracle.");
+            System.out.println("No se ha encontrado el driver de Oracle.");
         } catch (SQLException e) {
-            System.out.println("►No se pudo conectar, error en las credenciales");
-            System.out.println("►ERROR: " + e.getMessage());
+            System.out.println("No se pudo conectar, error en las credenciales");
+            System.out.println("ERROR: " + e.getMessage());
         }
 
         return null;
     }
-
-    /* FUNCIONES POR IMPLEMENTAR CON EL RESTO DEL JUEGO */
-
-    ///
-    /// - REGISTRAR JUGADOR
-    /// -
-    ///
 
     /**
      * Registra una nueva partida en el sistema y obtiene su identificador único.
@@ -113,41 +106,8 @@ public class BBDD {
             }
 
         } catch (SQLException e) {
-            System.out.println("► ERROR en BBDD: " + e.getMessage());
+            System.out.println(" ERROR en BBDD: " + e.getMessage());
             return 0;
-        }
-    }
-
-    /**
-     * Llama al procedimiento almacenado para insertar un único jugador en la base
-     * de datos.
-     * 
-     * @param con Conexión activa a la base de datos.
-     * @param j   Objeto {@link Jugador} con la información del perfil.
-     * @return {@code true} si la inserción fue exitosa.
-     */
-    public boolean insertarUnJugador(Connection con, Jugador j) {
-        String sql = "{call insertar_jugador(?, ?, ?)}";
-
-        try (CallableStatement cstmt = con.prepareCall(sql)) {
-            // 1. Nickname
-            cstmt.setString(1, j.getNombre());
-
-            // 2. Contraseña (usamos una por defecto si el modelo no tiene)
-            cstmt.setString(2, "pingu123");
-
-            // 3. Es_CPU (Comprobamos si es instancia de la clase Foca)
-            int esCpu = (j instanceof Foca) ? 1 : 0;
-            cstmt.setInt(3, esCpu);
-
-            cstmt.execute();
-            return true;
-
-        } catch (SQLException e) {
-            // Si el error es porque el nickname ya existe (Unique Constraint),
-            // aquí es donde capturaríamos el error de Oracle.
-            System.out.println("► Error al insertar a " + j.getNombre() + ": " + e.getMessage());
-            return false;
         }
     }
 
@@ -172,7 +132,7 @@ public class BBDD {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("► Error al comprobar existencia: " + e.getMessage());
+            System.out.println(" Error al comprobar existencia: " + e.getMessage());
         }
         return false;
     }
@@ -226,59 +186,19 @@ public class BBDD {
                                 idJugador = rs2.getInt("id_jugador");
                         }
                     }
-                    System.out.println("► Nuevo jugador registrado: " + j.getNombre() + " (ID: " + idJugador + ")");
+                    System.out.println(" Nuevo jugador registrado: " + j.getNombre() + " (ID: " + idJugador + ")");
                 }
             } else {
-                System.out.println("► El jugador " + j.getNombre() + " ya está en la BD con ID: " + idJugador);
+                System.out.println(" El jugador " + j.getNombre() + " ya está en la BD con ID: " + idJugador);
             }
 
             return idJugador; // Devolvemos el ID real de la base de datos
 
         } catch (SQLException e) {
-            System.out.println("► ERROR en registro de jugador: " + e.getMessage());
+            System.out.println(" ERROR en registro de jugador: " + e.getMessage());
             return -1;
         }
     }
-
-    /*
-     * public boolean ActualizarPartida(Juego juego) {
-     * // 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
-     * // se cerrará solo al llegar a la llave final }.
-     * try (Connection con = conectarBD()) {
-     * 
-     * if (con == null) return false;
-     * 
-     * // 2. Preparamos la llamada al procedimiento de Oracle
-     * String sql = "{call actualizar_partida(?, ?, ?)}";
-     * 
-     * try (CallableStatement cstmt = con.prepareCall(sql)) {
-     * // 1. p_num_partida: El ID de la partida que estamos jugando
-     * cstmt.setInt(1, juego.getTablero().getIdPartida());
-     * 
-     * // 2. p_torn_actual: El ID del jugador que tiene el turno
-     * cstmt.setInt(2, juego.getTurnoActual());
-     * 
-     * // 3. p_ganador: El ID del ganador (si no hay, pasamos un valor nulo o 0)
-     * if (juego.getGanador() != null) {
-     * cstmt.setInt(3, 1); // Aquí iría el ID real del ganador
-     * } else {
-     * cstmt.setNull(3, java.sql.Types.INTEGER);
-     * }
-     * 
-     * cstmt.execute();
-     * 
-     * // Recuperamos el ID que nos dio la función
-     * System.out.println("► Partida " + juego.getTablero().getIdPartida() +
-     * " actualizada en Oracle.");
-     * return true;
-     * }
-     * 
-     * } catch (SQLException e) {
-     * System.out.println("► ERROR al actualizar partida: " + e.getMessage());
-     * return false;
-     * }
-     * }
-     */
 
     /**
      * Vincula a un jugador con una partida específica y asigna su color.
@@ -312,7 +232,7 @@ public class BBDD {
 
             }
         } catch (SQLException e) {
-            System.out.println("► ERROR en insertarParticipacion: " + e.getMessage());
+            System.out.println(" ERROR en insertarParticipacion: " + e.getMessage());
             return false;
         }
     }
@@ -378,7 +298,7 @@ public class BBDD {
                 return true;
             }
         } catch (SQLException e) {
-            System.out.println("► ERROR al actualizar participación de " + j.getNombre() + ": " + e.getMessage());
+            System.out.println(" ERROR al actualizar participación de " + j.getNombre() + ": " + e.getMessage());
             return false;
         }
     }
@@ -417,7 +337,7 @@ public class BBDD {
                 return true;
             }
         } catch (SQLException e) {
-            System.out.println("► ERROR al actualizar estado de partida: " + e.getMessage());
+            System.out.println(" ERROR al actualizar estado de partida: " + e.getMessage());
             return false;
         }
     }
@@ -480,7 +400,7 @@ public class BBDD {
             return true;
 
         } catch (SQLException e) {
-            System.out.println("► ERROR al guardar estado completo: " + e.getMessage());
+            System.out.println(" ERROR al guardar estado completo: " + e.getMessage());
             return false;
         }
     }
@@ -560,7 +480,7 @@ public class BBDD {
             }
             return true;
         } catch (SQLException e) {
-            System.out.println("► ERROR al cargar: " + e.getMessage());
+            System.out.println(" ERROR al cargar: " + e.getMessage());
             return false;
         }
     }
@@ -598,7 +518,7 @@ public class BBDD {
             System.out.println("------------------------------------------------------------\n");
 
         } catch (SQLException e) {
-            System.out.println("► ERROR al listar partidas: " + e.getMessage());
+            System.out.println(" ERROR al listar partidas: " + e.getMessage());
         }
     }
 
@@ -654,7 +574,7 @@ public class BBDD {
             }
 
         } catch (SQLException e) {
-            System.out.println("► ERROR al obtener lista partidas pendientes: " + e.getMessage());
+            System.out.println(" ERROR al obtener lista partidas pendientes: " + e.getMessage());
         }
         return new ArrayList<>(mapa.values());
     }
@@ -705,7 +625,7 @@ public class BBDD {
             System.out.println("=".repeat(45) + "\n");
 
         } catch (SQLException e) {
-            System.out.println("► ERROR al generar ranking: " + e.getMessage());
+            System.out.println(" ERROR al generar ranking: " + e.getMessage());
         }
     }
 
@@ -734,14 +654,14 @@ public class BBDD {
                 // Recuperamos el resultado (1 = OK, 0 = FALLO)
                 int resultado = cstmt.getInt(1);
                 if (resultado == 1) {
-                    System.out.println("► Acceso concedido para: " + nickname);
+                    System.out.println(" Acceso concedido para: " + nickname);
                     return true;
                 }
             }
         } catch (SQLException e) {
-            System.out.println("► ERROR crítico en el login seguro: " + e.getMessage());
+            System.out.println(" ERROR crítico en el login seguro: " + e.getMessage());
         }
-        System.out.println("► Credenciales inválidas.");
+        System.out.println(" Credenciales inválidas.");
         return false;
     }
 
@@ -771,7 +691,7 @@ public class BBDD {
                 return obtenerIdJugador(con, nickname);
             }
         } catch (SQLException e) {
-            System.out.println("► ERROR: El nombre '" + nickname + "' ya está ocupado.");
+            System.out.println(" ERROR: El nombre '" + nickname + "' ya está ocupado.");
             return -1;
         }
     }
@@ -848,7 +768,7 @@ public class BBDD {
                 jugadores.add(rs.getString("nickname"));
             }
         } catch (SQLException e) {
-            System.out.println("► ERROR al listar jugadores: " + e.getMessage());
+            System.out.println(" ERROR al listar jugadores: " + e.getMessage());
         }
         return jugadores;
     }
@@ -879,7 +799,7 @@ public class BBDD {
                 int filasAfectadas = pstmt.executeUpdate();
 
                 if (filasAfectadas > 0) {
-                    System.out.println("► Partida " + idPartida + " eliminada.");
+                    System.out.println(" Partida " + idPartida + " eliminada.");
                     return true;
                 } else {
                     return false;
@@ -887,7 +807,7 @@ public class BBDD {
             }
 
         } catch (SQLException e) {
-            System.out.println("► ERROR al eliminar partida: " + e.getMessage());
+            System.out.println(" ERROR al eliminar partida: " + e.getMessage());
             return false;
         }
     }

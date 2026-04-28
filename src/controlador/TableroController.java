@@ -36,6 +36,8 @@ import modelo.*;
 import datos.BBDD;
 import util.SettingsManager;
 import util.SoundManager;
+import util.CameraController;
+import util.GameFlowManager;
 
 /**
  * Controlador principal de la vista del Tablero de Juego.
@@ -52,7 +54,7 @@ import util.SoundManager;
  * @author BadLabs©️
  * @version 1.0
  */
-public class TableroController {
+public class TableroController implements GameFlowManager.GameUIHandler {
 
     @FXML
     private Pane boardPane;
@@ -184,22 +186,16 @@ public class TableroController {
     private Map<Jugador, ImageView> turnCircles = new HashMap<>(); // Círculos del indicador superior
     private Pane tokensPane = new Pane(); // Capa superior para que los jugadores no queden detrás
 
+    // GESTIÓN DE FLUJO Y REGLAS (Delegada)
+    private GameFlowManager gameFlow;
+
     // ESTADO DE EVENTOS
     private Map<Jugador, Pane> highlightingBackups = new HashMap<>();
     private Runnable onEventContinue;
 
-    // ESTADO DE CÁMARA
-    private double mouseAnchorX;
-    private double mouseAnchorY;
-    private double translateAnchorX;
-    private double translateAnchorY;
-    private double zoomFactor = 1.0;
-    private static final double MIN_ZOOM = 0.4;
-    private static final double MAX_ZOOM = 3.0;
+    // GESTIÓN DE CÁMARA (Delegada)
+    private CameraController camera;
 
-    // CONTROL AUTOMÁTICO DE CÁMARA
-    private boolean cameraAutoMode = true;
-    private TranslateTransition cameraTransition;
     @FXML
     private StackPane eventNotificationContainer;
     @FXML
@@ -227,7 +223,10 @@ public class TableroController {
 
         // Inicialización de Opciones Overlay
         initOptionsOverlay();
-        initCamera();
+
+        // Inicializar Gestores
+        this.camera = new CameraController(cameraViewport, boardPane, zoomGroup, casillaNodes);
+        this.camera.init();
 
         // Esconder panel de log al inicio
         logPanelContainer.setTranslateX(-320);
@@ -241,21 +240,24 @@ public class TableroController {
 
         this.jugadores = GameContext.getInstance().getConfiguredPlayers();
 
+        // Inicializar Gestor de Flujo (después de tener tablero y jugadores)
+        this.gameFlow = new GameFlowManager(this.tablero, this.jugadores, this);
+
         // Centrar en el primer jugador
         if (jugadores != null && !jugadores.isEmpty()) {
-            smoothCenterOnPlayer(jugadores.get(0), 1.0);
+            camera.smoothCenterOnPlayer(jugadores.get(0), 1.0);
         } else {
-            centrarTablero();
+            camera.centerBoard();
         }
 
         // Centrar tablero automáticamente al conocer el tamaño
         cameraViewport.widthProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() > 0)
-                this.centrarTablero();
+                camera.centerBoard();
         });
         cameraViewport.heightProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal.doubleValue() > 0)
-                this.centrarTablero();
+                camera.centerBoard();
         });
 
         juegoSimulado.setTablero(this.tablero);
@@ -792,9 +794,7 @@ public class TableroController {
                     moveUp.setInterpolator(Interpolator.EASE_BOTH);
                     moveUp.play();
 
-                    moverJugadorAnimado(jActual, pasos, () -> {
-                        procesarEfectosCasilla(jActual);
-                    });
+                    moverJugadorAnimado(jActual, pasos);
                 });
                 moveDelay.play();
             });
@@ -810,7 +810,7 @@ public class TableroController {
      * @param onComplete     Acción a ejecutar cuando el jugador llega a su destino
      *                       final.
      */
-    private void moverJugadorAnimado(Jugador j, int pasosRestantes, Runnable onComplete) {
+    private void moverJugadorAnimado(Jugador j, int pasosRestantes) {
         if (pasosRestantes <= 0 || j.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
             diceNumberLabel.setText("0");
 
@@ -818,7 +818,7 @@ public class TableroController {
             fadeOut.setToValue(0);
             fadeOut.setOnFinished(e -> {
                 diceAnimationContainer.setVisible(false);
-                onComplete.run();
+                gameFlow.processCellEffects(j);
             });
             fadeOut.play();
         } else {
@@ -835,169 +835,55 @@ public class TableroController {
             cellAntigua.getChildren().remove(playerTokens.get(j));
             posicionarToken(j);
 
-            if (cameraAutoMode) {
-                smoothCenterOnPlayer(j, 0.4);
+            if (camera.isAutoMode()) {
+                camera.smoothCenterOnPlayer(j, 0.4);
             }
 
             PauseTransition pause = new PauseTransition(Duration.millis(350));
             pause.setOnFinished(e -> {
-                moverJugadorAnimado(j, pasosRestantes - 1, onComplete);
+                moverJugadorAnimado(j, pasosRestantes - 1);
             });
             pause.play();
         }
     }
 
-    /**
-     * Evalúa y aplica las reglas especiales de la casilla donde ha caído el
-     * jugador.
-     * 
-     * @param j El jugador que ha finalizado su movimiento.
-     */
-    private void procesarEfectosCasilla(Jugador j) {
-        PauseTransition effectDelay = new PauseTransition(Duration.seconds(1));
-        effectDelay.setOnFinished(ev -> {
-            int posAntes = j.getPosicion();
-
-            String logEfecto = tablero.aplicarEfectoCasilla(j);
-            if (logEfecto != null && !logEfecto.isEmpty()) {
-                log(logEfecto.replace("\n", " "));
-            }
-
-            int posDespues = j.getPosicion();
-
-            if (posAntes != posDespues) {
-                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
-                mostrarNotificacionEvento("¡" + tipo + "!", j);
-
-                log("¡Efecto! " + j.getNombre() + " se mueve a la casilla " + posDespues);
-                moverFichaDirecta(j, posAntes, posDespues, () -> comprobarBatallaYFinalizarTurno(j));
-            } else {
-                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
-                if (tipo.equals("ROMPEDIZAS")) {
-                    // Animación de temblor
-                    Node pilar = casillaNodes.get(posAntes);
-                    TranslateTransition tiembla = new TranslateTransition(Duration.millis(50), pilar);
-                    tiembla.setByX(4);
-                    tiembla.setAutoReverse(true);
-                    tiembla.setCycleCount(6);
-                    tiembla.setOnFinished(e -> comprobarBatallaYFinalizarTurno(j));
-                    tiembla.play();
-                } else {
-                    comprobarBatallaYFinalizarTurno(j);
-                }
-            }
-        });
-        effectDelay.play();
+    @Override
+    public void notifyEvent(String msg, Jugador j) {
+        mostrarNotificacionEvento(msg, j);
     }
 
-    /**
-     * Comprueba si el jugador debe iniciar una batalla (Guerra) tras aplicar
-     * los efectos de la casilla.
-     * 
-     * @param jActual El jugador que ha terminado su acción de movimiento.
-     */
-    private void comprobarBatallaYFinalizarTurno(Jugador jActual) {
-        if (jActual.getPosicion() <= 0 || jActual.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
-            finalizarTurno();
-        } else {
-            Jugador oponente = null;
-            for (Jugador p : jugadores) {
-                if (oponente == null && p != jActual && p.getPosicion() == jActual.getPosicion()) {
-                    oponente = p;
-                }
-            }
-
-            if (oponente != null) {
-                log("¡COLISIÓN en casilla " + jActual.getPosicion() + "!");
-                mostrarNotificacionEvento("¡COLISIÓN!", jActual);
-                resolverCombate(jActual, oponente);
-            } else {
-                finalizarTurno();
-            }
-        }
+    @Override
+    public void showEventDialog(String title, String msg, Runnable onComplete, Jugador... players) {
+        mostrarEventoDialogo(title, msg, onComplete, players);
     }
 
-    /**
-     * Ejecuta la resolución de un conflicto entre dos jugadores en la misma
-     * casilla.
-     * 
-     * @param atacante El jugador que acaba de llegar a la casilla.
-     * @param defensor El jugador que ya se encontraba allí.
-     */
-    private void resolverCombate(Jugador atacante, Jugador defensor) {
-        boolean esFoca = (atacante instanceof Foca || defensor instanceof Foca);
-        String titulo = esFoca ? "¡Ataque de la Foca Loca!" : "¡Guerra de Bolas de Nieve!";
-        StringBuilder mensaje = new StringBuilder();
+    @Override
+    public void moveTokenDirect(Jugador j, int desde, int hasta, Runnable onComplete) {
+        moverFichaDirecta(j, desde, hasta, onComplete);
+    }
 
-        if (esFoca) {
-            Jugador humano = (atacante instanceof Foca) ? defensor : atacante;
-            Foca foca = (Foca) ((atacante instanceof Foca) ? atacante : defensor);
+    @Override
+    public void finishTurn() {
+        finalizarTurno();
+    }
 
-            mensaje.append("¡La Foca Loca choca con ").append(humano.getNombre()).append("!\n\n");
-
-            if (humano.getInventario().tieneObjeto("Pez")) {
-                humano.getInventario().usarObjeto("Pez", humano);
-                foca.setTurnosBloqueados(foca.getTurnosBloqueados() + 2);
-                mensaje.append(humano.getNombre()).append(" lanza un veloz PEZ a la Foca.\n");
-                mensaje.append("La Foca se entretiene comiendo y pierde 2 turnos.");
-            } else {
-                mensaje.append(humano.getNombre()).append(" no tiene Peces para distraerla.\n");
-                mensaje.append("¡ZAS! Recibe un aletazo implacable.\n");
-
-                int casillaAgujero = -1;
-                for (int i = humano.getPosicion() - 1; i >= 0 && casillaAgujero == -1; i--) {
-                    if (tablero.getCasilla(i) != null && tablero.getCasilla(i).getTipo().equals("Casilla AGUJERO")) {
-                        casillaAgujero = i;
-                    }
-                }
-
-                int posAntigua = humano.getPosicion();
-                if (casillaAgujero != -1) {
-                    humano.setPosicion(casillaAgujero);
-                    mensaje.append(humano.getNombre()).append(" sale volando al Agujero de la casilla ")
-                            .append(casillaAgujero).append(".");
-                } else {
-                    humano.setPosicion(0);
-                    mensaje.append(humano.getNombre()).append(" sale volando hasta la SALIDA.");
-                }
-                moverFichaDirecta(humano, posAntigua, humano.getPosicion(), null);
-            }
+    @Override
+    public void playShakeAnimation(int position, Runnable onComplete) {
+        Node pilar = casillaNodes.get(position);
+        if (pilar != null) {
+            TranslateTransition tiembla = new TranslateTransition(Duration.millis(50), pilar);
+            tiembla.setByX(4);
+            tiembla.setAutoReverse(true);
+            tiembla.setCycleCount(6);
+            tiembla.setOnFinished(e -> {
+                if (onComplete != null)
+                    onComplete.run();
+            });
+            tiembla.play();
         } else {
-            int bolasAtacante = atacante.getInventario().getCantidad("BolaNieve");
-            int bolasDefensor = defensor.getInventario().getCantidad("BolaNieve");
-
-            mensaje.append(atacante.getNombre()).append(" (").append(bolasAtacante).append(" bolas) VS ")
-                    .append(defensor.getNombre()).append(" (").append(bolasDefensor).append(" bolas)\n\n");
-
-            if (bolasAtacante > bolasDefensor) {
-                int diff = bolasAtacante - bolasDefensor;
-                int posAntigua = defensor.getPosicion();
-                defensor.setPosicion(Math.max(0, posAntigua - diff));
-                mensaje.append(atacante.getNombre()).append(" gana.\n");
-                mensaje.append(defensor.getNombre()).append(" retrocede ").append(posAntigua - defensor.getPosicion())
-                        .append(" casillas.");
-                moverFichaDirecta(defensor, posAntigua, defensor.getPosicion(), null);
-            } else if (bolasDefensor > bolasAtacante) {
-                int diff = bolasDefensor - bolasAtacante;
-                int posAntigua = atacante.getPosicion();
-                atacante.setPosicion(Math.max(0, posAntigua - diff));
-                mensaje.append(defensor.getNombre()).append(" se defiende y gana.\n");
-                mensaje.append(atacante.getNombre()).append(" retrocede ").append(posAntigua - atacante.getPosicion())
-                        .append(" casillas.");
-                moverFichaDirecta(atacante, posAntigua, atacante.getPosicion(), null);
-            } else {
-                mensaje.append("¡Empate técnico! Nadie tiene más bolas. Se quedan donde están.");
-            }
-
-            while (atacante.getInventario().getCantidad("BolaNieve") > 0)
-                atacante.getInventario().eliminarObjeto("BolaNieve");
-            while (defensor.getInventario().getCantidad("BolaNieve") > 0)
-                defensor.getInventario().eliminarObjeto("BolaNieve");
+            if (onComplete != null)
+                onComplete.run();
         }
-
-        log(mensaje.toString().replace("\n", "  |  "));
-
-        mostrarEventoDialogo(titulo, mensaje.toString(), this::finalizarTurno, atacante, defensor);
     }
 
     /**
@@ -1136,7 +1022,6 @@ public class TableroController {
         animacionEnCurso = false;
 
         juegoSimulado.setTurnoActual(turnoActual);
-        juegoSimulado.comprobarGanador();
 
         // Se ha eliminado el auto-guardado por turno para optimizar rendimiento
         // y por petición del usuario.
@@ -1149,8 +1034,8 @@ public class TableroController {
             actualizarUI();
             setControlesBloqueados(false);
 
-            if (cameraAutoMode) {
-                smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
+            if (camera.isAutoMode()) {
+                camera.smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
             }
 
             comprobarBloqueoInicioTurno();
@@ -1487,7 +1372,7 @@ public class TableroController {
      * 
      * @param msg El texto a mostrar.
      */
-    private void log(String msg) {
+    public void log(String msg) {
         gameLogArea.appendText("► " + msg + "\n");
     }
 
@@ -1638,106 +1523,14 @@ public class TableroController {
         animateOut(confirmOverlay, () -> animateIn(menuPausa));
     }
 
-    // --- LÓGICA DE ANIMACIONES ---
-
-    /**
-     * Inicializa los controles de la cámara (Zoom con scroll y Pan con arrastre).
-     */
-    private void initCamera() {
-        // Hemos eliminado el clipping rígido para que el tablero se pueda ver por
-        // debajo de la interfaz
-
-        // Zoom suave con Scroll
-        cameraViewport.addEventFilter(ScrollEvent.SCROLL, event -> {
-            double delta = event.getDeltaY();
-            double zoomStep = (delta > 0) ? 1.1 : 0.9;
-
-            double nextZoom = zoomFactor * zoomStep;
-            if (nextZoom >= MIN_ZOOM && nextZoom <= MAX_ZOOM) {
-                zoomFactor = nextZoom;
-                zoomGroup.setScaleX(zoomFactor);
-                zoomGroup.setScaleY(zoomFactor);
-            }
-            event.consume();
-        });
-
-        // Desplazamiento (Pan) con Arrastre
-        cameraViewport.setOnMousePressed(event -> {
-            if (event.isPrimaryButtonDown()) {
-                mouseAnchorX = event.getSceneX();
-                mouseAnchorY = event.getSceneY();
-                translateAnchorX = boardPane.getTranslateX();
-                translateAnchorY = boardPane.getTranslateY();
-                cameraViewport.setCursor(javafx.scene.Cursor.MOVE);
-            }
-        });
-
-        cameraViewport.setOnMouseDragged(event -> {
-            if (event.isPrimaryButtonDown()) {
-                cameraAutoMode = false; // El usuario toma el control manual
-                if (cameraTransition != null)
-                    cameraTransition.stop();
-                boardPane.setTranslateX(translateAnchorX + (event.getSceneX() - mouseAnchorX));
-                boardPane.setTranslateY(translateAnchorY + (event.getSceneY() - mouseAnchorY));
-            }
-        });
-
-        cameraViewport.setOnMouseReleased(event -> {
-            cameraViewport.setCursor(javafx.scene.Cursor.DEFAULT);
-        });
-    }
-
     /**
      * Resetea la cámara a su posición automática centrada en el jugador actual.
      */
     @FXML
     private void handleResetCamera() {
         util.SoundManager.playConfirm();
-        cameraAutoMode = true; // Reactivar modo automático
-        smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
-    }
-
-    /**
-     * Centra la cámara suavemente sobre un jugador específico.
-     */
-    /**
-     * Centra la cámara suavemente sobre un jugador específico.
-     * 
-     * @param j               El jugador sobre el que centrar.
-     * @param durationSeconds Duración de la transición.
-     */
-    private void smoothCenterOnPlayer(Jugador j, double durationSeconds) {
-        if (boardPane != null && cameraViewport != null && j != null) {
-            StackPane cell = casillaNodes.get(j.getPosicion());
-            if (cell != null) {
-                double viewWidth = cameraViewport.getWidth();
-                double viewHeight = cameraViewport.getHeight();
-                if (viewWidth <= 0)
-                    viewWidth = 1280;
-                if (viewHeight <= 0)
-                    viewHeight = 720;
-
-                // Calculamos el centro visual (restando los 300px del panel derecho)
-                double visualCenterX = (viewWidth - 300) / 2.0;
-                double visualCenterY = viewHeight / 2.0;
-
-                // Centro de la casilla en coordenadas del boardPane
-                double targetX = cell.getLayoutX() + (cell.getPrefWidth() / 2.0);
-                double targetY = cell.getLayoutY() + (cell.getPrefHeight() / 2.0);
-
-                double newTX = visualCenterX - targetX;
-                double newTY = visualCenterY - targetY;
-
-                if (cameraTransition != null)
-                    cameraTransition.stop();
-
-                cameraTransition = new TranslateTransition(Duration.seconds(durationSeconds), boardPane);
-                cameraTransition.setToX(newTX);
-                cameraTransition.setToY(newTY);
-                cameraTransition.setInterpolator(Interpolator.EASE_BOTH);
-                cameraTransition.play();
-            }
-        }
+        camera.setAutoMode(true); // Reactivar modo automático
+        camera.smoothCenterOnPlayer(jugadores.get(turnoActual), 1.0);
     }
 
     /**
@@ -1874,35 +1667,7 @@ public class TableroController {
         animateOut(eventDialogueBox, null);
     }
 
-    /**
-     * Centra el tablero completo en la vista disponible.
-     */
-    private void centrarTablero() {
-        if (boardPane != null && cameraViewport != null) {
-            double viewWidth = cameraViewport.getWidth();
-            double viewHeight = cameraViewport.getHeight();
-
-            if (viewWidth <= 0)
-                viewWidth = 1280;
-            if (viewHeight <= 0)
-                viewHeight = 720;
-
-            // Reseteamos zoom
-            zoomFactor = 1.0;
-            zoomGroup.setScaleX(1.0);
-            zoomGroup.setScaleY(1.0);
-
-            // Calculamos el centro visual (ventana completa, ya no hay panel derecho)
-            double visualCenterX = viewWidth / 2.0;
-            double visualCenterY = viewHeight / 2.0;
-
-            // El punto de dibujo central es (1200, 1100), pero el isométrico
-            // desplaza el "centro visual" del rombo un poco hacia arriba.
-            // Ajustamos para que se vea perfectamente centrado.
-            boardPane.setTranslateX(visualCenterX - 1200);
-            boardPane.setTranslateY(visualCenterY - 950);
-        }
-    }
+    // --- LÓGICA DE ANIMACIONES ---
 
     /**
      * Ejecuta una animación de entrada suave para un panel u overlay.
