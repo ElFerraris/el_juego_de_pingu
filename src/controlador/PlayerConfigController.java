@@ -43,6 +43,12 @@ public class PlayerConfigController {
     private HBox playerSlotsContainer;
     @FXML
     private Label errorLabel;
+    @FXML
+    private VBox focaCard;
+    @FXML
+    private ImageView focaIcon;
+    @FXML
+    private CheckBox focaEnabledCheck;
 
     private List<Slot> slots = new ArrayList<>();
     private List<String> allPlayerNames = new ArrayList<>();
@@ -104,6 +110,34 @@ public class PlayerConfigController {
             new ParallelTransition(ft, st).play();
         }
         updateAllComboCells();
+        updateFocaStyle();
+    }
+
+    /**
+     * Alterna el estado de inclusión de la Foca en la partida.
+     */
+    @FXML
+    private void toggleFoca() {
+        util.SoundManager.playConfirm();
+        focaEnabledCheck.setSelected(!focaEnabledCheck.isSelected());
+        updateFocaStyle();
+    }
+
+    private void updateFocaStyle() {
+        if (focaEnabledCheck.isSelected()) {
+            focaCard.getStyleClass().remove("player-card-empty");
+            focaCard.setOpacity(1.0);
+            javafx.scene.effect.DropShadow glow = new javafx.scene.effect.DropShadow();
+            glow.setColor(Color.web("#546e7a"));
+            glow.setRadius(20);
+            focaIcon.setEffect(glow);
+        } else {
+            if (!focaCard.getStyleClass().contains("player-card-empty")) {
+                focaCard.getStyleClass().add("player-card-empty");
+            }
+            focaCard.setOpacity(0.6);
+            focaIcon.setEffect(null);
+        }
     }
 
     private boolean isUpdatingAll = false;
@@ -120,7 +154,7 @@ public class PlayerConfigController {
             isUpdatingAll = true;
             try {
                 for (Slot s : slots) {
-                    if (s.getType() != SlotType.NONE) {
+                    if (s.isEnabled()) {
                         s.refreshCombo();
                     }
                 }
@@ -145,25 +179,27 @@ public class PlayerConfigController {
         List<Jugador> configured = new ArrayList<>();
         boolean errorEncontrado = false;
 
+        // 1. Añadir Jugadores Humanos
         for (Slot s : slots) {
-            if (!errorEncontrado && s.getType() != SlotType.NONE) {
-                if (s.getType() == SlotType.PLAYER) {
-                    String name = s.getName();
-                    if (name == null || name.trim().isEmpty()) {
-                        errorLabel.setText("Todos los jugadores seleccionados deben tener nombre");
-                        errorEncontrado = true;
-                    } else {
-                        configured.add(new Pinguino(-1, name, s.getColor()));
-                    }
-                } else if (s.getType() == SlotType.FOCA) {
-                    configured.add(new Foca(-1, "FOCA LOCA"));
+            if (!errorEncontrado && s.isEnabled()) {
+                String name = s.getName();
+                if (name == null || name.trim().isEmpty()) {
+                    errorLabel.setText("Todos los jugadores seleccionados deben tener nombre");
+                    errorEncontrado = true;
+                } else {
+                    configured.add(new Pinguino(-1, name, s.getColor()));
                 }
             }
         }
 
+        // 2. Añadir Foca si está activada
+        if (!errorEncontrado && focaEnabledCheck.isSelected()) {
+            configured.add(new Foca(-1, "FOCA LOCA"));
+        }
+
         if (!errorEncontrado) {
             if (configured.size() < 2) {
-                errorLabel.setText("Mínimo 2 jugadores (incluyendo CPU) para empezar");
+                errorLabel.setText("Mínimo 2 participantes para empezar");
             } else {
                 GameContext.getInstance().setConfiguredPlayers(configured);
                 NavigationController.navigateTo(event, "SeedSelectionView.fxml",
@@ -182,25 +218,7 @@ public class PlayerConfigController {
         NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
     }
 
-    /**
-     * Representa los posibles tipos de entidad en un hueco de jugador.
-     */
-    private static class SlotType {
-        public static final SlotType PLAYER = new SlotType("JUGADOR");
-        public static final SlotType FOCA = new SlotType("FOCA (CPU)");
-        public static final SlotType NONE = new SlotType("VACÍO");
 
-        private final String label;
-
-        private SlotType(String label) {
-            this.label = label;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-    }
 
     /**
      * Representa un hueco de jugador en la interfaz.
@@ -215,7 +233,7 @@ public class PlayerConfigController {
         private VBox card;
         private Region flashOverlay;
         private Label titleLabel;
-        private ComboBox<SlotType> typeCombo;
+        private CheckBox slotEnabledCheck;
         private ComboBox<String> nameCombo;
         private Label fixedNameLabel;
         private ImageView colorIcon;
@@ -278,14 +296,12 @@ public class PlayerConfigController {
         }
 
         /**
-         * Configura los huecos restantes (1 al 3) con selectores desplegables para
-         * elegir entre Jugador, CPU o Vacío.
+         * Configura los huecos restantes (1 al 2) con un CheckBox para activarlos.
          */
         private void setupWithDropdowns() {
-            typeCombo = new ComboBox<>();
-            typeCombo.getItems().addAll(SlotType.PLAYER, SlotType.FOCA, SlotType.NONE);
-            typeCombo.setValue(index == 1 ? SlotType.PLAYER : SlotType.NONE);
-            typeCombo.setPrefWidth(160);
+            slotEnabledCheck = new CheckBox("ACTIVAR P" + (index + 1));
+            slotEnabledCheck.getStyleClass().add("premium-checkbox");
+            slotEnabledCheck.setSelected(index == 1); // El P2 activado por defecto
 
             nameCombo = new ComboBox<>();
             nameCombo.getItems().addAll(allPlayerNames);
@@ -295,21 +311,17 @@ public class PlayerConfigController {
             nameCombo.setButtonCell(new PlayerCell());
             nameCombo.valueProperty().addListener((obs, old, nw) -> updateAllComboCells());
 
-            fixedNameLabel = new Label("FOCA LOCA");
-            fixedNameLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #546e7a;");
-            fixedNameLabel.setVisible(false);
-            fixedNameLabel.setManaged(false);
-
             selectedColor = (index == 1) ? "Rojo" : "Verde";
             setupColorPicker();
 
-            typeCombo.valueProperty().addListener((obs, old, nw) -> {
+            slotEnabledCheck.selectedProperty().addListener((obs, old, nw) -> {
                 flashCard();
                 updateVisibility();
                 updateCardStyle();
+                updateAllComboCells();
             });
 
-            card.getChildren().addAll(titleLabel, typeCombo, nameCombo, fixedNameLabel, colorIcon);
+            card.getChildren().addAll(titleLabel, slotEnabledCheck, nameCombo, colorIcon);
             updateVisibility();
         }
 
@@ -338,7 +350,7 @@ public class PlayerConfigController {
             colorMenu.setOnShowing(e -> populateColorGrid(colorMenu));
 
             colorIcon.setOnMouseClicked(e -> {
-                if (getType() == SlotType.PLAYER) {
+                if (isEnabled()) {
                     colorMenu.show(colorIcon, Side.BOTTOM, 0, 0);
                 }
             });
@@ -349,7 +361,7 @@ public class PlayerConfigController {
          */
         private void actualizarIcono() {
             try {
-                String colorName = (getType() == SlotType.FOCA) ? "gris" : selectedColor.toLowerCase();
+                String colorName = selectedColor.toLowerCase();
                 Image img = new Image(
                         getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
                 colorIcon.setImage(img);
@@ -358,7 +370,7 @@ public class PlayerConfigController {
             }
 
             javafx.scene.effect.DropShadow glow = new javafx.scene.effect.DropShadow();
-            glow.setColor(getType() == SlotType.FOCA ? Color.web("#546e7a") : colorDesdeNombre(selectedColor));
+            glow.setColor(colorDesdeNombre(selectedColor));
             glow.setRadius(15);
             colorIcon.setEffect(glow);
         }
@@ -380,19 +392,15 @@ public class PlayerConfigController {
          * dependiendo de si el hueco es para un Jugador, una Foca o está Vacío.
          */
         private void updateVisibility() {
-            SlotType type = getType();
+            boolean enabled = isEnabled();
             if (nameCombo != null) {
-                nameCombo.setVisible(type == SlotType.PLAYER);
-                nameCombo.setManaged(type == SlotType.PLAYER);
-            }
-            if (fixedNameLabel != null) {
-                fixedNameLabel.setVisible(type == SlotType.FOCA);
-                fixedNameLabel.setManaged(type == SlotType.FOCA);
+                nameCombo.setVisible(enabled);
+                nameCombo.setManaged(enabled);
             }
             if (colorIcon != null) {
-                colorIcon.setVisible(type != SlotType.NONE);
-                colorIcon.setManaged(type != SlotType.NONE);
-                actualizarIcono();
+                colorIcon.setVisible(enabled);
+                colorIcon.setManaged(enabled);
+                if (enabled) actualizarIcono();
             }
         }
 
@@ -402,17 +410,11 @@ public class PlayerConfigController {
          */
         private void updateCardStyle() {
             card.getStyleClass().removeAll("player-card-empty", "player-card-foca");
-            SlotType type = getType();
+            boolean enabled = isEnabled();
 
-            if (type == SlotType.NONE) {
+            if (!enabled) {
                 card.getStyleClass().add("player-card-empty");
                 card.setStyle("-fx-border-color: #90a4ae;");
-            } else if (type == SlotType.FOCA) {
-                card.getStyleClass().add("player-card-foca");
-                card.setStyle("-fx-border-color: #546e7a;");
-                if (colorIcon != null) {
-                    ((javafx.scene.effect.DropShadow) colorIcon.getEffect()).setColor(Color.web("#546e7a"));
-                }
             } else {
                 Color c = colorDesdeNombre(selectedColor);
                 String hex = String.format("#%02x%02x%02x",
@@ -467,8 +469,8 @@ public class PlayerConfigController {
             return root;
         }
 
-        public SlotType getType() {
-            return (typeCombo == null) ? SlotType.PLAYER : typeCombo.getValue();
+        public boolean isEnabled() {
+            return (slotEnabledCheck == null) ? true : slotEnabledCheck.isSelected();
         }
 
         public String getName() {
@@ -516,7 +518,7 @@ public class PlayerConfigController {
 
                 boolean taken = false;
                 for (Slot s : slots) {
-                    if (s != this && s.getType() == SlotType.PLAYER && cName.equals(s.getColor())) {
+                    if (s != this && s.isEnabled() && cName.equals(s.getColor())) {
                         taken = true;
                         break;
                     }

@@ -16,9 +16,25 @@
     <VBox spacing="35" alignment="CENTER" maxWidth="1100" maxHeight="680" styleClass="glass-panel">
         <Label text="CONFIGURACIÓN DE PERSONAJES" styleClass="title-text" />
         
-        <HBox fx:id="playerSlotsContainer" spacing="30" alignment="CENTER" minHeight="280">
-            <!-- Cards and "+" buttons injected here -->
+        <HBox fx:id="playerSlotsContainer" spacing="20" alignment="CENTER" minHeight="350">
+            <!-- 3 Tarjetas de jugadores humanos inyectadas aquí -->
         </HBox>
+
+        <!-- Tarjeta de la Foca (Botón Gigante) -->
+        <VBox fx:id="focaCard" onMouseClicked="#toggleFoca" alignment="CENTER" spacing="10" 
+              maxWidth="1000" prefHeight="100" styleClass="player-card, player-card-foca" 
+              style="-fx-min-height: 100; -fx-max-height: 100; -fx-cursor: hand;">
+            <HBox alignment="CENTER" spacing="30" style="-fx-padding: 0 40;">
+                <ImageView fx:id="focaIcon" fitHeight="65" fitWidth="65" preserveRatio="true">
+                    <image>
+                        <Image url="@../assets/ico_jugadores/ico_gris.png" />
+                    </image>
+                </ImageView>
+                <Label text="FOCA LOCA (CPU)" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #546e7a;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <CheckBox fx:id="focaEnabledCheck" mouseTransparent="true" scaleX="2.5" scaleY="2.5" />
+            </HBox>
+        </VBox>
 
         <VBox spacing="30" alignment="CENTER">
             <Label fx:id="errorLabel" styleClass="error-text" wrapText="true" textAlignment="CENTER" />
