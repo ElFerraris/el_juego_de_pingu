@@ -10,11 +10,18 @@ import javafx.application.Platform;
 /**
  * Controlador para la vista del Menú Principal.
  * 
- * <p>Esta clase se encarga de gestionar las interacciones del usuario en la pantalla inicial
- * del juego después del login. Permite navegar hacia la configuración de partida, cargar
- * partidas guardadas, acceder a opciones o cerrar la sesión.</p>
+ * <p>
+ * Esta clase se encarga de gestionar las interacciones del usuario en la
+ * pantalla inicial
+ * del juego después del login. Permite navegar hacia la configuración de
+ * partida, cargar
+ * partidas guardadas, acceder a opciones o cerrar la sesión.
+ * </p>
  * 
- * <p>En JavaFX, los controladores se enlazan con archivos .fxml mediante la anotación {@code @FXML}.</p>
+ * <p>
+ * En JavaFX, los controladores se enlazan con archivos .fxml mediante la
+ * anotación {@code @FXML}.
+ * </p>
  * 
  * @author BadLabs©️
  * @version 1.0
@@ -22,22 +29,27 @@ import javafx.application.Platform;
 public class MainMenuController {
 
     /** Etiqueta que muestra el mensaje de bienvenida al jugador actual. */
-    @FXML 
+    @FXML
     private Label welcomeLabel;
 
     /**
      * Método de inicialización automática de JavaFX.
      * 
-     * <p>Se ejecuta después de que el archivo FXML ha sido cargado y los campos anotados 
-     * con {@code @FXML} han sido inyectados. Aquí preparamos la interfaz con los datos
-     * del usuario logueado.</p>
+     * <p>
+     * Se ejecuta después de que el archivo FXML ha sido cargado y los campos
+     * anotados
+     * con {@code @FXML} han sido inyectados. Aquí preparamos la interfaz con los
+     * datos
+     * del usuario logueado.
+     * </p>
      */
     @FXML
     public void initialize() {
         // Iniciar la música del menú
         util.SoundManager.playMenuMusic();
 
-        // Obtenemos el usuario del contexto global (Singleton) para personalizar el saludo
+        // Obtenemos el usuario del contexto global (Singleton) para personalizar el
+        // saludo
         Jugador current = GameContext.getInstance().getCurrentUser();
 
         // Mostramos su nombre
@@ -79,8 +91,11 @@ public class MainMenuController {
     /**
      * Gestiona el cierre de sesión del usuario.
      * 
-     * <p>En lugar de cerrar directamente, marca el tipo de acción en el contexto global
-     * y abre un diálogo de confirmación.</p>
+     * <p>
+     * En lugar de cerrar directamente, marca el tipo de acción en el contexto
+     * global
+     * y abre un diálogo de confirmación.
+     * </p>
      * 
      * @param event El evento de acción disparado por el botón "Cerrar Sesión".
      */
@@ -94,7 +109,9 @@ public class MainMenuController {
     /**
      * Gestiona la salida completa de la aplicación.
      * 
-     * <p>Similar al logout, solicita confirmación mediante un diálogo emergente.</p>
+     * <p>
+     * Similar al logout, solicita confirmación mediante un diálogo emergente.
+     * </p>
      * 
      * @param event El evento de acción disparado por el botón "Salir".
      */
@@ -105,4 +122,3 @@ public class MainMenuController {
         NavigationController.navigateTo(event, "ConfirmDialogView.fxml", NavigationController.Direction.FORWARD);
     }
 }
-

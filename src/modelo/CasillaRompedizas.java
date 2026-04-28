@@ -1,13 +1,28 @@
 package modelo;
 
 /**
- * Casilla rompedizas: penaliza al jugador según la cantidad de objetos.
- * - 0 objetos: sin penalización
- * - 1-5 objetos: pierde un turno
- * - Más de 5 objetos: vuelve al principio
+ * Casilla de suelo inestable que penaliza el exceso de carga en el inventario.
+ * 
+ * <p>
+ * El efecto varía según la cantidad total de objetos acumulados:
+ * <ul>
+ * <li>0 objetos: Tránsito seguro.</li>
+ * <li>1-5 objetos: El jugador pierde un turno equilibrándose.</li>
+ * <li>Más de 5 objetos: El hielo se rompe y el jugador regresa al inicio.</li>
+ * </ul>
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class CasillaRompedizas extends Casilla {
 
+    /**
+     * Constructor para la Casilla Rompediza.
+     * 
+     * @param posicion Índice en el tablero.
+     * @param tipo     Identificador de tipo.
+     */
     public CasillaRompedizas(int posicion, String tipo) {
         super(posicion, tipo);
     }
@@ -27,7 +42,8 @@ public class CasillaRompedizas extends Casilla {
             return "El hielo cruje por el peso... " + jugador.getNombre() + " pierde un turno equilibrándose.";
         } else {
             jugador.setPosicion(0);
-            return "¡CRACK! Demasiado peso. El hielo se rompe y " + jugador.getNombre() + " se cae al agua volviendo al inicio.";
+            return "¡CRACK! Demasiado peso. El hielo se rompe y " + jugador.getNombre()
+                    + " se cae al agua volviendo al inicio.";
         }
     }
 

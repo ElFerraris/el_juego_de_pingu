@@ -212,6 +212,12 @@ public class NavigationController {
      * Detecta si las vistas usan la estructura de "glass-panel" para animar
      * solo el contenido interno y no el fondo.
      * </p>
+     * 
+     * @param stage    La ventana principal en la que se realiza la transición.
+     * @param fxmlFile Nombre del archivo de la vista destino a cargar.
+     * @param dir      La dirección de la transición (ej. Direction.RIGHT).
+     * @throws IOException Si ocurre un error al intentar leer el archivo FXML de
+     *                     destino.
      */
     private static void loadAndSetWithTransition(Stage stage, String fxmlFile, int dir) throws IOException {
         // Si no hay dirección, cargamos de forma normal
@@ -412,6 +418,13 @@ public class NavigationController {
      * <li>Aplicar la resolución configurada si no estamos en pantalla
      * completa.</li>
      * </ul>
+     * 
+     * @param stage      La ventana (Stage) donde se establecerá la escena.
+     * @param fxmlFile   Nombre del archivo de la vista a cargar.
+     * @param fullScreen Determina si la ventana debe configurarse en modo pantalla
+     *                   completa.
+     * @throws IOException Si ocurre un error leyendo el archivo FXML o construyendo
+     *                     su jerarquía.
      */
     private static void loadAndSet(Stage stage, String fxmlFile, boolean fullScreen) throws IOException {
         String fullPath = VISTA_PATH + fxmlFile;
@@ -496,13 +509,23 @@ public class NavigationController {
         }
     }
 
-    /** Verifica si la ventana está actualmente en pantalla completa. */
+    /**
+     * Verifica si la ventana está actualmente en pantalla completa.
+     * 
+     * @param stage La ventana a comprobar.
+     * @return true si la ventana se encuentra en pantalla completa, false en caso
+     *         contrario.
+     */
     private static boolean isFullWindowed(Stage stage) {
         return stage.isFullScreen();
     }
 
     /**
      * Aplica la resolución de pantalla guardada en las preferencias.
+     * 
+     * @param stage La ventana a la que se le aplicará la resolución.
+     * @param sm    Instancia del gestor de ajustes para extraer la resolución
+     *              deseada.
      */
     private static void applyResolution(Stage stage, util.SettingsManager sm) {
         String[] dimensions = sm.getResolution().split("x");
@@ -517,6 +540,8 @@ public class NavigationController {
 
     /**
      * Asegura que el archivo CSS principal esté cargado en la escena.
+     * 
+     * @param scene La escena en la que se inyectará la hoja de estilos global.
      */
     private static void ensureCssLoaded(Scene scene) {
         if (scene != null) {
@@ -540,6 +565,10 @@ public class NavigationController {
      * inyectar
      * comportamiento sin tener que escribir código en cada controlador.
      * </p>
+     * 
+     * @param root     El nodo raíz de la vista (Parent) a analizar.
+     * @param fxmlFile Nombre del archivo FXML para comprobar exclusiones de sonido
+     *                 en ciertas pantallas.
      */
     private static void applyGlobalEffects(Parent root, String fxmlFile) {
         if (root != null) {
@@ -572,6 +601,8 @@ public class NavigationController {
 
     /**
      * Adjunta los sonidos de clic a un nodo basándose en su texto o clase CSS.
+     * 
+     * @param node El componente visual de la interfaz de usuario.
      */
     private static void attachMenuSounds(Node node) {
         node.setOnMouseClicked(e -> {
@@ -605,6 +636,9 @@ public class NavigationController {
 
     /**
      * Sobrecarga para aplicar efectos si el nodo es un Parent.
+     * 
+     * @param node     El nodo en el cual verificar si es del tipo Parent.
+     * @param fxmlFile Nombre de la vista, utilizado para condiciones de audio.
      */
     private static void applyGlobalEffects(Node node, String fxmlFile) {
         if (node instanceof Parent) {
@@ -612,7 +646,12 @@ public class NavigationController {
         }
     }
 
-    /** Muestra el overlay de carga. */
+    /**
+     * Muestra el overlay de carga.
+     * 
+     * @param scene La escena sobre la cual se desplegará el overlay (pantalla de
+     *              espera).
+     */
     public static void showLoading(Scene scene) {
         LoadingOverlay.show(scene);
     }

@@ -4,17 +4,46 @@ import modelo.CasillaTrineo;
 import java.util.Random;
 
 /**
- * Representa un evento aleatorio que ocurre en una casilla interrogante.
- * Otorga objetos al jugador según el tipo de evento.
+ * Representa un suceso fortuito activado por las casillas de suministro.
+ * 
+ * <p>
+ * Los eventos encapsulan recompensas directas (objetos) o beneficios tácticos
+ * (transporte en moto de nieve) que alteran el estado del jugador o su posición
+ * en el tablero.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class Evento {
 
+    /** Identificador del tipo de suceso o recompensa. */
     private String tipoEvento;
 
+    /**
+     * Constructor para un Evento.
+     * 
+     * @param tipoEvento Cadena que identifica la naturaleza del evento.
+     */
     public Evento(String tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
 
+    /**
+     * Ejecuta las consecuencias del evento sobre el jugador y el tablero.
+     * 
+     * <p>
+     * Gestiona la lógica de entrega de suministros o el desplazamiento especial
+     * mediante la Moto de Nieve, buscando la interacción más coherente según el
+     * estado del tablero.
+     * </p>
+     * 
+     * @param jugador El {@link Jugador} que recibe los efectos.
+     * @param tablero El {@link Tablero} actual para cálculos de posición (ej. Moto
+     *                de Nieve).
+     * @return Un mensaje descriptivo y amigable para el usuario sobre el resultado
+     *         del evento.
+     */
     public String aplicarEfecto(Jugador jugador, Tablero tablero) {
         switch (tipoEvento) {
             case "Pez":
@@ -23,7 +52,8 @@ public class Evento {
             case "BolaNieve":
                 Random r = new Random();
                 int cantidad = r.nextInt(3) + 1;
-                for (int i = 0; i < cantidad; i++) jugador.getInventario().agregarObjeto("BolaNieve");
+                for (int i = 0; i < cantidad; i++)
+                    jugador.getInventario().agregarObjeto("BolaNieve");
                 return "¡Has recogido " + cantidad + " Bolas de Nieve! \u2744\uFE0F";
             case "DadoRapido":
                 jugador.getInventario().agregarObjeto("DadoRapido");
@@ -44,6 +74,11 @@ public class Evento {
         return "No hay objeto.";
     }
 
+    /**
+     * Obtiene el tipo de evento registrado.
+     * 
+     * @return Cadena con el tipo.
+     */
     public String getTipoEvento() {
         return tipoEvento;
     }

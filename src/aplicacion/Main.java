@@ -9,7 +9,26 @@ import javafx.scene.text.Font;
 import util.SettingsManager;
 import util.SoundManager;
 
+/**
+ * Clase principal que inicializa la aplicación JavaFX.
+ * 
+ * <p>
+ * Esta clase se encarga de cargar las fuentes globales, inicializar el
+ * gestor de configuración, aplicar los volúmenes de audio guardados y
+ * mostrar la pantalla inicial de inicio de sesión (Login).
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
+ */
 public class Main extends Application {
+
+	/**
+	 * Punto de entrada de JavaFX.
+	 * 
+	 * @param primaryStage El escenario principal proporcionado por la plataforma
+	 *                     JavaFX.
+	 */
 	@Override
 	public void start(Stage primaryStage) {
 		// REGISTRO GLOBAL DE FUENTES
@@ -44,6 +63,11 @@ public class Main extends Application {
 		}
 	}
 
+	/**
+	 * Método principal estándar de Java.
+	 * 
+	 * @param args Argumentos de línea de comandos pasados a la aplicación.
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}

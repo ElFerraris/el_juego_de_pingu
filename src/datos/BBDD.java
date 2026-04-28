@@ -13,14 +13,32 @@ import modelo.Pinguino;
 import modelo.Jugador;
 
 /**
- * Clase para gestionar la conexión y operaciones con la Base de Datos.
+ * Motor de persistencia y gestión de datos del juego.
+ * 
+ * <p>
+ * Proporciona una interfaz robusta para interactuar con la base de datos
+ * Oracle,
+ * encargándose de la conectividad, ejecución de procedimientos almacenados y
+ * consultas complejas para el guardado y carga de partidas, gestión de usuarios
+ * y generación de rankings.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.1
  */
 public class BBDD {
-    // Gestor de conexión principal para el juego de pingüinos
 
     /**
-     * Establece conexión con la Base de Datos Oracle.
-     * @return Conexión a la BD, o null si falla.
+     * Establece una conexión activa con la base de datos Oracle remota.
+     * 
+     * <p>
+     * Utiliza el driver Thin de Oracle y maneja internamente las excepciones
+     * de conectividad y credenciales, proporcionando logs de diagnóstico en
+     * caso de fallo.
+     * </p>
+     * 
+     * @return Objeto {@link Connection} configurado, o {@code null} si la conexión
+     *         falla.
      */
     public static Connection conectarBD() {
         System.out.println("►Estableciendo conexión con la Base de Datos...");
@@ -52,84 +70,101 @@ public class BBDD {
         return null;
     }
 
-/* FUNCIONES POR IMPLEMENTAR CON EL RESTO DEL JUEGO */
-	
-	///
-	/// - REGISTRAR JUGADOR
-	/// - 
-	///
-	
-	
-	
+    /* FUNCIONES POR IMPLEMENTAR CON EL RESTO DEL JUEGO */
+
+    ///
+    /// - REGISTRAR JUGADOR
+    /// -
+    ///
+
+    /**
+     * Registra una nueva partida en el sistema y obtiene su identificador único.
+     * 
+     * @param juego Instancia del {@link Juego} con la información del tablero.
+     * @return El ID de la partida generado por la base de datos, o 0 si falla.
+     */
     public int guardarNuevaPartida(Juego juego) {
-    	// 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
+        // 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
         // se cerrará solo al llegar a la llave final }.
-        try (Connection con = conectarBD()) { 
-            
-            if (con == null) return 0;
+        try (Connection con = conectarBD()) {
+
+            if (con == null)
+                return 0;
 
             // 2. Preparamos la llamada al procedimiento de Oracle
             // Ahora recibe dos parámetros: seed y nombre
-            String sql = "{? = call insertar_partida(?, ?)}"; 
+            String sql = "{? = call insertar_partida(?, ?)}";
 
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 // Registramos el tipo del primer "?" (el retorno)
                 cstmt.registerOutParameter(1, java.sql.Types.INTEGER);
-                
+
                 // 1. Semilla del tablero
                 cstmt.setString(2, juego.getTablero().getSeed());
-                
+
                 // 2. Nombre de la partida
                 cstmt.setString(3, juego.getNombrePartida());
-                
+
                 cstmt.execute();
-                
+
                 // Recuperamos el ID que nos dio la función
-                int idPartida = cstmt.getInt(1); 
+                int idPartida = cstmt.getInt(1);
                 return idPartida;
             }
-            
+
         } catch (SQLException e) {
             System.out.println("► ERROR en BBDD: " + e.getMessage());
             return 0;
         }
     }
-    
+
     /**
-     * Llama al procedimiento almacenado para insertar un único jugador.
+     * Llama al procedimiento almacenado para insertar un único jugador en la base
+     * de datos.
+     * 
+     * @param con Conexión activa a la base de datos.
+     * @param j   Objeto {@link Jugador} con la información del perfil.
+     * @return {@code true} si la inserción fue exitosa.
      */
     public boolean insertarUnJugador(Connection con, Jugador j) {
         String sql = "{call insertar_jugador(?, ?, ?)}";
-        
+
         try (CallableStatement cstmt = con.prepareCall(sql)) {
             // 1. Nickname
             cstmt.setString(1, j.getNombre());
-            
+
             // 2. Contraseña (usamos una por defecto si el modelo no tiene)
-            cstmt.setString(2, "pingu123"); 
-            
+            cstmt.setString(2, "pingu123");
+
             // 3. Es_CPU (Comprobamos si es instancia de la clase Foca)
             int esCpu = (j instanceof Foca) ? 1 : 0;
             cstmt.setInt(3, esCpu);
-            
+
             cstmt.execute();
             return true;
-            
+
         } catch (SQLException e) {
-            // Si el error es porque el nickname ya existe (Unique Constraint), 
+            // Si el error es porque el nickname ya existe (Unique Constraint),
             // aquí es donde capturaríamos el error de Oracle.
             System.out.println("► Error al insertar a " + j.getNombre() + ": " + e.getMessage());
             return false;
         }
     }
-    
+
+    /**
+     * Verifica la existencia de un jugador en el sistema basándose en su nickname.
+     * 
+     * @param con      Conexión activa a la base de datos.
+     * @param nickname Nombre de usuario a comprobar.
+     * @return {@code true} si el jugador ya está registrado.
+     */
     public boolean existeJugador(Connection con, String nickname) {
         // Buscamos si hay algún registro con ese nombre
         String sql = "SELECT COUNT(*) FROM jugador WHERE nickname = ?";
-        
+
         try (PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setString(1, nickname);
-            
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     // Si el conteo es mayor a 0, el jugador ya existe
@@ -141,21 +176,30 @@ public class BBDD {
         }
         return false;
     }
-    
+
     /**
-     * Comprueba si el jugador existe y, si no, lo inserta en la base de datos.
-     * @param j El objeto Jugador (o CPU) a registrar.
-     * @return true si se insertó o ya existía, false si hubo un error crítico.
+     * Garantiza que un jugador exista en la base de datos antes de iniciar una
+     * partida.
+     * 
+     * <p>
+     * Realiza una comprobación de existencia y, en caso negativo, ejecuta el
+     * registro del nuevo perfil. Devuelve siempre el ID único de base de datos
+     * para su uso posterior en la sesión.
+     * </p>
+     * 
+     * @param j El {@link Jugador} a validar o registrar.
+     * @return El ID único del jugador en la base de datos, o -1 en caso de error.
      */
     public int registrarJugadorSiNoExiste(Jugador j) {
         int idJugador = -1; // Valor por defecto si falla
 
         try (Connection con = conectarBD()) {
-            if (con == null) return -1;
+            if (con == null)
+                return -1;
 
             // 1. PASO: Comprobar si existe y pillar su ID
             String sqlCheck = "SELECT id_jugador FROM jugador WHERE nickname = ?";
-            
+
             try (PreparedStatement pstmt = con.prepareStatement(sqlCheck)) {
                 pstmt.setString(1, j.getNombre());
                 try (ResultSet rs = pstmt.executeQuery()) {
@@ -173,12 +217,13 @@ public class BBDD {
                     cstmt.setString(2, "pingu123");
                     cstmt.setInt(3, (j instanceof Foca) ? 1 : 0);
                     cstmt.execute();
-                    
+
                     // 3. PASO: Una vez insertado, volvemos a consultar para obtener el ID generado
                     try (PreparedStatement pstmt2 = con.prepareStatement(sqlCheck)) {
                         pstmt2.setString(1, j.getNombre());
                         try (ResultSet rs2 = pstmt2.executeQuery()) {
-                            if (rs2.next()) idJugador = rs2.getInt("id_jugador");
+                            if (rs2.next())
+                                idJugador = rs2.getInt("id_jugador");
                         }
                     }
                     System.out.println("► Nuevo jugador registrado: " + j.getNombre() + " (ID: " + idJugador + ")");
@@ -186,7 +231,7 @@ public class BBDD {
             } else {
                 System.out.println("► El jugador " + j.getNombre() + " ya está en la BD con ID: " + idJugador);
             }
-            
+
             return idJugador; // Devolvemos el ID real de la base de datos
 
         } catch (SQLException e) {
@@ -194,82 +239,91 @@ public class BBDD {
             return -1;
         }
     }
-    
+
     /*
-    public boolean ActualizarPartida(Juego juego) {
-    	// 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
-        // se cerrará solo al llegar a la llave final }.
-        try (Connection con = conectarBD()) { 
-            
-            if (con == null) return false;
+     * public boolean ActualizarPartida(Juego juego) {
+     * // 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
+     * // se cerrará solo al llegar a la llave final }.
+     * try (Connection con = conectarBD()) {
+     * 
+     * if (con == null) return false;
+     * 
+     * // 2. Preparamos la llamada al procedimiento de Oracle
+     * String sql = "{call actualizar_partida(?, ?, ?)}";
+     * 
+     * try (CallableStatement cstmt = con.prepareCall(sql)) {
+     * // 1. p_num_partida: El ID de la partida que estamos jugando
+     * cstmt.setInt(1, juego.getTablero().getIdPartida());
+     * 
+     * // 2. p_torn_actual: El ID del jugador que tiene el turno
+     * cstmt.setInt(2, juego.getTurnoActual());
+     * 
+     * // 3. p_ganador: El ID del ganador (si no hay, pasamos un valor nulo o 0)
+     * if (juego.getGanador() != null) {
+     * cstmt.setInt(3, 1); // Aquí iría el ID real del ganador
+     * } else {
+     * cstmt.setNull(3, java.sql.Types.INTEGER);
+     * }
+     * 
+     * cstmt.execute();
+     * 
+     * // Recuperamos el ID que nos dio la función
+     * System.out.println("► Partida " + juego.getTablero().getIdPartida() +
+     * " actualizada en Oracle.");
+     * return true;
+     * }
+     * 
+     * } catch (SQLException e) {
+     * System.out.println("► ERROR al actualizar partida: " + e.getMessage());
+     * return false;
+     * }
+     * }
+     */
 
-            // 2. Preparamos la llamada al procedimiento de Oracle
-            String sql = "{call actualizar_partida(?, ?, ?)}"; 
-
-            try (CallableStatement cstmt = con.prepareCall(sql)) {
-            	// 1. p_num_partida: El ID de la partida que estamos jugando
-            	cstmt.setInt(1, juego.getTablero().getIdPartida());	  
-            	
-            	// 2. p_torn_actual: El ID del jugador que tiene el turno
-            	cstmt.setInt(2, juego.getTurnoActual());
-                
-                // 3. p_ganador: El ID del ganador (si no hay, pasamos un valor nulo o 0)
-                if (juego.getGanador() != null) {
-                    cstmt.setInt(3, 1); // Aquí iría el ID real del ganador
-                } else {
-                    cstmt.setNull(3, java.sql.Types.INTEGER);
-                }
-                
-                cstmt.execute();
-                
-                // Recuperamos el ID que nos dio la función
-                System.out.println("► Partida " + juego.getTablero().getIdPartida() + " actualizada en Oracle.");
-                return true;
-            }
-            
-        } catch (SQLException e) {
-            System.out.println("► ERROR al actualizar partida: " + e.getMessage());
-            return false;
-        }
-    }*/
-    
-    
-    
-    
-    
     /**
-     * Registra que un jugador específico está participando en una partida concreta.
+     * Vincula a un jugador con una partida específica y asigna su color.
+     * 
+     * @param idPartida ID de la partida activa.
+     * @param idJugador ID del jugador participante.
+     * @param color     Color representativo elegido.
+     * @return {@code true} si la vinculación fue exitosa.
      */
     public boolean insertarParticipacion(int idPartida, int idJugador, String color) {
         // Llamada al procedimiento con los 2 parámetros de entrada (IN)
         String sql = "{call insertar_participacion(?, ?, ?)}";
-        
-        try (Connection con = conectarBD()) { 
-            
-            if (con == null) return false;
-            
-        try (CallableStatement cstmt = con.prepareCall(sql)) {
-            
-            // 1. p_id_partida
-            cstmt.setInt(1, idPartida);
-            
-            // 2. p_id_jugador
-            cstmt.setInt(2, idJugador);
-            
-            cstmt.setString(3, color);
 
-            
-            cstmt.execute();
-            return true;
-           
-        }
+        try (Connection con = conectarBD()) {
+
+            if (con == null)
+                return false;
+
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+
+                // 1. p_id_partida
+                cstmt.setInt(1, idPartida);
+
+                // 2. p_id_jugador
+                cstmt.setInt(2, idJugador);
+
+                cstmt.setString(3, color);
+
+                cstmt.execute();
+                return true;
+
+            }
         } catch (SQLException e) {
             System.out.println("► ERROR en insertarParticipacion: " + e.getMessage());
             return false;
         }
     }
-    
-    
+
+    /**
+     * Obtiene el identificador numérico único de un jugador a partir de su nombre.
+     * 
+     * @param con      Conexión activa a la base de datos.
+     * @param nickname El nombre de usuario.
+     * @return El ID del jugador, o -1 si no se encuentra.
+     */
     public static int obtenerIdJugador(Connection con, String nickname) {
         String sql = "SELECT id_jugador FROM jugador WHERE nickname = ?";
         try (PreparedStatement pstmt = con.prepareStatement(sql)) {
@@ -284,13 +338,22 @@ public class BBDD {
         }
         return -1;
     }
-    
-    
+
+    /**
+     * Actualiza el estado persistente de un jugador (posición, inventario,
+     * bloqueos)
+     * dentro de una partida.
+     * 
+     * @param idPartida ID de la partida actual.
+     * @param j         El {@link Jugador} cuyo estado se desea sincronizar.
+     * @return {@code true} si la actualización fue correcta.
+     */
     public boolean actualizarParticipacion(int idPartida, Jugador j) {
         String sql = "{call actualizar_participacion(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
 
         try (Connection con = conectarBD()) {
-            if (con == null) return false;
+            if (con == null)
+                return false;
 
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 // 1. IDs para el WHERE
@@ -319,12 +382,20 @@ public class BBDD {
             return false;
         }
     }
-    
+
+    /**
+     * Actualiza la información global de una partida (turno y ganador).
+     * 
+     * @param idPartida ID de la partida a actualizar.
+     * @param juego     Instancia del {@link Juego} con el estado actual.
+     * @return {@code true} si la actualización fue exitosa.
+     */
     public boolean actualizarEstadoPartida(int idPartida, Juego juego) {
         String sql = "{call actualizar_partida(?, ?, ?)}";
 
         try (Connection con = conectarBD()) {
-            if (con == null) return false;
+            if (con == null)
+                return false;
 
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 // 1. p_num_partida: El ID de la fila que queremos actualizar
@@ -350,17 +421,30 @@ public class BBDD {
             return false;
         }
     }
-    
+
+    /**
+     * Realiza un guardado atómico (transaccional) de todo el estado del juego.
+     * 
+     * <p>
+     * Actualiza tanto la información global de la partida (turno, ganador) como
+     * el estado individual de cada uno de los jugadores participantes.
+     * </p>
+     * 
+     * @param idPartida ID de la partida a persistir.
+     * @param juego     Instancia del {@link Juego} con el estado actual completo.
+     * @return {@code true} si se completó la transacción con éxito.
+     */
     public boolean guardarEstadoCompleto(int idPartida, Juego juego) {
         String sqlPartida = "{call actualizar_partida(?, ?, ?)}";
         String sqlJugador = "{call actualizar_participacion(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-        
+
         try (Connection con = conectarBD()) {
-            if (con == null) return false;
-            
+            if (con == null)
+                return false;
+
             // Iniciamos transacción para evitar guardados a medias
             con.setAutoCommit(false);
-            
+
             // 1. Guardar la Partida
             try (CallableStatement cstmtP = con.prepareCall(sqlPartida)) {
                 cstmtP.setInt(1, idPartida);
@@ -372,7 +456,7 @@ public class BBDD {
                 }
                 cstmtP.execute();
             }
-            
+
             // 2. Guardar a todos los Jugadores
             try (CallableStatement cstmtJ = con.prepareCall(sqlJugador)) {
                 for (Jugador j : juego.getJugadores()) {
@@ -385,33 +469,47 @@ public class BBDD {
                     cstmtJ.setInt(7, j.getInventario().getCantidad("DadoLento"));
                     cstmtJ.setInt(8, j.getInventario().getCantidad("DadoRapido"));
                     cstmtJ.setInt(9, j.getTurnosBloqueados());
-                    
+
                     cstmtJ.execute();
                 }
             }
-            
+
             con.commit();
             // Restaurar a true (aunque la conexión se cierra justo abajo)
             con.setAutoCommit(true);
             return true;
-            
+
         } catch (SQLException e) {
             System.out.println("► ERROR al guardar estado completo: " + e.getMessage());
             return false;
         }
     }
-    
+
+    /**
+     * Recupera y restaura el estado completo de una partida desde la base de datos.
+     * 
+     * <p>
+     * Reconstruye el tablero mediante su semilla, restaura el turno actual y
+     * repuebla la lista de jugadores con sus posiciones e inventarios exactos.
+     * </p>
+     * 
+     * @param idPartida ID de la partida a cargar.
+     * @param juego     Objeto {@link Juego} donde se volcarán los datos
+     *                  recuperados.
+     * @return {@code true} si la carga fue íntegra y exitosa.
+     */
     public boolean cargarDatosPartida(int idPartida, Juego juego) {
         String sqlPartida = "SELECT seed, torn_actual FROM partida WHERE num_partida = ?";
         String sqlJugadores = "SELECT j.id_jugador, j.nickname, j.es_cpu, p.posicion_actual, p.color, " +
-                              "p.num_peces, p.num_bolas_nieve, p.num_dados_lentos, p.num_dados_rapidos, p.turnos_bloqueado " +
-                              "FROM participacion_jugadores p " +
-                              "JOIN jugador j ON p.id_jugador = j.id_jugador " +
-                              "WHERE p.id_partida = ?"+
-                              "ORDER BY j.id_jugador ASC";
+                "p.num_peces, p.num_bolas_nieve, p.num_dados_lentos, p.num_dados_rapidos, p.turnos_bloqueado " +
+                "FROM participacion_jugadores p " +
+                "JOIN jugador j ON p.id_jugador = j.id_jugador " +
+                "WHERE p.id_partida = ?" +
+                "ORDER BY j.id_jugador ASC";
 
         try (Connection con = conectarBD()) {
-            if (con == null) return false;
+            if (con == null)
+                return false;
 
             // 1. Cargar datos generales de la partida
             try (PreparedStatement pstmt = con.prepareStatement(sqlPartida)) {
@@ -421,7 +519,8 @@ public class BBDD {
                         juego.getTablero().introducirSeed(rs.getString("seed"));
                         juego.setTurnoActual(rs.getInt(("torn_actual")));
                         juego.getTablero().setIdPartida(idPartida);
-                        // El turno lo setearemos después de cargar los jugadores para evitar errores de índice
+                        // El turno lo setearemos después de cargar los jugadores para evitar errores de
+                        // índice
                     } else {
                         return false; // No existe la partida
                     }
@@ -438,7 +537,7 @@ public class BBDD {
                         int id = rs.getInt("id_jugador");
                         String nombre = rs.getString("nickname");
                         String color = rs.getString("color");
-                        
+
                         if (rs.getInt("es_cpu") == 1) {
                             nuevo = new Foca(id, nombre);
                         } else {
@@ -448,13 +547,13 @@ public class BBDD {
                         // Restaurar estado físico e inventario
                         nuevo.setPosicion(rs.getInt("posicion_actual"));
                         nuevo.setTurnosBloqueados(rs.getInt("turnos_bloqueado"));
-                        
+
                         // IMPORTANTE: Aquí debes rellenar el inventario de tu objeto Jugador
                         // Ejemplo:
-                        nuevo.getInventario().agregarObjetos("Pez",rs.getInt("num_peces"));
-                        nuevo.getInventario().agregarObjetos("BolaNieve",rs.getInt("num_bolas_nieve"));
-                        nuevo.getInventario().agregarObjetos("DadoLento",rs.getInt("num_dados_lentos"));
-                        nuevo.getInventario().agregarObjetos("DadoRapido",rs.getInt("num_dados_rapidos"));                        
+                        nuevo.getInventario().agregarObjetos("Pez", rs.getInt("num_peces"));
+                        nuevo.getInventario().agregarObjetos("BolaNieve", rs.getInt("num_bolas_nieve"));
+                        nuevo.getInventario().agregarObjetos("DadoLento", rs.getInt("num_dados_lentos"));
+                        nuevo.getInventario().agregarObjetos("DadoRapido", rs.getInt("num_dados_rapidos"));
                         juego.agregarJugador(nuevo);
                     }
                 }
@@ -465,14 +564,19 @@ public class BBDD {
             return false;
         }
     }
-    
+
+    /**
+     * Imprime por consola un listado de las partidas que no han sido finalizadas
+     * aún.
+     * Útil para tareas de depuración y monitorización administrativa.
+     */
     public void mostrarPartidasPendientes() {
         // Consulta: Solo donde ganador no tiene valor
         String sql = "SELECT num_partida, seed, hora_partida FROM partida WHERE ganador IS NULL ORDER BY hora_partida DESC";
 
         try (Connection con = conectarBD();
-             PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
 
             System.out.println("\n=== PARTIDAS PENDIENTES DE FINALIZAR ===");
             System.out.printf("%-12s | %-40s | %-20s %n", "ID", "SEED", "ULTIMA CONEXION");
@@ -497,47 +601,56 @@ public class BBDD {
             System.out.println("► ERROR al listar partidas: " + e.getMessage());
         }
     }
-    
+
+    /**
+     * Obtiene una lista de resúmenes de partidas en curso para un usuario
+     * específico.
+     * 
+     * @param idUsuario ID del jugador que solicita sus partidas.
+     * @return Lista de objetos {@link modelo.PartidaGuardada} con los datos de
+     *         previsualización.
+     */
     public ArrayList<modelo.PartidaGuardada> obtenerPartidasPendientes(int idUsuario) {
-        // Usamos LinkedHashMap para mantener el orden de la consulta (ORDER BY hora_partida DESC)
+        // Usamos LinkedHashMap para mantener el orden de la consulta (ORDER BY
+        // hora_partida DESC)
         Map<Integer, modelo.PartidaGuardada> mapa = new LinkedHashMap<>();
-        
+
         String sql = "SELECT p.num_partida, p.seed, p.nombre, " +
-                     "TO_CHAR(p.hora_partida, 'DD/MM/YYYY HH24:MI') as hora_partida, " +
-                     "pj.color " +
-                     "FROM partida p " +
-                     "LEFT JOIN participacion_jugadores pj ON p.num_partida = pj.id_partida " +
-                     "WHERE p.ganador IS NULL " +
-                     "AND p.num_partida IN (SELECT id_partida FROM participacion_jugadores WHERE id_jugador = ?) " +
-                     "ORDER BY p.hora_partida DESC";
+                "TO_CHAR(p.hora_partida, 'DD/MM/YYYY HH24:MI') as hora_partida, " +
+                "pj.color " +
+                "FROM partida p " +
+                "LEFT JOIN participacion_jugadores pj ON p.num_partida = pj.id_partida " +
+                "WHERE p.ganador IS NULL " +
+                "AND p.num_partida IN (SELECT id_partida FROM participacion_jugadores WHERE id_jugador = ?) " +
+                "ORDER BY p.hora_partida DESC";
 
         try (Connection con = conectarBD();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = con.prepareStatement(sql)) {
+
             pstmt.setInt(1, idUsuario);
             try (ResultSet rs = pstmt.executeQuery()) {
 
-            while (rs.next()) {
-                int id = rs.getInt("num_partida");
-                String color = rs.getString("color");
-                
-                if (!mapa.containsKey(id)) {
-                    List<String> colores = new ArrayList<>();
-                    if (color != null) colores.add(color);
-                    
-                    mapa.put(id, new modelo.PartidaGuardada(
-                        id,
-                        rs.getString("seed"),
-                        rs.getString("hora_partida"),
-                        rs.getString("nombre"),
-                        colores
-                    ));
-                } else {
-                    if (color != null) {
-                        mapa.get(id).getColoresJugadores().add(color);
+                while (rs.next()) {
+                    int id = rs.getInt("num_partida");
+                    String color = rs.getString("color");
+
+                    if (!mapa.containsKey(id)) {
+                        List<String> colores = new ArrayList<>();
+                        if (color != null)
+                            colores.add(color);
+
+                        mapa.put(id, new modelo.PartidaGuardada(
+                                id,
+                                rs.getString("seed"),
+                                rs.getString("hora_partida"),
+                                rs.getString("nombre"),
+                                colores));
+                    } else {
+                        if (color != null) {
+                            mapa.get(id).getColoresJugadores().add(color);
+                        }
                     }
                 }
-            }
             }
 
         } catch (SQLException e) {
@@ -545,30 +658,36 @@ public class BBDD {
         }
         return new ArrayList<>(mapa.values());
     }
-    
+
+    /**
+     * Genera y muestra un ranking de los jugadores humanos más activos en el
+     * sistema,
+     * excluyendo a las entidades controladas por la CPU.
+     */
     public void mostrarRankingMasPartidas() {
-        // Consulta: Unimos jugador con participación y contamos cuántas veces aparece cada uno
+        // Consulta: Unimos jugador con participación y contamos cuántas veces aparece
+        // cada uno
         String sql = "SELECT j.nickname, COUNT(p.id_partida) AS total_partidas " +
-                     "FROM jugador j " +
-                     "JOIN participacion_jugadores p ON j.id_jugador = p.id_jugador " +
-                     "WHERE j.nickname != 'Foca Loca'"+ //Quitamos la Foca
-                     "GROUP BY j.nickname " +
-                     "ORDER BY total_partidas DESC";
+                "FROM jugador j " +
+                "JOIN participacion_jugadores p ON j.id_jugador = p.id_jugador " +
+                "WHERE j.nickname != 'Foca Loca'" + // Quitamos la Foca
+                "GROUP BY j.nickname " +
+                "ORDER BY total_partidas DESC";
 
         try (Connection con = conectarBD();
-             PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
 
             System.out.println("\n" + "=".repeat(45));
             System.out.println("       RANKING: PINGÜINOS MÁS ACTIVOS        ");
             System.out.println("=".repeat(45));
-            
+
             System.out.printf("| %-25s | %-12s |%n", "NOMBRE JUGADOR", "PARTIDAS");
             System.out.println("-".repeat(45));
 
             boolean hayDatos = false;
             int puesto = 1;
-            
+
             while (rs.next()) {
                 hayDatos = true;
                 String nombre = rs.getString("nickname");
@@ -589,24 +708,25 @@ public class BBDD {
             System.out.println("► ERROR al generar ranking: " + e.getMessage());
         }
     }
-    
-    
-    
+
     /**
      * Realiza el login utilizando la función de encriptación de la base de datos.
+     * 
      * @param nickname El nombre del jugador.
-     * @param password La contraseña en texto plano (la función de BD se encarga del hash).
-     * @return true si el login es exitoso, false si falla.
+     * @param password La contraseña en texto plano.
+     * @return {@code true} si las credenciales son válidas; {@code false} en caso
+     *         contrario.
      */
     public static boolean loginJugador(String nickname, String password) {
         // Llamada a la función PL/SQL: {? = call nombre_funcion(?, ?)}
         String sql = "{? = call verificar_password(?, ?)}";
         try (Connection con = conectarBD()) {
-            if (con == null) return false;
+            if (con == null)
+                return false;
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 // Registramos el tipo de salida (el RETURN de la función)
                 cstmt.registerOutParameter(1, java.sql.Types.INTEGER);
-                
+
                 // Seteamos los parámetros de entrada
                 cstmt.setString(2, nickname);
                 cstmt.setString(3, password);
@@ -624,94 +744,100 @@ public class BBDD {
         System.out.println("► Credenciales inválidas.");
         return false;
     }
-    
-    
+
     /**
-     * Inserta un nuevo jugador en la tabla con su contraseña.
-     * @return El ID generado por Oracle, o -1 si hubo un error (ej: el nombre ya existe).
+     * Crea una nueva cuenta de usuario con contraseña encriptada.
+     * 
+     * @param nickname Nombre único de usuario.
+     * @param password Contraseña en texto plano.
+     * @param esCpu    Indica si la entidad es controlada por la IA.
+     * @return El ID generado para el nuevo usuario, o -1 si el registro falla.
      */
     public static int registrarNuevoJugador(String nickname, String password, boolean esCpu) {
         String sql = "{call insertar_jugador(?, ?, ?)}";
-        
+
         try (Connection con = conectarBD()) {
-            if (con == null) return -1;
+            if (con == null)
+                return -1;
 
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 cstmt.setString(1, nickname);
                 cstmt.setString(2, password);
                 cstmt.setInt(3, esCpu ? 1 : 0);
-                
+
                 cstmt.execute();
-                
+
                 // Una vez insertado, recuperamos el ID que le ha tocado
-                return obtenerIdJugador(con, nickname); 
+                return obtenerIdJugador(con, nickname);
             }
         } catch (SQLException e) {
             System.out.println("► ERROR: El nombre '" + nickname + "' ya está ocupado.");
             return -1;
         }
     }
-    
-    
-    
-    
-	/*
-	public boolean guardarPartida(Connection con, Juego juego) {
-		
-		String sql = "";
-		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-		
-		} catch (SQLException e) {
-			System.out.println("Error al guardar: " + e.getMessage());
-		}
-	}
 
-	public Juego cargarPartida(Connection conConnection con) {
+    /*
+     * public boolean guardarPartida(Connection con, Juego juego) {
+     * 
+     * String sql = "";
+     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+     * 
+     * } catch (SQLException e) {
+     * System.out.println("Error al guardar: " + e.getMessage());
+     * }
+     * }
+     * 
+     * public Juego cargarPartida(Connection conConnection con) {
+     * 
+     * String sql = "";
+     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+     * 
+     * } catch (SQLException e) {
+     * System.out.println("Error al guardar: " + e.getMessage());
+     * }
+     * }
+     * 
+     * public String encriptarDatos(Connection con, String datos) {
+     * 
+     * String sql = "";
+     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+     * 
+     * } catch (SQLException e) {
+     * System.out.println("Error al guardar: " + e.getMessage());
+     * }
+     * 
+     * }
+     * 
+     * public String desencriptarDatos(Connection con, String datos) {
+     * 
+     * String sql = "";
+     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+     * 
+     * } catch (SQLException e) {
+     * System.out.println("Error al guardar: " + e.getMessage());
+     * }
+     * 
+     * }
+     * 
+     * public boolean existePartidaGuardada(Connection con) {
+     * 
+     * String sql = "";
+     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+     * 
+     * } catch (SQLException e) {
+     * System.out.println("Error al guardar: " + e.getMessage());
+     * }
+     * 
+     * }
+     */
 
-		String sql = "";
-		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-		
-		} catch (SQLException e) {
-			System.out.println("Error al guardar: " + e.getMessage());
-		}
-	}
-
-	public String encriptarDatos(Connection con, String datos) {
-
-		String sql = "";
-		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-		
-		} catch (SQLException e) {
-			System.out.println("Error al guardar: " + e.getMessage());
-		}
-
-	}
-
-	public String desencriptarDatos(Connection con, String datos) {
-	
-		String sql = "";
-		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-		
-		} catch (SQLException e) {
-			System.out.println("Error al guardar: " + e.getMessage());
-		}
-	
-	}
-
-	public boolean existePartidaGuardada(Connection con) {
-
-		String sql = "";
-		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-		
-		} catch (SQLException e) {
-			System.out.println("Error al guardar: " + e.getMessage());
-		}
-
-	}
-	*/
-    
-    
-
+    /**
+     * Recupera el listado completo de nombres de jugadores registrados en el
+     * sistema
+     * que no son controlados por la IA.
+     * 
+     * @return Una lista de cadenas con los nicknames de los jugadores humanos.
+     */
     public ArrayList<String> obtenerTodosLosJugadores() {
         ArrayList<String> jugadores = new ArrayList<>();
         String sql = "SELECT nickname FROM jugador WHERE es_cpu = 0 ORDER BY nickname";
@@ -726,25 +852,32 @@ public class BBDD {
         }
         return jugadores;
     }
-    
+
     /**
-     * Elimina una partida de la base de datos. 
-     * Gracias al ON DELETE CASCADE en Oracle, las participaciones se borran solas.
+     * Elimina permanentemente una partida de la base de datos.
+     * 
+     * <p>
+     * Debido a la integridad referencial (ON DELETE CASCADE), esta acción
+     * también elimina automáticamente todas las participaciones asociadas.
+     * </p>
+     * 
+     * @param idPartida El identificador de la partida a borrar.
+     * @return {@code true} si se eliminó al menos un registro.
      */
     public boolean eliminarPartida(int idPartida) {
         String sql = "DELETE FROM partida WHERE num_partida = ?";
 
         try (Connection con = conectarBD()) {
-            
+
             if (con == null) {
                 return false;
             }
 
             try (PreparedStatement pstmt = con.prepareStatement(sql)) {
                 pstmt.setInt(1, idPartida);
-                
+
                 int filasAfectadas = pstmt.executeUpdate();
-                
+
                 if (filasAfectadas > 0) {
                     System.out.println("► Partida " + idPartida + " eliminada.");
                     return true;
@@ -752,7 +885,7 @@ public class BBDD {
                     return false;
                 }
             }
-            
+
         } catch (SQLException e) {
             System.out.println("► ERROR al eliminar partida: " + e.getMessage());
             return false;

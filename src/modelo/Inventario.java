@@ -3,24 +3,51 @@ package modelo;
 import java.util.ArrayList;
 
 /**
- * Inventario de un jugador. Contiene peces, bolas de nieve y dados especiales.
+ * Sistema de gestión de recursos y objetos para un jugador.
+ * 
+ * <p>
+ * Centraliza el almacenamiento y manipulación de los diferentes consumibles
+ * del juego: peces (para sobornos), bolas de nieve (para combate) y
+ * dados especiales (para movilidad). Controla los límites de capacidad y
+ * proporciona métodos para el uso estratégico de los mismos.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class Inventario {
 
+    /** Capacidad máxima permitida para peces. */
     public static final int MAX_PECES = 2;
+    /** Capacidad máxima permitida para bolas de nieve. */
     public static final int MAX_BOLAS_NIEVE = 6;
+    /** Capacidad máxima permitida para dados especiales en total. */
     public static final int MAX_DADOS = 3;
 
+    /** Colección de dados especiales (Rápidos/Lentos). */
     private ArrayList<Objeto> dados = new ArrayList<>();
+    /** Contador actual de peces recolectados. */
     private int peces;
+    /** Contador actual de bolas de nieve fabricadas. */
     private int bolasNieve;
 
+    /**
+     * Constructor por defecto del inventario inicializado a cero.
+     */
     public Inventario() {
     }
 
     /**
-     * Agrega un objeto al inventario si no se ha alcanzado el máximo.
-     * @return true si se pudo agregar, false si está lleno.
+     * Intenta añadir un objeto de un tipo específico al inventario.
+     * 
+     * <p>
+     * Valida que no se exceda el límite máximo definido para cada categoría.
+     * </p>
+     * 
+     * @param tipo Nombre del objeto ("Pez", "BolaNieve", "DadoRapido",
+     *             "DadoLento").
+     * @return {@code true} si el objeto fue añadido con éxito; {@code false} si el
+     *         inventario está lleno para ese tipo.
      */
     public boolean agregarObjeto(String tipo) {
         switch (tipo.trim()) {
@@ -53,7 +80,9 @@ public class Inventario {
     }
 
     /**
-     * Elimina un objeto del inventario.
+     * Elimina una unidad del tipo de objeto especificado.
+     * 
+     * @param tipo Categoría del objeto a eliminar.
      */
     public void eliminarObjeto(String tipo) {
         if (tipo.equals("Pez") && peces > 0) {
@@ -66,42 +95,59 @@ public class Inventario {
     }
 
     /**
-     * Comprueba si el jugador tiene al menos un objeto del tipo indicado.
+     * Comprueba si el inventario contiene al menos una unidad del tipo indicado.
+     * 
+     * @param tipo Categoría o subtipo de objeto.
+     * @return {@code true} si existe disponibilidad.
      */
     public boolean tieneObjeto(String tipo) {
         switch (tipo) {
-            case "Pez": return peces >= 1;
-            case "BolaNieve": return bolasNieve >= 1;
-            case "Dados": return dados.size() >= 1;
-            case "DadoRapido": return tieneObjetoEspecifico("Rapido");
-            case "DadoLento": return tieneObjetoEspecifico("Lento");
-            default: return false;
+            case "Pez":
+                return peces >= 1;
+            case "BolaNieve":
+                return bolasNieve >= 1;
+            case "Dados":
+                return dados.size() >= 1;
+            case "DadoRapido":
+                return tieneObjetoEspecifico("Rapido");
+            case "DadoLento":
+                return tieneObjetoEspecifico("Lento");
+            default:
+                return false;
         }
     }
 
     /**
-     * Devuelve la cantidad de objetos del tipo indicado.
-     * "Total" devuelve la suma de todos los objetos.
+     * Obtiene la cantidad actual de objetos de un tipo.
+     * 
+     * @param tipo Categoría ("Pez", "BolaNieve", "Dados", "Total", etc.).
+     * @return Cantidad entera almacenada.
      */
     public int getCantidad(String tipo) {
         switch (tipo) {
-            case "Pez": 
+            case "Pez":
                 return peces;
-            case "BolaNieve": 
+            case "BolaNieve":
                 return bolasNieve;
-            case "Dados": 
+            case "Dados":
                 return dados.size();
             case "DadoRapido":
                 return contarDadosPorClase(DadoRapido.class);
             case "DadoLento":
                 return contarDadosPorClase(DadoLento.class);
-            case "Total": 
+            case "Total":
                 return peces + bolasNieve + dados.size();
-            default: 
+            default:
                 return 0;
         }
     }
-    
+
+    /**
+     * Método auxiliar para contar cuántos dados de un subtipo existen.
+     * 
+     * @param clase Clase del dado a buscar.
+     * @return Cantidad encontrada.
+     */
     private int contarDadosPorClase(Class<?> clase) {
         int contador = 0;
         for (Objeto d : dados) {
@@ -113,7 +159,11 @@ public class Inventario {
     }
 
     /**
-     * Usa un objeto del inventario y aplica su efecto.
+     * Ejecuta el uso de un objeto genérico.
+     * 
+     * @param tipo    Categoría del objeto.
+     * @param jugador El {@link Jugador} que consume el objeto.
+     * @return {@code true} si se pudo usar; {@code false} si no había existencias.
      */
     public boolean usarObjeto(String tipo, Jugador jugador) {
         if (tipo.equals("Pez") && peces > 0) {
@@ -133,14 +183,18 @@ public class Inventario {
     }
 
     /**
-     * Usa un dado específico (Rápido o Lento) del inventario.
+     * Selecciona y consume un dado especial específico (Rápido o Lento).
+     * 
+     * @param subTipo Identificador del subtipo ("Rapido" o "Lento").
+     * @param jugador El {@link Jugador} sobre el que se aplica el efecto del dado.
+     * @return {@code true} si se encontró y usó el dado.
      */
     public boolean usarDadoEspecifico(String subTipo, Jugador jugador) {
         for (int i = 0; i < dados.size(); i++) {
             Objeto d = dados.get(i);
             if ((subTipo.equals("Rapido") && d instanceof DadoRapido) ||
-                (subTipo.equals("Lento") && d instanceof DadoLento)) {
-                dados.remove(i).usar(jugador);
+                    (subTipo.equals("Lento") && d instanceof DadoLento)) {
+                ((Dado) dados.remove(i)).usar(jugador);
                 return true;
             }
         }
@@ -148,25 +202,33 @@ public class Inventario {
     }
 
     /**
-     * Devuelve la lista de dados especiales.
+     * Proporciona la lista interna de dados especiales.
+     * 
+     * @return Lista de {@link Objeto} que son dados.
      */
     public ArrayList<Objeto> getListaDados() {
         return this.dados;
     }
 
     /**
-     * Comprueba si existe un dado específico (Rápido o Lento).
+     * Verifica la existencia de un subtipo de dado sin consumirlo.
+     * 
+     * @param subTipo "Rapido" o "Lento".
+     * @return {@code true} si existe al menos uno.
      */
     public boolean tieneObjetoEspecifico(String subTipo) {
         for (Objeto d : dados) {
-            if (subTipo.equals("Rapido") && d instanceof DadoRapido) return true;
-            if (subTipo.equals("Lento") && d instanceof DadoLento) return true;
+            if (subTipo.equals("Rapido") && d instanceof DadoRapido)
+                return true;
+            if (subTipo.equals("Lento") && d instanceof DadoLento)
+                return true;
         }
         return false;
     }
 
     /**
-     * Reduce el inventario a la mitad (cuando la foca ataca).
+     * Simula la pérdida de recursos tras un ataque de la Foca.
+     * Reduce a la mitad (redondeo hacia abajo) todas las existencias.
      */
     public void serAtacado() {
         this.peces /= 2;
@@ -179,23 +241,28 @@ public class Inventario {
             }
         }
     }
-    
+
+    /**
+     * Intenta agregar múltiples unidades de un mismo tipo.
+     * 
+     * @param tipo     Tipo de objeto.
+     * @param cantidad Número de unidades deseadas.
+     * @return Número real de unidades que se pudieron añadir antes de llenar el
+     *         inventario.
+     */
     public int agregarObjetos(String tipo, int cantidad) {
         int agregados = 0;
-        
+
         boolean inventarioLleno = false;
         while (agregados < cantidad && !inventarioLleno) {
-            // Reutilizamos la lógica de agregarObjeto(String) para no repetir código
             if (agregarObjeto(tipo)) {
                 agregados++;
             } else {
-                // Si agregarObjeto devuelve false, es que el inventario se llenó
-                inventarioLleno = true; 
+                inventarioLleno = true;
             }
         }
-        
+
         return agregados;
     }
-    
-    
+
 }

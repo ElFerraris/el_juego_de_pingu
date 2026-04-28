@@ -10,11 +10,18 @@ import javafx.util.Duration;
 import java.net.URL;
 
 /**
- * SoundManager
+ * Controlador global del sistema de audio y música dinámica.
  * 
- * Gestiona la carga y reproducción de efectos de sonido (SFX) y música de
- * fondo.
- * Utiliza AudioClip para efectos rápidos y MediaPlayer para la música.
+ * <p>
+ * Centraliza la gestión de efectos de sonido (SFX) mediante {@link AudioClip}
+ * para baja latencia, y la reproducción de música ambiental mediante
+ * {@link MediaPlayer}.
+ * Implementa un sistema de música dinámica por capas que intensifica la melodía
+ * a medida que los jugadores avanzan en el tablero.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class SoundManager {
 
@@ -57,6 +64,11 @@ public class SoundManager {
 
     // ==================== GESTIÓN DE SFX ====================
 
+    /**
+     * Ajusta el nivel de volumen global para los efectos de sonido.
+     * 
+     * @param volume Valor decimal entre 0.0 y 1.0.
+     */
     public static void setSfxVolume(double volume) {
         sfxVolume = volume;
         if (hoverSound != null)
@@ -67,16 +79,19 @@ public class SoundManager {
             backSound.setVolume(sfxVolume);
     }
 
+    /** Reproduce el efecto de sonido de navegación (hover). */
     public static void playHover() {
         if (hoverSound != null)
             hoverSound.play();
     }
 
+    /** Reproduce el efecto de sonido de confirmación. */
     public static void playConfirm() {
         if (confirmSound != null)
             confirmSound.play();
     }
 
+    /** Reproduce el efecto de sonido de retroceso. */
     public static void playBack() {
         if (backSound != null)
             backSound.play();
@@ -88,6 +103,11 @@ public class SoundManager {
     private static MediaPlayer[] gameMusicLayers = new MediaPlayer[7];
     private static int currentLevel = -1;
 
+    /**
+     * Ajusta el nivel de volumen global para la música de fondo.
+     * 
+     * @param volume Valor decimal entre 0.0 y 1.0.
+     */
     public static void setMusicVolume(double volume) {
         musicVolume = volume;
         if (musicPlayer != null) {
@@ -106,7 +126,9 @@ public class SoundManager {
     }
 
     /**
-     * Carga y reproduce un archivo de música normal (para menús).
+     * Carga y reproduce un archivo de música de forma cíclica.
+     * 
+     * @param path Ruta interna del recurso de audio.
      */
     public static void playMusic(String path) {
         if (currentMusicPath.equals(path) && musicPlayer != null) {
@@ -212,7 +234,7 @@ public class SoundManager {
     }
 
     /**
-     * Detiene la música actual de menús.
+     * Detiene por completo la música ambiental de los menús y libera sus recursos.
      */
     public static void stopMusic() {
         if (musicPlayer != null) {

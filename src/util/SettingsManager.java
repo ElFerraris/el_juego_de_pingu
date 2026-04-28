@@ -4,10 +4,17 @@ import java.io.*;
 import java.util.Properties;
 
 /**
- * SettingsManager
+ * Gestor central de la configuración y preferencias del usuario.
  * 
- * Gestiona la configuración del juego (volumen, resolución, pantalla completa).
- * Guarda los datos en la carpeta de documentos del usuario para persistencia.
+ * <p>
+ * Implementa el patrón Singleton para proporcionar un acceso unificado a los
+ * ajustes de resolución, modo de pantalla y volúmenes (música/SFX). Los datos
+ * se persisten en un archivo {@code .properties} ubicado en la carpeta de
+ * documentos del sistema operativo.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class SettingsManager {
 
@@ -26,6 +33,11 @@ public class SettingsManager {
         load();
     }
 
+    /**
+     * Obtiene la instancia única del gestor de configuración.
+     * 
+     * @return La instancia Singleton.
+     */
     public static SettingsManager getInstance() {
         if (instance == null) {
             instance = new SettingsManager();
@@ -33,6 +45,10 @@ public class SettingsManager {
         return instance;
     }
 
+    /**
+     * Configura la ubicación del archivo de ajustes en la carpeta de documentos del
+     * usuario.
+     */
     private void setupFile() {
         // Buscamos la carpeta de documentos del usuario
         String userHome = System.getProperty("user.home");
@@ -49,6 +65,11 @@ public class SettingsManager {
         settingsFile = new File(configDir, FILE_NAME);
     }
 
+    /**
+     * Carga los valores desde el archivo de propiedades. Si no existe, genera uno
+     * con
+     * valores predeterminados.
+     */
     public void load() {
         if (settingsFile.exists()) {
             try (InputStream is = new FileInputStream(settingsFile)) {
@@ -66,6 +87,9 @@ public class SettingsManager {
         }
     }
 
+    /**
+     * Persiste los ajustes actuales en el sistema de archivos.
+     */
     public void save() {
         try (OutputStream os = new FileOutputStream(settingsFile)) {
             props.store(os, "Configuración del Juego de Pingu");

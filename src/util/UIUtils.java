@@ -6,8 +6,16 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 /**
- * Utilidades para la Interfaz de Usuario (UI).
- * Contiene animaciones y efectos para que el juego se sienta más dinámico.
+ * Colección de herramientas auxiliares para la interfaz de usuario (UI).
+ * 
+ * <p>
+ * Proporciona métodos para la traducción de nombres de colores a objetos
+ * {@link Color} de JavaFX y para la aplicación de micro-animaciones de
+ * interactividad, como el escalado por proximidad del cursor (hover).
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class UIUtils {
 
@@ -15,16 +23,25 @@ public class UIUtils {
      * Convierte un nombre de color (String) al objeto Color de JavaFX.
      */
     public static Color colorDesdeNombre(String nombre) {
-        if (nombre == null) return Color.GRAY;
+        if (nombre == null)
+            return Color.GRAY;
         switch (nombre.toLowerCase()) {
-            case "rojo":     return Color.RED;
-            case "azul":     return Color.BLUE;
-            case "verde":    return Color.GREEN;
-            case "amarillo": return Color.YELLOW;
-            case "naranja":  return Color.ORANGE;
-            case "morado":   return Color.PURPLE;
-            case "rosa":     return Color.PINK;
-            default:         return Color.GRAY;
+            case "rojo":
+                return Color.RED;
+            case "azul":
+                return Color.BLUE;
+            case "verde":
+                return Color.GREEN;
+            case "amarillo":
+                return Color.YELLOW;
+            case "naranja":
+                return Color.ORANGE;
+            case "morado":
+                return Color.PURPLE;
+            case "rosa":
+                return Color.PINK;
+            default:
+                return Color.GRAY;
         }
     }
 
