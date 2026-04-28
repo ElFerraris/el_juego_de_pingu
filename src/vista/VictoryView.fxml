@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<StackPane prefHeight="720.0" prefWidth="1280.0" styleClass="root-plain-bg" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.VictoryController">
+    <stylesheets>
+        <java.net.URL value="@style.css" />
+    </stylesheets>
+   <children>
+      <VBox alignment="CENTER" maxWidth="750.0" prefHeight="650.0" spacing="35.0" styleClass="glass-panel">
+         <children>
+            <Label styleClass="title-text" text="¡VICTORIA!" />
+            
+            <ImageView fx:id="winnerImageView" fitHeight="300.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/jugadores/Azul.png" />
+               </image>
+            </ImageView>
+            
+            <VBox alignment="CENTER" spacing="5.0">
+               <children>
+                  <Label fx:id="winnerNameLabel" style="-fx-font-size: 40px; -fx-font-weight: bold;" styleClass="label" text="NOMBRE DEL JUGADOR" />
+                  <Label text="¡Ha llegado a la meta y es el nuevo Rey de la Antártida!" textFill="#0d47a1">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            
+            <HBox alignment="CENTER" spacing="40.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#handleNewGame" prefWidth="280.0" styleClass="button-primary" text="NUEVA PARTIDA" />
+                  <Button mnemonicParsing="false" onAction="#handleMainMenu" prefWidth="280.0" styleClass="button-secondary" text="MENÚ PRINCIPAL" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</StackPane>

@@ -1027,8 +1027,19 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         // y por petición del usuario.
 
         if (jugadores.get(turnoActual).getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
-            log("¡" + jugadores.get(turnoActual).getNombre() + " HA GANADO LA PARTIDA!");
-            mostrarAlertaVictoria(jugadores.get(turnoActual).getNombre());
+            Jugador ganador = jugadores.get(turnoActual);
+            log("¡" + ganador.getNombre() + " HA GANADO LA PARTIDA!");
+            
+            // Guardamos el ganador en el contexto global para la pantalla de victoria
+            GameContext.getInstance().setWinner(ganador);
+            
+            // Pequeña pausa para que se vea el movimiento final antes de cambiar de escena
+            PauseTransition pause = new PauseTransition(Duration.seconds(2.0));
+            pause.setOnFinished(e -> {
+                Stage stage = (Stage) boardPane.getScene().getWindow();
+                NavigationController.navigateTo(stage, "VictoryView.fxml");
+            });
+            pause.play();
         } else {
             turnoActual = (turnoActual + 1) % jugadores.size();
             actualizarUI();
@@ -1374,16 +1385,6 @@ public class TableroController implements GameFlowManager.GameUIHandler {
      */
     public void log(String msg) {
         gameLogArea.appendText("► " + msg + "\n");
-    }
-
-    /**
-     * Muestra una alerta especial de victoria cuando un jugador llega a la meta.
-     * 
-     * @param nombre El nombre del jugador ganador.
-     */
-    private void mostrarAlertaVictoria(String nombre) {
-        String mensaje = "¡Enhorabuena " + nombre + ", has llegado a la meta!";
-        mostrarEventoDialogo("¡Fin de la Partida!", mensaje, () -> handleBack(null));
     }
 
     // --- GESTIÓN DE MENÚS, OVERLAYS Y PANELES ---

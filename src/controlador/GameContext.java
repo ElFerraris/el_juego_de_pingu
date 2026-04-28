@@ -58,8 +58,11 @@ public class GameContext {
      */
     private int idPartidaCargar = -1;
 
-    /** Almacena el turno en el que se guardó la partida para poder restaurarlo. */
+    /** El turno en el que se guardó la partida para poder restaurarlo. */
     private int turnoModoFuga = 0;
+
+    /** El jugador que ha ganado la partida. */
+    private Jugador winner;
 
     /**
      * Constructor privado.
@@ -105,6 +108,7 @@ public class GameContext {
         gameName = null;
         idPartidaCargar = -1;
         turnoModoFuga = 0;
+        winner = null;
         actionToConfirm = ActionConfirmType.NONE;
         System.out.println("► GameContext: Datos reiniciados.");
     }
@@ -188,5 +192,15 @@ public class GameContext {
     /** @param action Define qué acción debe validar el diálogo de confirmación. */
     public void setActionToConfirm(int action) {
         this.actionToConfirm = action;
+    }
+
+    /** @return El ganador de la partida. */
+    public Jugador getWinner() {
+        return winner;
+    }
+
+    /** @param winner El jugador que ha llegado a la meta. */
+    public void setWinner(Jugador winner) {
+        this.winner = winner;
     }
 }
