@@ -26,6 +26,7 @@ public class GameContext {
     public static class ActionConfirmType {
         public static final int LOGOUT = 0;
         public static final int QUIT = 1;
+        public static final int SAVE = 2;
         public static final int NONE = -1;
     }
 

@@ -163,6 +163,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
 
     // Controles de Confirmación
     @FXML
+    private Button btnConfirmYes;
+    @FXML
     private Label confirmTitle;
     @FXML
     private Label confirmMessage;
@@ -1491,13 +1493,44 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     }
 
     /**
-     * Ejecuta la acción confirmada (salir o volver al menú) guardando la partida.
+     * Muestra el diálogo de confirmación para guardar la partida manualmente.
+     */
+    @FXML
+    private void handleSavePartida() {
+        util.SoundManager.playConfirm();
+        pendingAction = GameContext.ActionConfirmType.SAVE;
+
+        confirmTitle.setText("GUARDAR PARTIDA");
+        confirmMessage.setText("¿Deseas guardar el estado actual de la partida?");
+        btnConfirmYes.setText("SÍ, GUARDAR");
+        btnConfirmYes.getStyleClass().remove("button-danger");
+        btnConfirmYes.getStyleClass().add("button-primary");
+
+        animateOut(menuPausa, () -> animateIn(confirmOverlay));
+    }
+
+    /**
+     * Ejecuta la acción confirmada (salir, volver al menú o guardar) guardando la partida.
      * 
      * @param event El evento de acción.
      */
     @FXML
     private void handleConfirmYes(ActionEvent event) {
         util.SoundManager.playConfirm();
+
+        if (pendingAction == GameContext.ActionConfirmType.SAVE) {
+            int idPartida = tablero.getIdPartida();
+            if (idPartida > 0) {
+                boolean exito = bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
+                if (exito) {
+                    mostrarNotificacionEvento("PARTIDA GUARDADA CON ÉXITO", jugadores.get(turnoActual));
+                    animateOut(confirmOverlay, null); // Volver a la partida directamente cerrando el overlay de confirmación
+                } else {
+                    mostrarNotificacionEvento("ERROR AL GUARDAR PARTIDA", jugadores.get(turnoActual));
+                }
+            }
+            return;
+        }
 
         // GUARDADO MANUAL ANTES DE SALIR
         int idPartida = tablero.getIdPartida();
@@ -1521,6 +1554,14 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     @FXML
     private void handleConfirmNo(ActionEvent event) {
         util.SoundManager.playBack();
+        
+        // Restauramos el estilo por defecto del botón de confirmación por si acaso
+        btnConfirmYes.setText("SÍ, SALIR");
+        btnConfirmYes.getStyleClass().remove("button-primary");
+        if (!btnConfirmYes.getStyleClass().contains("button-danger")) {
+            btnConfirmYes.getStyleClass().add("button-danger");
+        }
+
         animateOut(confirmOverlay, () -> animateIn(menuPausa));
     }
 

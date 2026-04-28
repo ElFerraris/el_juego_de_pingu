@@ -123,6 +123,7 @@
             <Label text="MENÚ" styleClass="title-text" style="-fx-font-size: 50px;" />
             <Separator />
             <Button text="REANUDAR" onAction="#handleResume" prefWidth="300" prefHeight="60" styleClass="button-primary" />
+            <Button text="GUARDAR PARTIDA" onAction="#handleSavePartida" prefWidth="300" prefHeight="60" styleClass="button-secondary" />
             <Button text="OPCIONES" onAction="#handleShowOptions" prefWidth="300" prefHeight="60" styleClass="button-secondary" />
             <Button text="MENÚ PRINCIPAL" onAction="#handleGoToMainMenu" prefWidth="300" prefHeight="60" styleClass="button-secondary" />
             <Button text="SALIR AL ESCRITORIO" onAction="#handleExitGame" prefWidth="300" prefHeight="60" styleClass="button-danger" />
@@ -177,7 +178,7 @@
             <Label fx:id="confirmMessage" text="La partida se guardará automáticamente." 
                    style="-fx-font-size: 22px; -fx-text-fill: #0d47a1; -fx-text-alignment: center;" wrapText="true" />
             <HBox spacing="30" alignment="CENTER">
-                <Button text="SÍ, SALIR" onAction="#handleConfirmYes" prefWidth="220" prefHeight="50" styleClass="button-danger" />
+                <Button fx:id="btnConfirmYes" text="SÍ, SALIR" onAction="#handleConfirmYes" prefWidth="220" prefHeight="50" styleClass="button-danger" />
                 <Button text="NO, VOLVER" onAction="#handleConfirmNo" prefWidth="220" prefHeight="50" styleClass="button-secondary" />
             </HBox>
         </VBox>
