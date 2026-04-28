@@ -1,6 +1,6 @@
-# 🐧 REGLAS Y LÓGICA DEL PROYECTO (GUÍA PARA IA)
+# 🐧 REGLAS Y LÓGICA DEL PROYECTO
 
-Este archivo es de **lectura obligatoria** para cualquier IA que trabaje en este proyecto. Contiene las restricciones técnicas, la lógica del juego y el contexto del entorno de desarrollo.
+Este archivo es de **lectura obligatoria** para cualquier que trabaje en este proyecto. Contiene las restricciones técnicas, la lógica del juego y el contexto del entorno de desarrollo.
 
 ---
 
@@ -17,9 +17,7 @@ Este archivo es de **lectura obligatoria** para cualquier IA que trabaje en este
 
 ## 🏗️ ENTORNO DE DESARROLLO
 
-*   **Editor**: Antigravity (IA Agentic).
 *   **Compilación/IDE**: **Eclipse**.
-    *   *Nota para la IA*: Asegúrate de que las rutas de los recursos sean compatibles con el classpath de Eclipse (`/assets/...`, `/vista/...`).
 *   **Java**: Versión 21.
 *   **Framework**: JavaFX (Modular).
 
