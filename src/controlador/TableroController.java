@@ -323,6 +323,51 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         boardPane.getChildren().clear();
         casillaNodes.clear();
 
+        // --- CAPA DE FONDO DEL ENTORNO ---
+        try {
+            String fondoPath = "/assets/tablero/fondo_tablero/fondo_tablero.png";
+            java.net.URL fondoUrl = getClass().getResource(fondoPath);
+            
+            if (fondoUrl != null) {
+                Image fondoImg = new Image(fondoUrl.toExternalForm(), true); // Carga asíncrona para no bloquear
+                ImageView fondoView = new ImageView();
+                
+                // Cuando la imagen termine de cargar, la posicionamos
+                fondoImg.progressProperty().addListener((obs, oldV, newV) -> {
+                    if (newV.doubleValue() == 1.0) {
+                        fondoView.setImage(fondoImg);
+                        fondoView.setPreserveRatio(true);
+                        fondoView.setSmooth(true);
+                        
+                        // Centrado manual sobre el área de 2400x2000
+                        double imgW = fondoImg.getWidth();
+                        double imgH = fondoImg.getHeight();
+                        
+                        // Ampliamos el fondo un poco más para tener margen de maniobra
+                        double factorEscala = 3400;
+                        fondoView.setFitWidth(factorEscala);
+                        imgW = factorEscala;
+                        imgH = fondoImg.getHeight() * (factorEscala / fondoImg.getWidth());
+                        
+                        // Ajuste horizontal para centrar el saliente de hielo (Líneas Rojas)
+                        fondoView.setLayoutX(((2400 - imgW) / 2) - 150);
+                        
+                        // Ajuste vertical para que los bordes coincidan (Líneas Verdes)
+                        // Bajamos el fondo (+250) para que la grieta del hielo "toque" el tablero
+                        fondoView.setLayoutY(((2000 - imgH) / 2) + 250);
+                        
+                        System.out.println("Fondo del tablero ampliado y ajustado.");
+                    }
+                });
+                
+                boardPane.getChildren().add(0, fondoView); // Aseguramos que sea el fondo (índice 0)
+            } else {
+                System.err.println("Error: No se pudo localizar el recurso: " + fondoPath);
+            }
+        } catch (Exception e) {
+            System.err.println("Aviso: Error al configurar el fondo: " + e.getMessage());
+        }
+
         // Inicializamos la capa de tokens y la añadimos al final (encima de todo)
         tokensPane.getChildren().clear();
         tokensPane.setPickOnBounds(false); // Para que no bloquee clics en el tablero
