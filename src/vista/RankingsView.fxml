@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.RankingsController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
+    
+    <Region style="-fx-background-color: rgba(5,20,60,0.2);"/>
+    
+    <VBox spacing="30" alignment="CENTER" maxWidth="900" maxHeight="650" styleClass="glass-panel">
+        <Label text="ESTADÍSTICAS Y RANKINGS" styleClass="title-text" />
+        
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="RANKING GENERAL" onAction="#handleRankingGeneral" prefWidth="200" styleClass="button-small" />
+            <Button text="RÉCORD ABSOLUTO" onAction="#handleRecordAbsoluto" prefWidth="200" styleClass="button-small" />
+            <Button text="ENCIMA DE LA MEDIA" onAction="#handleEncimaMedia" prefWidth="200" styleClass="button-small" />
+            <Button text="MI NIVEL" onAction="#handleMiNivel" prefWidth="200" styleClass="button-small" />
+        </HBox>
+        
+        <TextArea fx:id="outputArea" VBox.vgrow="ALWAYS" editable="false" wrapText="false" styleClass="text-area-rankings" />
+        
+        <Button text="VOLVER AL MENÚ" onAction="#handleVolver" prefWidth="300" styleClass="button-secondary" />
+    </VBox>
+</StackPane>

@@ -6,6 +6,9 @@ import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import modelo.Jugador;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextArea;
+import datos.BBDD;
 
 /**
  * Controlador para la vista del Menú Principal.
@@ -86,6 +89,14 @@ public class MainMenuController {
     @FXML
     private void showOptions(ActionEvent event) {
         NavigationController.navigateTo(event, "OptionsView.fxml", NavigationController.Direction.FORWARD);
+    }
+
+    /**
+     * Navega a la vista unificada de estadísticas y rankings.
+     */
+    @FXML
+    private void showRankingsView(ActionEvent event) {
+        NavigationController.navigateTo(event, "RankingsView.fxml", NavigationController.Direction.LEFT);
     }
 
     /**

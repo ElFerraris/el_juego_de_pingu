@@ -544,3 +544,19 @@
     -fx-font-weight: bold;
     -fx-effect: dropshadow(one-pass-box, black, 2, 2, 1, 1);
 }
+
+/* ESTILOS PARA LA VISTA DE RANKINGS */
+.text-area-rankings {
+    -fx-font-family: 'Consolas', 'Courier New', monospace !important;
+    -fx-font-size: 18px;
+    -fx-control-inner-background: rgba(13, 71, 161, 0.05);
+    -fx-text-fill: #1a237e;
+    -fx-border-color: #0d47a1;
+    -fx-border-width: 2;
+    -fx-padding: 10;
+}
+
+.button-small {
+    -fx-font-size: 16px;
+    -fx-padding: 8 15;
+}
