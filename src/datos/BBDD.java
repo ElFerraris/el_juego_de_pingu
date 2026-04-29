@@ -811,5 +811,37 @@ public class BBDD {
             return false;
         }
     }
+    
+    /**
+     * Actualiza la contraseña y el estado de CPU de un jugador existente.
+     * * @param idJugador      ID único del jugador en la base de datos.
+     * @param nuevaContrasena La nueva contraseña en texto plano (el procedimiento se encarga del Hash y el Salt).
+     * @return {@code true} si la actualización fue exitosa.
+     */
+    public boolean cambiarContrasenaJugador(int idJugador, String nuevaContrasena) {
+        // Llamada al procedimiento: {call actualizar_jugador(p_id, p_pas)}
+        String sql = "{call actualizar_jugador(?, ?)}";
+
+        try (Connection con = conectarBD()) {
+            if (con == null) return false;
+
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+                // 1. p_id_jugador
+                cstmt.setInt(1, idJugador);
+                
+                // 2. p_contrasena (El procedimiento generará el nuevo Salt y MD5)
+                cstmt.setString(2, nuevaContrasena);
+                
+                cstmt.execute();
+                
+                System.out.println(" Seguridad: Contraseña actualizada para el jugador ID: " + idJugador);
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println(" ERROR al cambiar contraseña: " + e.getMessage());
+            return false;
+        }
+    }
+    
 
 }
