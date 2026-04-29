@@ -67,11 +67,19 @@ public class CameraController {
             double delta = event.getDeltaY();
             double zoomStep = (delta > 0) ? 1.1 : 0.9;
 
+            // Calculamos el zoom mínimo necesario para que el fondo siga cubriendo la pantalla
+            Bounds b = board.getBoundsInLocal();
+            double minZoomX = viewport.getWidth() / b.getWidth();
+            double minZoomY = viewport.getHeight() / b.getHeight();
+            double minZ = Math.max(minZoomX, minZoomY);
+            if (minZ < 0.1 || Double.isNaN(minZ)) minZ = 0.4; // Salvaguarda si no hay datos
+
             double nextZoom = zoomFactor * zoomStep;
-            if (nextZoom >= MIN_ZOOM && nextZoom <= MAX_ZOOM) {
+            if (nextZoom >= minZ && nextZoom <= MAX_ZOOM) {
                 zoomFactor = nextZoom;
                 zoomGroup.setScaleX(zoomFactor);
                 zoomGroup.setScaleY(zoomFactor);
+                aplicarLimites(); // Corregir posición si el zoom nos saca de límites
             }
             event.consume();
         });
@@ -95,6 +103,7 @@ public class CameraController {
                 }
                 board.setTranslateX(translateAnchorX + (event.getSceneX() - mouseAnchorX));
                 board.setTranslateY(translateAnchorY + (event.getSceneY() - mouseAnchorY));
+                aplicarLimites();
             }
         });
 
@@ -126,6 +135,8 @@ public class CameraController {
             // Ajuste empírico para el centro del rombo isométrico
             board.setTranslateX(visualCenterX - 1200);
             board.setTranslateY(visualCenterY - 950);
+            
+            aplicarLimites(); // Asegurar que el centrado inicial no rompa los límites
         }
     }
 
@@ -160,8 +171,54 @@ public class CameraController {
                 transition.setToX(newTX);
                 transition.setToY(newTY);
                 transition.setInterpolator(Interpolator.EASE_BOTH);
+                transition.setOnFinished(e -> aplicarLimites()); // Validar límites al terminar la animación
                 transition.play();
             }
+        }
+    }
+
+    /**
+     * Restringe el movimiento del tablero para que el fondo siempre cubra el viewport.
+     */
+    private void aplicarLimites() {
+        if (board == null || viewport == null) return;
+
+        double z = zoomFactor;
+        double vw = viewport.getWidth();
+        double vh = viewport.getHeight();
+
+        // Si el viewport aún no tiene tamaño (inicio), usamos valores por defecto
+        if (vw <= 0) vw = 1280;
+        if (vh <= 0) vh = 720;
+
+        // Obtenemos los límites reales del contenido (incluyendo el fondo ampliado)
+        Bounds b = board.getBoundsInLocal();
+        
+        // Si el tablero está vacío o no ha cargado, no aplicamos límites aún
+        if (b.getWidth() < 100) return; 
+
+        // El contenido visual mide (b.width * z)
+        // La restricción es: (Translate * z) + (Bound * z) debe cubrir el viewport [0, vw]
+        
+        double minTX = (vw / z) - b.getMaxX();
+        double maxTX = -b.getMinX();
+        
+        double minTY = (vh / z) - b.getMaxY();
+        double maxTY = -b.getMinY();
+
+        // Si el fondo es más pequeño que el viewport (mucho zoom out), centramos
+        if (minTX > maxTX) {
+            board.setTranslateX((maxTX + minTX) / 2.0);
+        } else {
+            if (board.getTranslateX() < minTX) board.setTranslateX(minTX);
+            if (board.getTranslateX() > maxTX) board.setTranslateX(maxTX);
+        }
+
+        if (minTY > maxTY) {
+            board.setTranslateY((maxTY + minTY) / 2.0);
+        } else {
+            if (board.getTranslateY() < minTY) board.setTranslateY(minTY);
+            if (board.getTranslateY() > maxTY) board.setTranslateY(maxTY);
         }
     }
 
