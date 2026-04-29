@@ -327,39 +327,38 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         try {
             String fondoPath = "/assets/tablero/fondo_tablero/fondo_tablero.png";
             java.net.URL fondoUrl = getClass().getResource(fondoPath);
-            
+
             if (fondoUrl != null) {
                 Image fondoImg = new Image(fondoUrl.toExternalForm(), true); // Carga asíncrona para no bloquear
                 ImageView fondoView = new ImageView();
-                
+
                 // Cuando la imagen termine de cargar, la posicionamos
                 fondoImg.progressProperty().addListener((obs, oldV, newV) -> {
                     if (newV.doubleValue() == 1.0) {
                         fondoView.setImage(fondoImg);
                         fondoView.setPreserveRatio(true);
                         fondoView.setSmooth(true);
-                        
+
                         // Centrado manual sobre el área de 2400x2000
                         double imgW = fondoImg.getWidth();
                         double imgH = fondoImg.getHeight();
-                        
-                        // Ampliamos el fondo un poco más para tener margen de maniobra
-                        double factorEscala = 3400;
+
+                        // Ampliamos el fondo un poquito más
+                        double factorEscala = 3640;
                         fondoView.setFitWidth(factorEscala);
                         imgW = factorEscala;
                         imgH = fondoImg.getHeight() * (factorEscala / fondoImg.getWidth());
-                        
-                        // Ajuste horizontal para centrar el saliente de hielo (Líneas Rojas)
-                        fondoView.setLayoutX(((2400 - imgW) / 2) - 150);
-                        
-                        // Ajuste vertical para que los bordes coincidan (Líneas Verdes)
-                        // Bajamos el fondo (+250) para que la grieta del hielo "toque" el tablero
-                        fondoView.setLayoutY(((2000 - imgH) / 2) + 250);
-                        
+
+                        // Centrado horizontal con pequeño ajuste a la izquierda
+                        fondoView.setLayoutX(((2400 - imgW) / 2) - 20);
+
+                        // Ajuste vertical (Un pelín más hacia abajo)
+                        fondoView.setLayoutY(((2000 - imgH) / 2) + 50);
+
                         System.out.println("Fondo del tablero ampliado y ajustado.");
                     }
                 });
-                
+
                 boardPane.getChildren().add(0, fondoView); // Aseguramos que sea el fondo (índice 0)
             } else {
                 System.err.println("Error: No se pudo localizar el recurso: " + fondoPath);
@@ -437,6 +436,12 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 // Retardo muy corto para que la ola sea rápida
                 seq.setDelay(Duration.millis(i * 15));
                 seq.play();
+
+                // Si es la última casilla (la meta), la hacemos invisible 
+                // para que se vea el fondo pero sea funcional.
+                if (i == Tablero.TAMANYO_TABLERO - 1) {
+                    cellNode.setOpacity(0);
+                }
 
                 casillaNodes.put(i, cellNode);
                 sortedNodes.add(cellNode);
@@ -1080,10 +1085,10 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         if (jugadores.get(turnoActual).getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
             Jugador ganador = jugadores.get(turnoActual);
             log("¡" + ganador.getNombre() + " HA GANADO LA PARTIDA!");
-            
+
             // Guardamos el ganador en el contexto global para la pantalla de victoria
             GameContext.getInstance().setWinner(ganador);
-            
+
             // Pequeña pausa para que se vea el movimiento final antes de cambiar de escena
             PauseTransition pause = new PauseTransition(Duration.seconds(2.0));
             pause.setOnFinished(e -> {
@@ -1559,7 +1564,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     }
 
     /**
-     * Ejecuta la acción confirmada (salir, volver al menú o guardar) guardando la partida.
+     * Ejecuta la acción confirmada (salir, volver al menú o guardar) guardando la
+     * partida.
      * 
      * @param event El evento de acción.
      */
@@ -1573,7 +1579,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 boolean exito = bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
                 if (exito) {
                     mostrarNotificacionEvento("PARTIDA GUARDADA CON ÉXITO", jugadores.get(turnoActual));
-                    animateOut(confirmOverlay, null); // Volver a la partida directamente cerrando el overlay de confirmación
+                    animateOut(confirmOverlay, null); // Volver a la partida directamente cerrando el overlay de
+                                                      // confirmación
                 } else {
                     mostrarNotificacionEvento("ERROR AL GUARDAR PARTIDA", jugadores.get(turnoActual));
                 }
@@ -1603,7 +1610,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     @FXML
     private void handleConfirmNo(ActionEvent event) {
         util.SoundManager.playBack();
-        
+
         // Restauramos el estilo por defecto del botón de confirmación por si acaso
         btnConfirmYes.setText("SÍ, SALIR");
         btnConfirmYes.getStyleClass().remove("button-primary");
