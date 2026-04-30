@@ -24,6 +24,7 @@
             <VBox spacing="15" alignment="CENTER" maxWidth="350">
                 <Button text="NUEVA PARTIDA" onAction="#showPlayerConfig" prefWidth="320" styleClass="button-primary" />
                 <Button text="CARGAR PARTIDA" onAction="#showLoadGame" prefWidth="320" />
+                <Button text="ESTADÍSTICAS Y RANKINGS" onAction="#showRankingsView" prefWidth="320" />
                 <Button text="OPCIONES" onAction="#showOptions" prefWidth="320" />
                 <Button text="CERRAR SESIÓN" onAction="#handleLogout" prefWidth="320" />
                 <Button text="SALIR" onAction="#handleQuitGame" prefWidth="320" styleClass="button-secondary" />

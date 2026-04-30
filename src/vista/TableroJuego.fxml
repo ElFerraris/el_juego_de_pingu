@@ -165,6 +165,30 @@
                             </HBox>
                         </VBox>
                     </Tab>
+                    <Tab text="CUENTA">
+                        <StackPane styleClass="tab-content-area" style="-fx-padding: 30;">
+                            <!-- Panel Info Inicial -->
+                            <VBox fx:id="passInfoOverlay" spacing="20" alignment="CENTER">
+                                <HBox alignment="CENTER" spacing="10">
+                                    <Label text="USUARIO:" style="-fx-font-size: 20px; -fx-text-fill: #0d47a1; -fx-font-weight: bold;" />
+                                    <Label fx:id="usernameLabelOverlay" text="PINGÜINO" style="-fx-font-size: 20px; -fx-text-fill: #1a237e;" />
+                                </HBox>
+                                <Button text="CAMBIAR CONTRASEÑA" onAction="#showPassFormOverlay" prefWidth="300" styleClass="button-primary" />
+                            </VBox>
+                            
+                            <!-- Panel Formulario Cambio (Oculto por defecto) -->
+                            <VBox fx:id="passFormOverlay" spacing="15" alignment="CENTER" visible="false">
+                                <Label text="CAMBIAR CONTRASEÑA" style="-fx-font-size: 20px; -fx-text-fill: #0d47a1; -fx-font-weight: bold;" />
+                                <PasswordField fx:id="newPassFieldOverlay" promptText="Nueva contraseña" maxWidth="350" />
+                                <PasswordField fx:id="confirmPassFieldOverlay" promptText="Confirmar nueva contraseña" maxWidth="350" />
+                                <HBox spacing="15" alignment="CENTER">
+                                    <Button text="CONFIRMAR" onAction="#handleConfirmPassOverlay" styleClass="button-primary" prefWidth="140" />
+                                    <Button text="CANCELAR" onAction="#hidePassFormOverlay" styleClass="button-secondary" prefWidth="140" />
+                                </HBox>
+                                <Label fx:id="passErrorLabelOverlay" text="" style="-fx-text-fill: #d32f2f; -fx-font-size: 14px;" />
+                            </VBox>
+                        </StackPane>
+                    </Tab>
                     <Tab text="CRÉDITOS">
                         <VBox alignment="CENTER" styleClass="tab-content-area" style="-fx-padding: 20;">
                             <ImageView pickOnBounds="true" preserveRatio="true" fitHeight="280">

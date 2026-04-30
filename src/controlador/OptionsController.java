@@ -2,6 +2,7 @@ package controlador;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import util.SettingsManager;
@@ -40,6 +41,22 @@ public class OptionsController {
     private Label sfxLabel;
     @FXML
     private Button applyButton;
+
+    // Campos para Seguridad
+    @FXML
+    private VBox passwordInfoPane;
+    @FXML
+    private Label usernameLabel;
+    @FXML
+    private VBox passwordFormPane;
+    @FXML
+    private PasswordField newPasswordField;
+    @FXML
+    private PasswordField confirmPasswordField;
+    @FXML
+    private Label passwordErrorLabel;
+
+    private datos.BBDD bbdd = new datos.BBDD();
 
     // Valores iniciales para detectar cambios (Dirty State)
     private String initialResolution;
@@ -82,6 +99,11 @@ public class OptionsController {
 
         // Añadir listeners para detectar cambios
         setupListeners();
+
+        // Cargar nombre de usuario
+        if (controlador.GameContext.getInstance().getCurrentUser() != null) {
+            usernameLabel.setText(controlador.GameContext.getInstance().getCurrentUser().getNombre());
+        }
 
         System.out.println("► Opciones inicializadas - Fullscreen: " + initialFullscreen);
     }
@@ -211,5 +233,54 @@ public class OptionsController {
     @FXML
     private void handleBack(ActionEvent event) {
         NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
+    }
+
+    // --- MÉTODOS DE SEGURIDAD ---
+
+    @FXML
+    private void showPasswordForm() {
+        passwordInfoPane.setVisible(false);
+        passwordFormPane.setVisible(true);
+        passwordErrorLabel.setText("");
+        newPasswordField.clear();
+        confirmPasswordField.clear();
+    }
+
+    @FXML
+    private void hidePasswordForm() {
+        passwordInfoPane.setVisible(true);
+        passwordFormPane.setVisible(false);
+    }
+
+    @FXML
+    private void handleConfirmPassword() {
+        String pass = newPasswordField.getText();
+        String confirm = confirmPasswordField.getText();
+
+        if (pass.isEmpty()) {
+            passwordErrorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+            passwordErrorLabel.setText("La contraseña no puede estar vacía.");
+            return;
+        }
+
+        if (!pass.equals(confirm)) {
+            passwordErrorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+            passwordErrorLabel.setText("Las contraseñas no coinciden.");
+            return;
+        }
+
+        int userId = controlador.GameContext.getInstance().getCurrentUser().getId();
+        boolean success = bbdd.cambiarContrasenaJugador(userId, pass);
+
+        if (success) {
+            passwordErrorLabel.setStyle("-fx-text-fill: #388e3c; -fx-font-size: 14px; -fx-font-weight: bold;");
+            passwordErrorLabel.setText("¡Contraseña cambiada exitosamente!");
+            // Limpiar los campos por seguridad
+            newPasswordField.clear();
+            confirmPasswordField.clear();
+        } else {
+            passwordErrorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+            passwordErrorLabel.setText("Error al conectar con la base de datos.");
+        }
     }
 }

@@ -814,7 +814,8 @@ public class BBDD {
     
     /**
      * Actualiza la contraseña y el estado de CPU de un jugador existente.
-     * * @param idJugador      ID único del jugador en la base de datos.
+     * 
+     * @param idJugador      ID único del jugador en la base de datos.
      * @param nuevaContrasena La nueva contraseña en texto plano (el procedimiento se encarga del Hash y el Salt).
      * @return {@code true} si la actualización fue exitosa.
      */
@@ -842,8 +843,131 @@ public class BBDD {
             return false;
         }
     }
-    
-    /*
-     * sape
+
+    // =========================================================================
+    // --- NUEVOS MÉTODOS DBMS (REPORTES Y ESTADÍSTICAS) ---
+    // =========================================================================
+
+    /**
+     * Lee el buffer de salida de DBMS_OUTPUT de la sesión de Oracle.
+     * 
+     * @param con Conexión activa a la base de datos.
+     * @return El contenido acumulado en el buffer como una cadena de texto.
+     * @throws SQLException Si ocurre un error al acceder al buffer.
      */
+    private String leerBufferDBMS(Connection con) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        try (CallableStatement fetchStmt = con.prepareCall("begin dbms_output.get_line(?, ?); end;")) {
+            fetchStmt.registerOutParameter(1, java.sql.Types.VARCHAR);
+            fetchStmt.registerOutParameter(2, java.sql.Types.INTEGER);
+            int status = 0;
+            // status = 0 indica que hay más líneas en el buffer
+            while (status == 0) {
+                fetchStmt.execute();
+                String line = fetchStmt.getString(1);
+                status = fetchStmt.getInt(2);
+                if (status == 0 && line != null) sb.append(line).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Habilita el buffer de DBMS_OUTPUT para la conexión actual.
+     * 
+     * @param con Conexión activa a la base de datos.
+     * @throws SQLException Si no se puede habilitar el buffer.
+     */
+    private void habilitarDBMS(Connection con) throws SQLException {
+        try (Statement stmt = con.createStatement()) {
+            stmt.execute("begin dbms_output.enable(); end;");
+        }
+    }
+
+    /**
+     * Obtiene el ranking general de partidas jugadas mediante un reporte DBMS.
+     * 
+     * @return Texto formateado con el ranking o mensaje de error.
+     */
+    public String obtenerRankingYErroresDBMS() {
+        try (Connection con = conectarBD()) {
+            if (con == null) return "Error de conexión.";
+            habilitarDBMS(con);
+            try (Statement stmt = con.createStatement()) {
+                stmt.execute("begin p_ranking_partidas_jugadas(); end;");
+            }
+            return leerBufferDBMS(con);
+        } catch (SQLException e) {
+            return "Error al obtener ranking: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Identifica el récord absoluto y muestra los jugadores que lo ostentan.
+     * 
+     * @return Informe con los jugadores que tienen el récord de victorias.
+     */
+    public String obtenerJugadoresConRecordDBMS() {
+        try (Connection con = conectarBD()) {
+            if (con == null) return "Error de conexión.";
+            habilitarDBMS(con);
+            int record = 0;
+            // 1. Obtener el valor del récord mediante función
+            try (CallableStatement cstmt = con.prepareCall("{? = call fun_record_absoluto()}")) {
+                cstmt.registerOutParameter(1, java.sql.Types.INTEGER);
+                cstmt.execute();
+                record = cstmt.getInt(1);
+            }
+            // 2. Ejecutar procedimiento que genera el reporte con ese récord
+            try (CallableStatement cstmt = con.prepareCall("begin p_jugadores_con_record(?); end;")) {
+                cstmt.setInt(1, record);
+                cstmt.execute();
+            }
+            return leerBufferDBMS(con);
+        } catch (SQLException e) {
+            return "Error al obtener récords: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Muestra el reporte de jugadores que están por encima de la media de victorias.
+     * 
+     * @return Informe estadístico DBMS.
+     */
+    public String obtenerJugadoresEncimaMediaDBMS() {
+        try (Connection con = conectarBD()) {
+            if (con == null) return "Error de conexión.";
+            habilitarDBMS(con);
+            try (Statement stmt = con.createStatement()) {
+                stmt.execute("begin p_jugadores_encima_media(); end;");
+            }
+            return leerBufferDBMS(con);
+        } catch (SQLException e) {
+            return "Error al obtener media: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Calcula en qué percentil se encuentra un jugador basado en sus victorias.
+     * 
+     * @param victorias Cantidad de victorias a comparar.
+     * @return Mensaje descriptivo con el porcentaje de superación.
+     */
+    public String obtenerPorcentajeJugadorDBMS(int victorias) {
+        try (Connection con = conectarBD()) {
+            if (con == null) return "Error de conexión.";
+            habilitarDBMS(con);
+            double pct = 0;
+            try (CallableStatement cstmt = con.prepareCall("{? = call fun_pct_inferior(?)}")) {
+                cstmt.registerOutParameter(1, java.sql.Types.DOUBLE);
+                cstmt.setInt(2, victorias);
+                cstmt.execute();
+                pct = cstmt.getDouble(1);
+            }
+            return "RESULTADO: \n\nTu nivel de victorias (" + victorias + ") supera al " 
+                   + String.format("%.2f", pct) + "% del total de jugadores registrados.";
+        } catch (SQLException e) {
+            return "Error al calcular porcentaje: " + e.getMessage();
+        }
+    }
 }

@@ -89,6 +89,16 @@ public class MainMenuController {
     }
 
     /**
+     * Navega a la vista unificada de estadísticas y rankings del sistema.
+     * 
+     * @param event El evento de acción disparado por el botón "Rankings".
+     */
+    @FXML
+    private void showRankingsView(ActionEvent event) {
+        NavigationController.navigateTo(event, "RankingsView.fxml", NavigationController.Direction.LEFT);
+    }
+
+    /**
      * Gestiona el cierre de sesión del usuario.
      * 
      * <p>

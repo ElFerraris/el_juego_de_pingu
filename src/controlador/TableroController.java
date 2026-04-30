@@ -151,6 +151,20 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     @FXML
     private Button btnApplyOverlay;
 
+    // Controles de Seguridad en Overlay
+    @FXML
+    private VBox passInfoOverlay;
+    @FXML
+    private Label usernameLabelOverlay;
+    @FXML
+    private VBox passFormOverlay;
+    @FXML
+    private PasswordField newPassFieldOverlay;
+    @FXML
+    private PasswordField confirmPassFieldOverlay;
+    @FXML
+    private Label passErrorLabelOverlay;
+
     // Controles de Confirmación de Objetos
     @FXML
     private VBox itemConfirmOverlay;
@@ -1831,6 +1845,12 @@ public class TableroController implements GameFlowManager.GameUIHandler {
 
         btnApplyOverlay.setDisable(true);
         btnApplyOverlay.getStyleClass().remove("button-dirty");
+
+        // Reset Seguridad Overlay
+        if (GameContext.getInstance().getCurrentUser() != null) {
+            usernameLabelOverlay.setText(GameContext.getInstance().getCurrentUser().getNombre());
+        }
+        hidePassFormOverlay();
     }
 
     /**
@@ -2002,6 +2022,54 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 ft.setOnFinished(e -> cpuTurnOverlay.setVisible(false));
                 ft.play();
             }
+        }
+    }
+    // --- GESTIÓN DE SEGURIDAD EN OVERLAY ---
+
+    @FXML
+    private void showPassFormOverlay() {
+        passInfoOverlay.setVisible(false);
+        passFormOverlay.setVisible(true);
+        passErrorLabelOverlay.setText("");
+        newPassFieldOverlay.clear();
+        confirmPassFieldOverlay.clear();
+    }
+
+    @FXML
+    private void hidePassFormOverlay() {
+        passInfoOverlay.setVisible(true);
+        passFormOverlay.setVisible(false);
+    }
+
+    @FXML
+    private void handleConfirmPassOverlay() {
+        String pass = newPassFieldOverlay.getText();
+        String confirm = confirmPassFieldOverlay.getText();
+
+        if (pass.isEmpty()) {
+            passErrorLabelOverlay.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+            passErrorLabelOverlay.setText("La contraseña no puede estar vacía.");
+            return;
+        }
+
+        if (!pass.equals(confirm)) {
+            passErrorLabelOverlay.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+            passErrorLabelOverlay.setText("Las contraseñas no coinciden.");
+            return;
+        }
+
+        int userId = GameContext.getInstance().getCurrentUser().getId();
+        boolean success = bbdd.cambiarContrasenaJugador(userId, pass);
+
+        if (success) {
+            passErrorLabelOverlay.setStyle("-fx-text-fill: #388e3c; -fx-font-size: 14px; -fx-font-weight: bold;");
+            passErrorLabelOverlay.setText("¡Contraseña cambiada exitosamente!");
+            // Limpiar los campos por seguridad
+            newPassFieldOverlay.clear();
+            confirmPassFieldOverlay.clear();
+        } else {
+            passErrorLabelOverlay.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+            passErrorLabelOverlay.setText("Error al conectar con la base de datos.");
         }
     }
 }
