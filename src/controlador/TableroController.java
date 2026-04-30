@@ -337,6 +337,50 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         boardPane.getChildren().clear();
         casillaNodes.clear();
 
+        // --- CAPA DE FONDO DEL ENTORNO ---
+        try {
+            String fondoPath = "/assets/tablero/fondo_tablero/fondo_tablero.png";
+            java.net.URL fondoUrl = getClass().getResource(fondoPath);
+
+            if (fondoUrl != null) {
+                Image fondoImg = new Image(fondoUrl.toExternalForm(), true); // Carga asíncrona para no bloquear
+                ImageView fondoView = new ImageView();
+
+                // Cuando la imagen termine de cargar, la posicionamos
+                fondoImg.progressProperty().addListener((obs, oldV, newV) -> {
+                    if (newV.doubleValue() == 1.0) {
+                        fondoView.setImage(fondoImg);
+                        fondoView.setPreserveRatio(true);
+                        fondoView.setSmooth(true);
+
+                        // Centrado manual sobre el área de 2400x2000
+                        double imgW = fondoImg.getWidth();
+                        double imgH = fondoImg.getHeight();
+
+                        // Ampliamos el fondo un poquito más
+                        double factorEscala = 3640;
+                        fondoView.setFitWidth(factorEscala);
+                        imgW = factorEscala;
+                        imgH = fondoImg.getHeight() * (factorEscala / fondoImg.getWidth());
+
+                        // Centrado horizontal con pequeño ajuste a la izquierda
+                        fondoView.setLayoutX(((2400 - imgW) / 2) - 20);
+
+                        // Ajuste vertical (Un pelín más hacia abajo)
+                        fondoView.setLayoutY(((2000 - imgH) / 2) + 50);
+
+                        System.out.println("Fondo del tablero ampliado y ajustado.");
+                    }
+                });
+
+                boardPane.getChildren().add(0, fondoView); // Aseguramos que sea el fondo (índice 0)
+            } else {
+                System.err.println("Error: No se pudo localizar el recurso: " + fondoPath);
+            }
+        } catch (Exception e) {
+            System.err.println("Aviso: Error al configurar el fondo: " + e.getMessage());
+        }
+
         // Inicializamos la capa de tokens y la añadimos al final (encima de todo)
         tokensPane.getChildren().clear();
         tokensPane.setPickOnBounds(false); // Para que no bloquee clics en el tablero
@@ -344,7 +388,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         List<StackPane> sortedNodes = new java.util.ArrayList<>();
 
         double centerX = 1200.0;
-        double bottomY = 1500.0; // Bajamos más el inicio para que quepa la escalera hacia arriba
+        double bottomY = 1470.0; // Un pelín hacia atrás (arriba)
 
         double xOffset = 48.0; // Reducido más para forzar el solapamiento y evitar huecos
         double yOffset = 24.0; // Manteniendo la proporción isométrica 2:1
@@ -375,10 +419,15 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                     layoutX = centerX + (gx - gy) * xOffset - 55;
                     layoutY = bottomY - (gx + gy) * yOffset - stepHeight - 150;
                 } else {
-                    zOrder = 7 + 7;
-                    double stepHeight = 49 * 2.0;
-                    layoutX = centerX + (7 - 7) * xOffset - 55;
-                    layoutY = bottomY - (7 + 7) * yOffset - stepHeight - 150 - 12;
+                    zOrder = 0;
+                    // Posicionamos el último pilar (la meta) encima del iglú del fondo.
+                    // Píxel original del iglú: 728, 467.
+                    // Escala: 3640 / 1450 = 2.5103...
+                    // Offset fondo: X=-640, Y=-311.86
+                    // Coordenadas en boardPane: X=1187.53, Y=860.47
+                    // Ajustamos -55 en X y -35 en Y para que el token del jugador caiga justo en el centro del píxel.
+                    layoutX = 1132.5; 
+                    layoutY = 825.5;
                 }
 
                 cellNode.setUserData(zOrder);
@@ -386,6 +435,10 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 // La posición layout es la FINAL
                 cellNode.setLayoutX(layoutX);
                 cellNode.setLayoutY(layoutY);
+                
+                if (i == 49) {
+                    cellNode.setOpacity(0);
+                }
 
                 // Animación de caída (modifica translateY desde muy arriba hasta 0)
                 double dropDistance = -1000.0;
