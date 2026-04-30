@@ -391,7 +391,7 @@ public class BBDD {
             if (con == null) return "Error de conexión.";
             habilitarDBMS(con);
             try (Statement stmt = con.createStatement()) {
-                stmt.execute("begin sp_ranking_y_errores(); end;");
+                stmt.execute("begin p_ranking_y_errores(); end;");
             }
             return leerBufferDBMS(con);
         } catch (SQLException e) {
