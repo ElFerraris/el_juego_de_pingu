@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.event.ActionEvent;
 import datos.BBDD;
+import modelo.Jugador;
 
 /**
  * Controlador para la nueva vista unificada de Rankings.
@@ -38,8 +39,18 @@ public class RankingsController {
 
     @FXML
     private void handleMiNivel(ActionEvent event) {
-        // Ejemplo con 5 victorias (sería ideal pasarlo desde el contexto del usuario)
-        outputArea.setText("Calculando tu nivel de victorias...\n\n" + bbdd.obtenerPorcentajeJugadorDBMS(5));
+        // Obtenemos el usuario logueado actualmente
+        Jugador current = GameContext.getInstance().getCurrentUser();
+        
+        if (current != null) {
+            // Buscamos sus victorias reales en la BD
+            int victorias = bbdd.obtenerVictoriasTotales(current.getId());
+            
+            outputArea.setText("Calculando tu nivel de victorias (" + victorias + ")...\n\n" 
+                + bbdd.obtenerPorcentajeJugadorDBMS(victorias));
+        } else {
+            outputArea.setText("No se ha podido identificar al usuario actual.\nPor favor, inicia sesión de nuevo.");
+        }
     }
 
     @FXML
