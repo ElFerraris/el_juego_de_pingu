@@ -149,6 +149,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     @FXML
     private Label sfxLabelOverlay;
     @FXML
+    private Slider zoomSlider;
+    @FXML
     private Button btnApplyOverlay;
 
     // Controles de Seguridad en Overlay
@@ -247,6 +249,14 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         // Inicializar Gestores
         this.camera = new CameraController(cameraViewport, boardPane, zoomGroup, casillaNodes);
         this.camera.init();
+
+        // Configuración y sincronización del slider de zoom
+        if (zoomSlider != null) {
+            zoomSlider.setMin(CameraController.MIN_ZOOM);
+            zoomSlider.setMax(CameraController.MAX_ZOOM);
+            zoomSlider.setValue(this.camera.zoomProperty().get());
+            zoomSlider.valueProperty().bindBidirectional(this.camera.zoomProperty());
+        }
 
         // Esconder panel de log al inicio
         logPanelContainer.setTranslateX(-320);

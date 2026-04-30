@@ -47,6 +47,16 @@
             </HBox>
         </top>
 
+        <!-- PANEL DERECHO: Control de Zoom -->
+        <right>
+            <VBox alignment="CENTER" pickOnBounds="false" style="-fx-padding: 0 20 0 0;" mouseTransparent="false">
+                <VBox alignment="CENTER" spacing="5" styleClass="glass-panel" style="-fx-padding: 15 5; -fx-background-radius: 15;">
+                    <Label text="🔍" style="-fx-font-weight: bold; -fx-text-fill: #0d47a1; -fx-font-size: 24px;" />
+                    <Slider fx:id="zoomSlider" orientation="VERTICAL" min="0.4" max="3.0" value="1.0" prefHeight="200" styleClass="slider" />
+                </VBox>
+            </VBox>
+        </right>
+
         <!-- El centro debe dejarse libre y pickOnBounds="false" en el padre 
              permitirá que los clics lleguen al tablero de fondo. -->
         <center>
