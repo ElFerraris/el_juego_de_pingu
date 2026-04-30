@@ -348,48 +348,62 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         casillaNodes.clear();
 
         // --- CAPA DE FONDO DEL ENTORNO ---
+        ImageView marView = new ImageView(); // Declaramos la capa de mar fuera para usarla después
         try {
             String fondoPath = "/assets/tablero/fondo_tablero/fondo_tablero.png";
+            String marPath = "/assets/tablero/fondo_tablero/fondo_tablero_mar.png";
             java.net.URL fondoUrl = getClass().getResource(fondoPath);
+            java.net.URL marUrl = getClass().getResource(marPath);
 
             if (fondoUrl != null) {
-                Image fondoImg = new Image(fondoUrl.toExternalForm(), true); // Carga asíncrona para no bloquear
+                Image fondoImg = new Image(fondoUrl.toExternalForm(), true);
                 ImageView fondoView = new ImageView();
 
-                // Cuando la imagen termine de cargar, la posicionamos
+                // Carga y posicionamiento del fondo base
                 fondoImg.progressProperty().addListener((obs, oldV, newV) -> {
                     if (newV.doubleValue() == 1.0) {
                         fondoView.setImage(fondoImg);
                         fondoView.setPreserveRatio(true);
                         fondoView.setSmooth(true);
 
-                        // Centrado manual sobre el área de 2400x2000
-                        double imgW = fondoImg.getWidth();
-                        double imgH = fondoImg.getHeight();
-
-                        // Ampliamos el fondo un poquito más
                         double factorEscala = 3640;
                         fondoView.setFitWidth(factorEscala);
-                        imgW = factorEscala;
-                        imgH = fondoImg.getHeight() * (factorEscala / fondoImg.getWidth());
+                        double imgW = factorEscala;
+                        double imgH = fondoImg.getHeight() * (factorEscala / fondoImg.getWidth());
 
-                        // Centrado horizontal con pequeño ajuste a la izquierda
                         fondoView.setLayoutX(((2400 - imgW) / 2) - 20);
-
-                        // Ajuste vertical (Un pelín más hacia abajo)
                         fondoView.setLayoutY(((2000 - imgH) / 2) + 50);
-
-                        System.out.println("Fondo del tablero ampliado y ajustado.");
                     }
                 });
+                boardPane.getChildren().add(0, fondoView);
+            }
 
-                boardPane.getChildren().add(0, fondoView); // Aseguramos que sea el fondo (índice 0)
-            } else {
-                System.err.println("Error: No se pudo localizar el recurso: " + fondoPath);
+            if (marUrl != null) {
+                Image marImg = new Image(marUrl.toExternalForm(), true);
+                
+                // Carga y posicionamiento de la capa de mar (delante de las casillas)
+                marImg.progressProperty().addListener((obs, oldV, newV) -> {
+                    if (newV.doubleValue() == 1.0) {
+                        marView.setImage(marImg);
+                        marView.setPreserveRatio(true);
+                        marView.setSmooth(true);
+
+                        double factorEscala = 3640;
+                        marView.setFitWidth(factorEscala);
+                        double imgW = factorEscala;
+                        double imgH = marImg.getHeight() * (factorEscala / marImg.getWidth());
+
+                        marView.setLayoutX(((2400 - imgW) / 2) - 20);
+                        marView.setLayoutY(((2000 - imgH) / 2) + 50);
+                    }
+                });
+                // No lo añadimos aún, lo haremos después de las casillas
+                marView.setMouseTransparent(true); // Para que no bloquee clics en el tablero
             }
         } catch (Exception e) {
-            System.err.println("Aviso: Error al configurar el fondo: " + e.getMessage());
+            System.err.println("Aviso: Error al configurar capas de fondo: " + e.getMessage());
         }
+
 
         // Inicializamos la capa de tokens y la añadimos al final (encima de todo)
         tokensPane.getChildren().clear();
@@ -478,6 +492,11 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         sortedNodes.sort((a, b) -> Integer.compare((int) b.getUserData(), (int) a.getUserData()));
 
         boardPane.getChildren().addAll(sortedNodes);
+        
+        // Añadimos la capa de mar sobre las casillas
+        if (marView != null) {
+            boardPane.getChildren().add(marView);
+        }
 
         tokensPane.setOpacity(0); // Ocultamos los pinguinos al principio
         boardPane.getChildren().add(tokensPane);
