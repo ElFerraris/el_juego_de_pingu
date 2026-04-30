@@ -6,6 +6,8 @@ import javafx.stage.Stage;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.text.Font;
+import javafx.scene.image.Image;
+import java.util.Random;
 import util.SettingsManager;
 import util.SoundManager;
 
@@ -37,6 +39,16 @@ public class Main extends Application {
 			Font.loadFont(getClass().getResourceAsStream("/assets/fuentes/upheavtt.ttf"), 12);
 		} catch (Exception e) {
 			System.err.println("No se pudieron cargar las fuentes desde Main: " + e.getMessage());
+		}
+
+		// CONFIGURACIÓN DE ICONO ALEATORIO (1-8)
+		try {
+			Random rand = new Random();
+			int iconNum = rand.nextInt(8) + 1; // Genera un número entre 1 y 8
+			String iconPath = "/assets/iconos/" + iconNum + ".png";
+			primaryStage.getIcons().add(new Image(getClass().getResourceAsStream(iconPath)));
+		} catch (Exception e) {
+			System.err.println("Aviso: No se pudo cargar el icono aleatorio: " + e.getMessage());
 		}
 
 		try {
