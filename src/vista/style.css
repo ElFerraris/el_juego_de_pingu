@@ -73,9 +73,15 @@
 }
 
 
-.button:pressed, .button-dynamic:pressed {
+.button:pressed, .button-dynamic:pressed, .button-active {
     -fx-translate-y: 2;
     -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.2), 0, 0, 0, 1);
+}
+
+.button-active {
+    -fx-background-color:
+        #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0, #1565c0,
+        #bbdefb, #bbdefb, #bbdefb, #bbdefb, #bbdefb, #bbdefb, #bbdefb;
 }
 
 .button-primary {

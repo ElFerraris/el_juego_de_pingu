@@ -15,10 +15,10 @@
         <Label text="ESTADÍSTICAS Y RANKINGS" styleClass="title-text" />
         
         <HBox spacing="10" alignment="CENTER">
-            <Button text="RANKING GENERAL" onAction="#handleRankingGeneral" prefWidth="220" styleClass="button-small" />
-            <Button text="RÉCORD ABSOLUTO" onAction="#handleRecordAbsoluto" prefWidth="220" styleClass="button-small" />
-            <Button text="ENCIMA DE LA MEDIA" onAction="#handleEncimaMedia" prefWidth="220" styleClass="button-small" />
-            <Button text="MI NIVEL" onAction="#handleMiNivel" prefWidth="220" styleClass="button-small" />
+            <Button fx:id="btnGeneral" text="RANKING GENERAL" onAction="#handleRankingGeneral" prefWidth="220" styleClass="button-small" />
+            <Button fx:id="btnRecord" text="RÉCORD ABSOLUTO" onAction="#handleRecordAbsoluto" prefWidth="220" styleClass="button-small" />
+            <Button fx:id="btnMedia" text="ENCIMA DE LA MEDIA" onAction="#handleEncimaMedia" prefWidth="220" styleClass="button-small" />
+            <Button fx:id="btnNivel" text="MI NIVEL" onAction="#handleMiNivel" prefWidth="220" styleClass="button-small" />
         </HBox>
         
         <TextArea fx:id="outputArea" VBox.vgrow="ALWAYS" editable="false" wrapText="false" styleClass="text-area-rankings" />

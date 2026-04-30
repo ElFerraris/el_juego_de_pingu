@@ -2,6 +2,7 @@ package controlador;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Button;
 import javafx.event.ActionEvent;
 import datos.BBDD;
 
@@ -23,6 +24,15 @@ public class RankingsController {
     @FXML
     private TextArea outputArea;
 
+    @FXML
+    private Button btnGeneral;
+    @FXML
+    private Button btnRecord;
+    @FXML
+    private Button btnMedia;
+    @FXML
+    private Button btnNivel;
+
     /** Instancia de acceso a datos. */
     private BBDD bbdd = new BBDD();
 
@@ -36,12 +46,27 @@ public class RankingsController {
     }
 
     /**
+     * Resalta visualmente el botón seleccionado y apaga el resto.
+     */
+    private void setActiveButton(Button activeButton) {
+        if (btnGeneral != null) btnGeneral.getStyleClass().remove("button-active");
+        if (btnRecord != null) btnRecord.getStyleClass().remove("button-active");
+        if (btnMedia != null) btnMedia.getStyleClass().remove("button-active");
+        if (btnNivel != null) btnNivel.getStyleClass().remove("button-active");
+
+        if (activeButton != null && !activeButton.getStyleClass().contains("button-active")) {
+            activeButton.getStyleClass().add("button-active");
+        }
+    }
+
+    /**
      * Solicita y muestra el ranking general de partidas jugadas por cada usuario.
      * 
      * @param event El evento disparado por el botón (puede ser null en el init).
      */
     @FXML
     private void handleRankingGeneral(ActionEvent event) {
+        setActiveButton(btnGeneral);
         outputArea.setText(">>> CARGANDO RANKING GENERAL DE PARTICIPACIÓN <<<\n\n" + bbdd.obtenerRankingYErroresDBMS());
     }
 
@@ -50,6 +75,7 @@ public class RankingsController {
      */
     @FXML
     private void handleRecordAbsoluto(ActionEvent event) {
+        setActiveButton(btnRecord);
         outputArea.setText(">>> CARGANDO JUGADORES CON EL RÉCORD ABSOLUTO <<<\n\n" + bbdd.obtenerJugadoresConRecordDBMS());
     }
 
@@ -58,17 +84,28 @@ public class RankingsController {
      */
     @FXML
     private void handleEncimaMedia(ActionEvent event) {
+        setActiveButton(btnMedia);
         outputArea.setText(">>> JUGADORES POR ENCIMA DE LA MEDIA DE VICTORIAS <<<\n\n" + bbdd.obtenerJugadoresEncimaMediaDBMS());
     }
 
     /**
-     * Calcula el nivel del usuario actual basado en sus victorias (simulado para este ejemplo).
+     * Calcula el nivel del usuario actual basado en sus victorias reales en la base de datos.
      */
     @FXML
     private void handleMiNivel(ActionEvent event) {
-        // En una versión final, obtendríamos las victorias reales del GameContext
-        int victoriasSimuladas = 5; 
-        outputArea.setText(">>> CÁLCULO DE NIVEL COMPARATIVO <<<\n\n" + bbdd.obtenerPorcentajeJugadorDBMS(victoriasSimuladas));
+        setActiveButton(btnNivel);
+        // Obtenemos el usuario logueado actualmente
+        modelo.Jugador current = GameContext.getInstance().getCurrentUser();
+        
+        if (current != null) {
+            // Buscamos sus victorias reales en la BD
+            int victorias = bbdd.obtenerVictoriasTotales(current.getId());
+            
+            outputArea.setText(">>> CÁLCULO DE TU NIVEL DE VICTORIAS (" + victorias + ") <<<\n\n" 
+                + bbdd.obtenerPorcentajeJugadorDBMS(victorias));
+        } else {
+            outputArea.setText("No se ha podido identificar al usuario actual.\nPor favor, inicia sesión de nuevo.");
+        }
     }
 
     /**

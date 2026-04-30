@@ -970,4 +970,22 @@ public class BBDD {
             return "Error al calcular porcentaje: " + e.getMessage();
         }
     }
+
+    /**
+     * Obtiene el número total de victorias de un jugador específico.
+     * @param idJugador ID del jugador a consultar.
+     * @return El número de partidas donde el jugador es el ganador.
+     */
+    public int obtenerVictoriasTotales(int idJugador) {
+        String sql = "SELECT COUNT(*) FROM partida WHERE ganador = ?";
+        try (Connection con = conectarBD(); PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setInt(1, idJugador);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener victorias: " + e.getMessage());
+        }
+        return 0;
+    }
 }
