@@ -215,7 +215,7 @@ public class PlayerConfigController {
      */
     @FXML
     private void showMainMenu(ActionEvent event) {
-        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
+        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.RIGHT);
     }
 
 

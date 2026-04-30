@@ -236,8 +236,8 @@ public class LoadGameController {
      */
     @FXML
     private void handleVolver(ActionEvent event) {
-        // Volvemos al menú principal con transición hacia atrás (baja)
-        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
+        // Volvemos al menú principal con transición hacia la derecha
+        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.RIGHT);
     }
 
     /**
