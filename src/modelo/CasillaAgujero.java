@@ -41,7 +41,7 @@ public class CasillaAgujero extends Casilla {
     @Override
     public String activarEfecto(Jugador jugador) {
         jugador.setPosicion(posicionAgujeroAnterior);
-        return jugador.getNombre() + " cae en un agujero y retrocede a la casilla " + posicionAgujeroAnterior + ".";
+        return "AGUJERO: CASILLA " + posicionAgujeroAnterior;
     }
 
     @Override

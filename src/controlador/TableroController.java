@@ -776,8 +776,9 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             int actuales = jActual.getInventario().getCantidad("BolaNieve");
 
             if (actuales >= Inventario.MAX_BOLAS_NIEVE) {
-                log(jActual.getNombre() + " ya tiene el máximo de bolas de nieve (" + Inventario.MAX_BOLAS_NIEVE
-                        + ").");
+                mostrarNotificacionEvento("¡MOCHILA LLENA!", jActual);
+                log(jActual.getNombre() + " ya tiene el máximo de bolas de nieve (" + Inventario.MAX_BOLAS_NIEVE + ").");
+                util.SoundManager.playBack();
                 if (jActual instanceof Foca) {
                     finalizarTurno();
                 }

@@ -273,16 +273,15 @@ public class Tablero {
 
         if (pos >= 0 && pos < casillas.size()) {
             Casilla casillaActual = casillas.get(pos);
-            String txtTop = "--- EFECTO: " + jugador.getNombre() + " cae en "
-                    + casillaActual.getTipo().replace("Casilla ", "") + " ---";
-
+            String tipo = casillaActual.getTipo().replace("Casilla ", "").toUpperCase();
             String efectoTxt = casillaActual.activarEfecto(jugador);
 
             if (efectoTxt != null && !efectoTxt.isEmpty()) {
-                System.out.println(txtTop + "\n  » " + efectoTxt);
-                return txtTop + "\n  » " + efectoTxt;
+                String logMsg = tipo + ": " + efectoTxt;
+                System.out.println(logMsg);
+                return logMsg;
             } else {
-                return ""; // Si es normal, no ensuciamos el log visual
+                return "";
             }
         }
         return "";

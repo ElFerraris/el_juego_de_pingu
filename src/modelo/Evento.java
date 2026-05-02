@@ -47,29 +47,41 @@ public class Evento {
     public String aplicarEfecto(Jugador jugador, Tablero tablero) {
         switch (tipoEvento) {
             case "Pez":
-                jugador.getInventario().agregarObjeto("Pez");
-                return "¡Encontraste un Sabroso Pez! \uD83D\uDC1F";
+                if (jugador.getInventario().agregarObjeto("Pez")) {
+                    return "+1 PEZ";
+                } else {
+                    return "PEZ: MOCHILA LLENA";
+                }
             case "BolaNieve":
                 Random r = new Random();
-                int cantidad = r.nextInt(3) + 1;
-                for (int i = 0; i < cantidad; i++)
-                    jugador.getInventario().agregarObjeto("BolaNieve");
-                return "¡Has recogido " + cantidad + " Bolas de Nieve! \u2744\uFE0F";
+                int cantidadDeseada = r.nextInt(3) + 1;
+                int agregados = jugador.getInventario().agregarObjetos("BolaNieve", cantidadDeseada);
+                if (agregados > 0) {
+                    return "+" + agregados + " BOLAS DE NIEVE";
+                } else {
+                    return "BOLAS: MOCHILA LLENA";
+                }
             case "DadoRapido":
-                jugador.getInventario().agregarObjeto("DadoRapido");
-                return "¡Encontraste un Dado Rápido! \uD83C\uDFB2\u26A1";
+                if (jugador.getInventario().agregarObjeto("DadoRapido")) {
+                    return "+1 DADO RAPIDO";
+                } else {
+                    return "DADO: MOCHILA LLENA";
+                }
             case "DadoLento":
-                jugador.getInventario().agregarObjeto("DadoLento");
-                return "¡Encontraste un Dado Lento! \uD83C\uDFB2\uD83D\uDC22";
+                if (jugador.getInventario().agregarObjeto("DadoLento")) {
+                    return "+1 DADO LENTO";
+                } else {
+                    return "DADO: MOCHILA LLENA";
+                }
             case "MotoNeu":
                 for (int i = jugador.getPosicion() + 1; i < Tablero.TAMANYO_TABLERO; i++) {
                     Casilla c = tablero.getCasilla(i);
                     if (c instanceof CasillaTrineo) {
                         jugador.setPosicion(i);
-                        return "¡BRRUUUM! Una Moto de Nieve te lleva hasta el Trineo en la casilla " + i + "!";
+                        return "MOTO DE NIEVE: CASILLA " + i;
                     }
                 }
-                return "Una Moto de Nieve... pero no hay más trineos adelante.";
+                return "MOTO DE NIEVE: SIN DESTINO";
         }
         return "No hay objeto.";
     }

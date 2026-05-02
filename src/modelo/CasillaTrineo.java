@@ -44,7 +44,7 @@ public class CasillaTrineo extends Casilla {
 
     public String avanzarSiguienteTrineo(Jugador jugador) {
         jugador.setPosicion(posicionSiguienteTrineo);
-        return jugador.getNombre() + " toma el trineo y avanza a la casilla " + posicionSiguienteTrineo + "!";
+        return "TRINEO: CASILLA " + posicionSiguienteTrineo;
     }
 
     @Override

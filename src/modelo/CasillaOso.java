@@ -27,10 +27,10 @@ public class CasillaOso extends Casilla {
     @Override
     public String activarEfecto(Jugador jugador) {
         if (jugador.sobornarOso()) {
-            return "¡Un Oso salvaje! " + jugador.getNombre() + " le da un pez y el oso le deja en paz.";
+            return "OSO: SOBORNADO";
         } else {
             jugador.setPosicion(0);
-            return "¡Un Oso salvaje! " + jugador.getNombre() + " no tiene peces y huye asustado al inicio.";
+            return "OSO: AL INICIO";
         }
     }
 

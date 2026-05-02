@@ -59,14 +59,28 @@ public class GameFlowManager {
             int posDespues = j.getPosicion();
 
             if (posAntes != posDespues) {
-                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
-                ui.notifyEvent("¡" + tipo + "!", j);
-                ui.log("¡Efecto! " + j.getNombre() + " se mueve a la casilla " + posDespues);
+                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "").toUpperCase();
+                String msg = "¡" + tipo + "!";
+                
+                // Si es interrogante, intentamos mostrar el mensaje detallado (ej: Moto de Nieve)
+                if (tipo.equals("INTERROGANTE") && logEfecto != null && logEfecto.contains(":")) {
+                    msg = logEfecto.substring(logEfecto.indexOf(":") + 1).trim();
+                }
+                
+                ui.notifyEvent(msg, j);
+                ui.log("¡EFECTO! " + j.getNombre() + " se mueve a la casilla " + posDespues);
                 ui.moveTokenDirect(j, posAntes, posDespues, () -> checkCollision(j));
             } else {
-                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "");
+                Casilla c = tablero.getCasilla(posAntes);
+                String tipo = c.getTipo().replace("Casilla ", "");
+                
                 if (tipo.equals("ROMPEDIZAS")) {
                     ui.playShakeAnimation(posAntes, () -> checkCollision(j));
+                } else if (tipo.equals("INTERROGANTE") && logEfecto != null && logEfecto.contains(":")) {
+                    // Extraer solo la parte del mensaje después del separador :
+                    String soloMensaje = logEfecto.substring(logEfecto.indexOf(":") + 1).trim();
+                    ui.notifyEvent(soloMensaje, j);
+                    checkCollision(j);
                 } else {
                     checkCollision(j);
                 }
@@ -104,23 +118,19 @@ public class GameFlowManager {
      */
     private void resolveCombat(Jugador atacante, Jugador defensor) {
         boolean esFoca = (atacante instanceof Foca || defensor instanceof Foca);
-        String titulo = esFoca ? "¡Ataque de la Foca Loca!" : "¡Guerra de Bolas de Nieve!";
+        String titulo = esFoca ? "ATAQUE FOCA" : "COMBATE";
         StringBuilder mensaje = new StringBuilder();
 
         if (esFoca) {
             Jugador humano = (atacante instanceof Foca) ? defensor : atacante;
             Foca foca = (Foca) ((atacante instanceof Foca) ? atacante : defensor);
 
-            mensaje.append("¡La Foca Loca choca con ").append(humano.getNombre()).append("!\n\n");
-
             if (humano.getInventario().tieneObjeto("Pez")) {
                 humano.getInventario().usarObjeto("Pez", humano);
                 foca.setTurnosBloqueados(foca.getTurnosBloqueados() + 2);
-                mensaje.append(humano.getNombre()).append(" lanza un veloz PEZ a la Foca.\n");
-                mensaje.append("La Foca se entretiene comiendo y pierde 2 turnos.");
+                mensaje.append("DISTRACTOR: PEZ ENTREGADO. FOCA PIERDE 2 TURNOS.");
             } else {
-                mensaje.append(humano.getNombre()).append(" no tiene Peces para distraerla.\n");
-                mensaje.append("¡ZAS! Recibe un aletazo implacable.\n");
+                mensaje.append("SIN PECES: RECIBE ALETAZO.");
 
                 int casillaAgujero = -1;
                 for (int i = humano.getPosicion() - 1; i >= 0 && casillaAgujero == -1; i--) {
@@ -132,11 +142,10 @@ public class GameFlowManager {
                 int posAntigua = humano.getPosicion();
                 if (casillaAgujero != -1) {
                     humano.setPosicion(casillaAgujero);
-                    mensaje.append(humano.getNombre()).append(" sale volando al Agujero de la casilla ")
-                            .append(casillaAgujero).append(".");
+                    mensaje.append(" RETROCEDE A CASILLA ").append(casillaAgujero);
                 } else {
                     humano.setPosicion(0);
-                    mensaje.append(humano.getNombre()).append(" sale volando hasta la SALIDA.");
+                    mensaje.append(" RETROCEDE AL INICIO");
                 }
                 ui.moveTokenDirect(humano, posAntigua, humano.getPosicion(), null);
             }
@@ -144,27 +153,25 @@ public class GameFlowManager {
             int bolasAtacante = atacante.getInventario().getCantidad("BolaNieve");
             int bolasDefensor = defensor.getInventario().getCantidad("BolaNieve");
 
-            mensaje.append(atacante.getNombre()).append(" (").append(bolasAtacante).append(" bolas) VS ")
-                    .append(defensor.getNombre()).append(" (").append(bolasDefensor).append(" bolas)\n\n");
+            mensaje.append(atacante.getNombre()).append(" (").append(bolasAtacante).append(") VS ")
+                    .append(defensor.getNombre()).append(" (").append(bolasDefensor).append(")\n");
 
             if (bolasAtacante > bolasDefensor) {
                 int diff = bolasAtacante - bolasDefensor;
                 int posAntigua = defensor.getPosicion();
                 defensor.setPosicion(Math.max(0, posAntigua - diff));
-                mensaje.append(atacante.getNombre()).append(" gana.\n");
-                mensaje.append(defensor.getNombre()).append(" retrocede ").append(posAntigua - defensor.getPosicion())
-                        .append(" casillas.");
+                mensaje.append("GANADOR: ").append(atacante.getNombre()).append(". ").append(defensor.getNombre())
+                        .append(" RETROCEDE ").append(posAntigua - defensor.getPosicion());
                 ui.moveTokenDirect(defensor, posAntigua, defensor.getPosicion(), null);
             } else if (bolasDefensor > bolasAtacante) {
                 int diff = bolasDefensor - bolasAtacante;
                 int posAntigua = atacante.getPosicion();
                 atacante.setPosicion(Math.max(0, posAntigua - diff));
-                mensaje.append(defensor.getNombre()).append(" se defiende y gana.\n");
-                mensaje.append(atacante.getNombre()).append(" retrocede ").append(posAntigua - atacante.getPosicion())
-                        .append(" casillas.");
+                mensaje.append("GANADOR: ").append(defensor.getNombre()).append(". ").append(atacante.getNombre())
+                        .append(" RETROCEDE ").append(posAntigua - atacante.getPosicion());
                 ui.moveTokenDirect(atacante, posAntigua, atacante.getPosicion(), null);
             } else {
-                mensaje.append("¡Empate técnico! Nadie tiene más bolas. Se quedan donde están.");
+                mensaje.append("EMPATE: SIN MOVIMIENTO.");
             }
 
             // Consumir bolas
@@ -174,7 +181,7 @@ public class GameFlowManager {
                 defensor.getInventario().eliminarObjeto("BolaNieve");
         }
 
-        ui.log(mensaje.toString().replace("\n", "  |  "));
+        ui.log(mensaje.toString().replace("\n", " | "));
         ui.showEventDialog(titulo, mensaje.toString(), ui::finishTurn, atacante, defensor);
     }
 }
