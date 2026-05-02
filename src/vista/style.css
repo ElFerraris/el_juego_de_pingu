@@ -171,6 +171,11 @@
     -fx-padding: 0 !important;
 }
 
+/* VISTA DE PARTIDA: Suavizado de bordes del tablero */
+#cameraViewport {
+    -fx-effect: innershadow(gaussian, rgba(0, 30, 80, 0.5), 150, 0, 0, 0);
+}
+
 .welcome-text {
     -fx-font-size: 36px;
     -fx-text-fill: #0d47a1;

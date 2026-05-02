@@ -73,20 +73,17 @@ public class CameraController {
         zoomGroup.scaleXProperty().bind(zoomProperty);
         zoomGroup.scaleYProperty().bind(zoomProperty);
 
-        // Listener para restringir el zoom y la posición cuando cambie la escala
+        // Listener para restringir el zoom mínimo (fijo en 0.4)
         zoomProperty.addListener((obs, oldVal, newVal) -> {
-            double minZ = getDynamicMinZoom();
-            if (newVal.doubleValue() < minZ - 0.001) { // Pequeño margen para evitar loops
-                zoomProperty.set(minZ);
+            if (newVal.doubleValue() < MIN_ZOOM) {
+                zoomProperty.set(MIN_ZOOM);
             }
-            // Usamos un pequeño delay para asegurar que el motor de layout ha terminado
-            Platform.runLater(this::clampCamera);
         });
 
         // Zoom suave con Scroll
         viewport.addEventFilter(ScrollEvent.SCROLL, event -> {
             double delta = event.getDeltaY();
-            double zoomStep = (delta > 0) ? 1.05 : 0.95; // Pasos un poco más suaves
+            double zoomStep = (delta > 0) ? 1.05 : 0.95;
 
             double nextZoom = zoomProperty.get() * zoomStep;
             double minZ = getDynamicMinZoom();
@@ -97,7 +94,6 @@ public class CameraController {
                 zoomProperty.set(minZ);
             }
             event.consume();
-            clampCamera(); // Clamp inmediato tras scroll
         });
 
         // Desplazamiento (Pan) con Arrastre
@@ -113,12 +109,18 @@ public class CameraController {
 
         viewport.setOnMouseDragged(event -> {
             if (event.isPrimaryButtonDown()) {
-                autoMode = false; // El usuario toma el control manual
+                autoMode = false;
                 if (transition != null) {
                     transition.stop();
                 }
-                board.setTranslateX(translateAnchorX + (event.getSceneX() - mouseAnchorX));
-                board.setTranslateY(translateAnchorY + (event.getSceneY() - mouseAnchorY));
+                
+                // IMPORTANTE: Dividimos por el zoom para que el arrastre sea 1:1 con el ratón
+                double s = zoomProperty.get();
+                double dx = (event.getSceneX() - mouseAnchorX) / s;
+                double dy = (event.getSceneY() - mouseAnchorY) / s;
+                
+                board.setTranslateX(translateAnchorX + dx);
+                board.setTranslateY(translateAnchorY + dy);
                 
                 clampCamera();
             }
@@ -134,25 +136,40 @@ public class CameraController {
      * Centra el tablero completo en el centro visual del viewport.
      */
     public void centerBoard() {
-        if (board != null && viewport != null) {
-            double viewWidth = viewport.getWidth();
-            double viewHeight = viewport.getHeight();
+        centerBoardSmooth(0.0); // Centrado instantáneo
+    }
 
-            if (viewWidth <= 0) viewWidth = 1280;
-            if (viewHeight <= 0) viewHeight = 720;
+    /**
+     * Centra el tablero con una animación suave.
+     */
+    public void centerBoardSmooth(double duration) {
+        if (board == null || viewport == null) return;
 
-            // Reseteamos zoom
-            zoomProperty.set(1.0);
+        double viewWidth = viewport.getWidth();
+        double viewHeight = viewport.getHeight();
+        if (viewWidth <= 0) viewWidth = 1280;
+        if (viewHeight <= 0) viewHeight = 720;
 
-            // Centro visual
-            double visualCenterX = viewWidth / 2.0;
-            double visualCenterY = viewHeight / 2.0;
+        // Calculamos el centro visual restando el panel lateral derecho (300px) si existe
+        double visualCenterX = (viewWidth - 300) / 2.0;
+        double visualCenterY = viewHeight / 2.0;
 
-            // Ajuste empírico para el centro del rombo isométrico
-            board.setTranslateX(visualCenterX - 1200);
-            board.setTranslateY(visualCenterY - 950);
-            
+        // Punto central del tablero (ajuste empírico basado en el rombo)
+        double targetTX = visualCenterX - 1200;
+        double targetTY = visualCenterY - 950;
+
+        if (duration <= 0) {
+            board.setTranslateX(targetTX);
+            board.setTranslateY(targetTY);
             clampCamera();
+        } else {
+            if (transition != null) transition.stop();
+            transition = new TranslateTransition(Duration.seconds(duration), board);
+            transition.setToX(targetTX);
+            transition.setToY(targetTY);
+            transition.setInterpolator(Interpolator.EASE_BOTH);
+            transition.setOnFinished(e -> clampCamera());
+            transition.play();
         }
     }
 
@@ -176,60 +193,34 @@ public class CameraController {
     }
 
     /**
-     * Restringe el desplazamiento del tablero para que el fondo no deje huecos.
+     * Restringe el desplazamiento del tablero para que no se pierda del todo.
+     * Permite libertad casi total siempre que quede un trozo visible.
      */
     public void clampCamera() {
-        if (board == null || viewport == null || board.getScene() == null) return;
+        if (board == null || viewport == null) return;
 
-        // Forzamos actualización de layout para tener coordenadas frescas
-        viewport.layout();
-        board.layout();
+        double s = zoomProperty.get();
+        double viewW = viewport.getWidth() / s;
+        double viewH = viewport.getHeight() / s;
 
-        Point2D topLeft = board.localToScene(BG_MIN_X, BG_MIN_Y);
-        Point2D bottomRight = board.localToScene(BG_MAX_X, BG_MAX_Y);
-        Point2D viewTopLeft = viewport.localToScene(0, 0);
-        Point2D viewBottomRight = viewport.localToScene(viewport.getWidth(), viewport.getHeight());
+        // Margen mínimo de seguridad (en píxeles del tablero) para no perderlo de vista
+        double margin = 200.0; 
 
-        if (topLeft == null || viewTopLeft == null || bottomRight == null || viewBottomRight == null) return;
+        // Límites relajados: el tablero puede salir de pantalla 
+        // siempre que el borde opuesto no pase del margen de seguridad.
+        double minTX = margin - BG_MAX_X;
+        double maxTX = viewW - margin - BG_MIN_X;
+        double minTY = margin - BG_MAX_Y;
+        double maxTY = viewH - margin - BG_MIN_Y;
 
-        double dx = 0;
-        double dy = 0;
-        double viewW = viewBottomRight.getX() - viewTopLeft.getX();
-        double viewH = viewBottomRight.getY() - viewTopLeft.getY();
-        double bgW = bottomRight.getX() - topLeft.getX();
-        double bgH = bottomRight.getY() - topLeft.getY();
+        double currentTX = board.getTranslateX();
+        double currentTY = board.getTranslateY();
 
-        // --- LÓGICA HORIZONTAL ---
-        if (bgW <= viewW + 1) {
-            // Si el fondo es más pequeño o igual que la vista, lo centramos
-            dx = (viewTopLeft.getX() + viewW / 2.0) - (topLeft.getX() + bgW / 2.0);
-        } else {
-            // Si es más grande, impedimos que se vean los bordes
-            if (topLeft.getX() > viewTopLeft.getX()) {
-                dx = viewTopLeft.getX() - topLeft.getX();
-            } else if (bottomRight.getX() < viewBottomRight.getX()) {
-                dx = viewBottomRight.getX() - bottomRight.getX();
-            }
-        }
+        if (currentTX < minTX) board.setTranslateX(minTX);
+        else if (currentTX > maxTX) board.setTranslateX(maxTX);
 
-        // --- LÓGICA VERTICAL ---
-        if (bgH <= viewH + 1) {
-            // Si el fondo es más pequeño o igual que la vista, lo centramos
-            dy = (viewTopLeft.getY() + viewH / 2.0) - (topLeft.getY() + bgH / 2.0);
-        } else {
-            // Si es más grande, impedimos que se vean los bordes
-            if (topLeft.getY() > viewTopLeft.getY()) {
-                dy = viewTopLeft.getY() - topLeft.getY();
-            } else if (bottomRight.getY() < viewBottomRight.getY()) {
-                dy = viewBottomRight.getY() - bottomRight.getY();
-            }
-        }
-
-        if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) {
-            double S = zoomProperty.get();
-            board.setTranslateX(board.getTranslateX() + dx / S);
-            board.setTranslateY(board.getTranslateY() + dy / S);
-        }
+        if (currentTY < minTY) board.setTranslateY(minTY);
+        else if (currentTY > maxTY) board.setTranslateY(maxTY);
     }
 
     /**
