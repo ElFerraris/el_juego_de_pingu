@@ -78,8 +78,15 @@
                     
                     <Region HBox.hgrow="ALWAYS" />
                     
-                    <Button onAction="#handleResetCamera" text="⌂" prefWidth="65" prefHeight="50" minWidth="65"
+                    <Button onAction="#handleResetCamera" prefWidth="65" prefHeight="50" minWidth="65"
                             styleClass="button-secondary">
+                        <graphic>
+                            <ImageView fitWidth="30.0" preserveRatio="true">
+                                <image>
+                                    <Image url="@../assets/iconos/camera.png" />
+                                </image>
+                            </ImageView>
+                        </graphic>
                         <tooltip><Tooltip text="Centrar Cámara" /></tooltip>
                     </Button>
                 </HBox>

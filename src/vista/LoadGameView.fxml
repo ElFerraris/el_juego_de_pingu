@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import java.net.URL?>
 
 <StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controlador.LoadGameController" styleClass="root-plain-bg" prefHeight="720.0" prefWidth="1280.0">
@@ -18,7 +20,15 @@
         <HBox spacing="30" alignment="CENTER" style="-fx-margin-top: 20px;">
             <Button text="VOLVER AL MENÚ" onAction="#handleVolver" styleClass="button-secondary" prefWidth="250" prefHeight="50" style="-fx-base: #f44336;" />
             <Button fx:id="btnJugar" text="JUGAR PARTIDA" onAction="#handleJugar" prefWidth="250" prefHeight="50" style="-fx-base: #4CAF50;"/>
-            <Button fx:id="btnEliminar" text="🗑️" onAction="#handleEliminar" prefWidth="70" prefHeight="50" style="-fx-font-size: 20px; -fx-base: #ff5252;" styleClass="button-danger"/>
+            <Button fx:id="btnEliminar" onAction="#handleEliminar" prefWidth="70" prefHeight="50" style="-fx-base: #ff5252;" styleClass="button-danger">
+                <graphic>
+                    <ImageView fitWidth="30.0" preserveRatio="true">
+                        <image>
+                            <Image url="@../assets/iconos/trash.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+            </Button>
         </HBox>
     </VBox>
 

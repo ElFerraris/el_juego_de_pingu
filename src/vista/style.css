@@ -471,22 +471,28 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 20, 0, 0, 0);
 }
 
-/* BOTÓN HAMBURGUESA (MÁS GRANDE Y FUERTE) */
+/* BOTÓN HAMBURGUESA (CON ESTILO PIXELADO) */
 .button-hamburger {
     -fx-min-width: 65px;
     -fx-min-height: 65px;
-    -fx-max-width: 65px;
-    -fx-max-height: 65px;
-    -fx-background-color: rgba(255, 255, 255, 0.3);
-    -fx-background-radius: 10;
+    -fx-background-radius: 0;
+    -fx-background-color:
+        #37474f, #37474f, #37474f, #37474f, #37474f, #37474f, #37474f,
+        #78909c, #78909c, #78909c, #78909c, #78909c, #78909c, #78909c;
+    -fx-background-insets:
+        0 8 0 8, 2 6 2 6, 4 4 4 4, 6 2 6 2, 8 1 8 1, 10 1 10 1, 12 0 12 0,
+        3 11 3 11, 5 9 5 9, 7 7 7 7, 9 5 9 5, 11 4 11 4, 13 4 13 4, 15 3 15 3;
     -fx-padding: 0;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.2), 0, 0, 4, 4);
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.3), 0, 0, 0, 4);
 }
 
 .button-hamburger:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.5);
+    -fx-background-color:
+        #37474f, #37474f, #37474f, #37474f, #37474f, #37474f, #37474f,
+        #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae, #90a4ae;
     -fx-translate-y: -2;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.3), 0, 0, 0, 6);
 }
 
 .hamburger-line {
@@ -509,19 +515,28 @@
 }
 
 .button-back-small {
-    -fx-background-radius: 50%;
-    -fx-min-width: 45px;
-    -fx-min-height: 45px;
-    -fx-padding: 0;
-    -fx-font-size: 22px;
-    -fx-background-color: #eee;
-    -fx-text-fill: #333;
+    -fx-background-radius: 0;
+    -fx-min-width: 50px;
+    -fx-min-height: 50px;
+    -fx-background-color:
+        #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
+        #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350, #ef5350;
+    -fx-background-insets:
+        0 6 0 6, 2 4 2 4, 4 2 4 2, 6 0 6 0, 8 0 8 0, 10 0 10 0, 12 0 12 0,
+        3 9 3 9, 5 7 5 7, 7 5 7 5, 9 3 9 3, 11 2 11 2, 13 2 13 2, 15 1 15 1;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
+    -fx-font-size: 22px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.3), 0, 0, 0, 4);
 }
 
 .button-back-small:hover {
-    -fx-background-color: #ff5252;
-    -fx-text-fill: white;
+    -fx-background-color:
+        #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c, #b71c1c,
+        #e57373, #e57373, #e57373, #e57373, #e57373, #e57373, #e57373;
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.3), 0, 0, 0, 6);
 }
 
 /* DINÁMICA DE JUGADORES EN EL LOG */
