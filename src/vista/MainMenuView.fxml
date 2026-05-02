@@ -15,19 +15,25 @@
     <!-- Capa de color semitransparente sobre el fondo -->
     <Region style="-fx-background-color: rgba(5,20,60,0.2);"/>
     
-    <VBox spacing="40" alignment="CENTER" maxWidth="600" maxHeight="650" styleClass="glass-panel">
-        <Label text="MENÚ PRINCIPAL" styleClass="title-text" />
-        
-        <VBox spacing="25" alignment="CENTER">
-            <Label fx:id="welcomeLabel" styleClass="welcome-text" />
-            
-            <VBox spacing="15" alignment="CENTER" maxWidth="350">
-                <Button text="NUEVA PARTIDA" onAction="#showPlayerConfig" prefWidth="320" styleClass="button-primary" />
-                <Button text="CARGAR PARTIDA" onAction="#showLoadGame" prefWidth="320" />
-                <Button text="ESTADÍSTICAS Y RANKINGS" onAction="#showRankingsView" prefWidth="320" />
-                <Button text="OPCIONES" onAction="#showOptions" prefWidth="320" />
-                <Button text="CERRAR SESIÓN" onAction="#handleLogout" prefWidth="320" />
-                <Button text="SALIR" onAction="#handleQuitGame" prefWidth="320" styleClass="button-secondary" />
+    <VBox alignment="CENTER" spacing="20" maxWidth="600">
+        <ImageView fitWidth="550.0" preserveRatio="true">
+            <image>
+                <Image url="@../assets/imagenes/TITULO_sin_fondo.png" />
+            </image>
+        </ImageView>
+
+        <VBox spacing="30" alignment="CENTER" styleClass="glass-panel" maxWidth="500" maxHeight="500">
+            <VBox spacing="20" alignment="CENTER">
+                <Label fx:id="welcomeLabel" styleClass="welcome-text" />
+                
+                <VBox spacing="12" alignment="CENTER" maxWidth="320">
+                    <Button text="NUEVA PARTIDA" onAction="#showPlayerConfig" prefWidth="300" styleClass="button-primary" />
+                    <Button text="CARGAR PARTIDA" onAction="#showLoadGame" prefWidth="300" />
+                    <Button text="ESTADÍSTICAS Y RANKINGS" onAction="#showRankingsView" prefWidth="300" />
+                    <Button text="OPCIONES" onAction="#showOptions" prefWidth="300" />
+                    <Button text="CERRAR SESIÓN" onAction="#handleLogout" prefWidth="300" />
+                    <Button text="SALIR" onAction="#handleQuitGame" prefWidth="300" styleClass="button-secondary" />
+                </VBox>
             </VBox>
         </VBox>
     </VBox>
