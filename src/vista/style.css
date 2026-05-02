@@ -164,6 +164,13 @@
     -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.15), 0, 0, 8, 8);
 }
 
+.transparent-panel {
+    -fx-background-color: transparent !important;
+    -fx-background-insets: 0 !important;
+    -fx-effect: none !important;
+    -fx-padding: 0 !important;
+}
+
 .welcome-text {
     -fx-font-size: 36px;
     -fx-text-fill: #0d47a1;

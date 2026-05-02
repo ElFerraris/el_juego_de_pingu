@@ -15,7 +15,7 @@
     <!-- Capa de color semitransparente sobre el fondo -->
     <Region style="-fx-background-color: rgba(5,20,60,0.2);"/>
     
-    <VBox alignment="CENTER" spacing="20" maxWidth="600">
+    <VBox alignment="CENTER" spacing="20" maxWidth="600" styleClass="glass-panel, transparent-panel">
         <ImageView fitWidth="550.0" preserveRatio="true">
             <image>
                 <Image url="@../assets/imagenes/TITULO_sin_fondo.png" />
