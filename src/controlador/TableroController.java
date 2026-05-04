@@ -949,28 +949,58 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             int posAntigua = j.getPosicion();
             int posNueva = posAntigua + 1;
 
-            // Primero movemos al jugador
+            ImageView token = playerTokens.get(j);
+            double startX = token.getTranslateX();
+            double startY = token.getTranslateY();
+
+            // Actualizamos la posición lógica
             j.setPosicion(posNueva);
 
+            // Quitamos de la casilla antigua y calculamos nueva posición visual
             StackPane cellAntigua = casillaNodes.get(posAntigua);
-            cellAntigua.getChildren().remove(playerTokens.get(j));
+            cellAntigua.getChildren().remove(token);
             posicionarToken(j);
-            
-            // Sincronizamos el número: ahora quedan (pasosRestantes - 1)
-            diceNumberLabel.setText(String.valueOf(pasosRestantes - 1));
-            
-            // Sonido de paso/movimiento para que el usuario sienta el ritmo
-            util.SoundManager.playConfirm(); // O un sonido más ligero si existiera
 
-            if (camera.isAutoMode()) {
-                camera.smoothCenterOnPlayer(j, 0.4);
-            }
+            double targetX = token.getTranslateX();
+            double targetY = token.getTranslateY();
 
-            PauseTransition pause = new PauseTransition(Duration.millis(450)); // Un poco más de tiempo para que se aprecie el paso
-            pause.setOnFinished(e -> {
-                moverJugadorAnimado(j, pasosRestantes - 1);
+            // Devolvemos el token a la posición inicial para la animación
+            token.setTranslateX(startX);
+            token.setTranslateY(startY);
+
+            // ANIMACIÓN DE SALTO (Parábola)
+            double jumpHeight = 60; 
+            Timeline jumpAnim = new Timeline(
+                new KeyFrame(Duration.ZERO, 
+                    new KeyValue(token.translateXProperty(), startX),
+                    new KeyValue(token.translateYProperty(), startY)
+                ),
+                new KeyFrame(Duration.millis(200), 
+                    // Punto álgido del salto (mitad de camino y hacia arriba)
+                    new KeyValue(token.translateYProperty(), Math.min(startY, targetY) - jumpHeight, Interpolator.EASE_OUT)
+                ),
+                new KeyFrame(Duration.millis(400), 
+                    // Aterrizaje
+                    new KeyValue(token.translateXProperty(), targetX, Interpolator.EASE_BOTH),
+                    new KeyValue(token.translateYProperty(), targetY, Interpolator.EASE_IN)
+                )
+            );
+
+            jumpAnim.setOnFinished(e -> {
+                // Sincronizamos el número al aterrizar
+                diceNumberLabel.setText(String.valueOf(pasosRestantes - 1));
+                util.SoundManager.playConfirm(); 
+                
+                if (camera.isAutoMode()) {
+                    camera.smoothCenterOnPlayer(j, 0.4);
+                }
+
+                PauseTransition pause = new PauseTransition(Duration.millis(150)); 
+                pause.setOnFinished(ev -> moverJugadorAnimado(j, pasosRestantes - 1));
+                pause.play();
             });
-            pause.play();
+
+            jumpAnim.play();
         }
     }
 
