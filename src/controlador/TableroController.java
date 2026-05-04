@@ -712,6 +712,9 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         for (int i = 0; i < jugadores.size(); i++) {
             Jugador j = jugadores.get(i);
 
+            HBox playerTurnInfo = new HBox(8);
+            playerTurnInfo.setAlignment(Pos.CENTER);
+
             ImageView circle = new ImageView();
             try {
                 String colorName = j.getColor() != null ? j.getColor().toLowerCase() : "gris";
@@ -732,8 +735,17 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             ds.setColor(Color.BLACK);
             circle.setEffect(ds);
 
+            Label nameLabel = new Label(j.getNombre().toUpperCase());
+            Color pColor = getColorFromString(j.getColor());
+            nameLabel.setTextFill(pColor);
+            // Sombra blanca fuerte para crear un efecto de "outline" y que resalte sobre el fondo azul
+            nameLabel.setStyle("-fx-font-weight: 900; -fx-font-size: 22px; " +
+                             "-fx-effect: dropshadow(three-pass-box, white, 3, 0.8, 0, 0);");
+
+            playerTurnInfo.getChildren().addAll(circle, nameLabel);
+
             turnCircles.put(j, circle);
-            turnIndicatorBox.getChildren().add(circle);
+            turnIndicatorBox.getChildren().add(playerTurnInfo);
 
             if (i < jugadores.size() - 1) {
                 Label arrow = new Label("→");
