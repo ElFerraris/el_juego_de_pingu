@@ -766,7 +766,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     private void handleRollDice(ActionEvent event) {
         if (!animacionEnCurso) {
             int pasos = (int) (Math.random() * 6) + 1;
-            ejecutarTurno(pasos);
+            ejecutarTurno(pasos, true);
         }
     }
 
@@ -832,7 +832,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             if (jActual.getInventario().tieneObjeto("DadoLento")) {
                 jActual.getInventario().usarDadoEspecifico("Lento", jActual);
                 int pasos = (int) (Math.random() * 3) + 1;
-                ejecutarTurno(pasos);
+                ejecutarTurno(pasos, false);
             } else {
                 log(jActual.getNombre() + " no tiene Dados Lentos.");
             }
@@ -851,7 +851,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             if (jActual.getInventario().tieneObjeto("DadoRapido")) {
                 jActual.getInventario().usarDadoEspecifico("Rapido", jActual);
                 int pasos = (int) (Math.random() * 6) + 3;
-                ejecutarTurno(pasos);
+                ejecutarTurno(pasos, false);
             } else {
                 log(jActual.getNombre() + " no tiene Dados Rápidos.");
             }
@@ -868,7 +868,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
      * 
      * @param pasos El número de casillas a avanzar obtenido del dado.
      */
-    private void ejecutarTurno(int pasos) {
+    private void ejecutarTurno(int pasos, boolean esDadoNormal) {
         if (!animacionEnCurso) {
             animacionEnCurso = true;
 
@@ -879,8 +879,14 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             setControlesBloqueados(true);
 
             try {
-                Image rollingGif = new Image(
-                        getClass().getResource("/assets/tablero/dados/dado_rodando.gif").toExternalForm());
+                String gifPath = "/assets/tablero/dados/dado_rodando.gif";
+                
+                // Si es un dado normal y el resultado está entre 1 y 6, usamos el GIF específico
+                if (esDadoNormal && pasos >= 1 && pasos <= 6) {
+                    gifPath = "/assets/tablero/dados/dado_" + pasos + ".gif";
+                }
+                
+                Image rollingGif = new Image(getClass().getResource(gifPath).toExternalForm());
                 diceImageView.setImage(rollingGif);
             } catch (Exception e) {
                 System.err.println("No se pudo cargar el GIF del dado: " + e.getMessage());
@@ -896,7 +902,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             fadeIn.setToValue(1.0);
             fadeIn.play();
 
-            PauseTransition rollPause = new PauseTransition(Duration.seconds(2.0));
+            double rollDuration = esDadoNormal ? 3.0 : 2.0;
+            PauseTransition rollPause = new PauseTransition(Duration.seconds(rollDuration));
             rollPause.setOnFinished(e -> {
                 diceImageView.setVisible(false);
                 diceNumberLabel.setText(String.valueOf(pasos));
