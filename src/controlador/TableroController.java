@@ -850,7 +850,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             Jugador jActual = jugadores.get(turnoActual);
             if (jActual.getInventario().tieneObjeto("DadoRapido")) {
                 jActual.getInventario().usarDadoEspecifico("Rapido", jActual);
-                int pasos = (int) (Math.random() * 6) + 3;
+                int pasos = (int) (Math.random() * 6) + 5;
                 ejecutarTurno(pasos, false);
             } else {
                 log(jActual.getNombre() + " no tiene Dados Rápidos.");
@@ -945,23 +945,28 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             fadeOut.play();
         } else {
             animacionEnCurso = true;
-            diceNumberLabel.setText(String.valueOf(pasosRestantes));
 
             int posAntigua = j.getPosicion();
             int posNueva = posAntigua + 1;
 
+            // Primero movemos al jugador
             j.setPosicion(posNueva);
 
             StackPane cellAntigua = casillaNodes.get(posAntigua);
-
             cellAntigua.getChildren().remove(playerTokens.get(j));
             posicionarToken(j);
+            
+            // Sincronizamos el número: ahora quedan (pasosRestantes - 1)
+            diceNumberLabel.setText(String.valueOf(pasosRestantes - 1));
+            
+            // Sonido de paso/movimiento para que el usuario sienta el ritmo
+            util.SoundManager.playConfirm(); // O un sonido más ligero si existiera
 
             if (camera.isAutoMode()) {
                 camera.smoothCenterOnPlayer(j, 0.4);
             }
 
-            PauseTransition pause = new PauseTransition(Duration.millis(350));
+            PauseTransition pause = new PauseTransition(Duration.millis(450)); // Un poco más de tiempo para que se aprecie el paso
             pause.setOnFinished(e -> {
                 moverJugadorAnimado(j, pasosRestantes - 1);
             });

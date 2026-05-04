@@ -44,8 +44,6 @@ public abstract class Dado extends Objeto {
 
     @Override
     public void usar(Jugador jugador) {
-        int pasos = tirar();
-        System.out.println("Has sacado un " + pasos + " con el " + getNombre());
-        jugador.moverFicha(pasos);
+        // El movimiento se gestiona desde el controlador para permitir animaciones
     }
 }
