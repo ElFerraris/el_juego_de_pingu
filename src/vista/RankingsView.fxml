@@ -21,6 +21,11 @@
             <Button fx:id="btnNivel" text="MI NIVEL" onAction="#handleMiNivel" prefWidth="220" styleClass="button-small" />
         </HBox>
         
+        <HBox spacing="15" alignment="CENTER">
+            <TextField fx:id="searchField" promptText="Escribe el nombre de un jugador..." prefWidth="400" style="-fx-font-size: 18px;" />
+            <Button fx:id="btnSearch" text="BUSCAR JUGADOR" onAction="#handleBuscarJugador" prefWidth="230" styleClass="button-small" />
+        </HBox>
+        
         <TextArea fx:id="outputArea" VBox.vgrow="ALWAYS" editable="false" wrapText="false" styleClass="text-area-rankings" />
         
         <Button text="VOLVER AL MENÚ" onAction="#handleVolver" prefWidth="300" styleClass="button-secondary" />

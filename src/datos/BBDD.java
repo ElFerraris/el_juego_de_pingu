@@ -863,12 +863,13 @@ public class BBDD {
             return false;
         }
     }
-    
+
     /**
      * Actualiza la contraseña y el estado de CPU de un jugador existente.
      * 
-     * @param idJugador      ID único del jugador en la base de datos.
-     * @param nuevaContrasena La nueva contraseña en texto plano (el procedimiento se encarga del Hash y el Salt).
+     * @param idJugador       ID único del jugador en la base de datos.
+     * @param nuevaContrasena La nueva contraseña en texto plano (el procedimiento
+     *                        se encarga del Hash y el Salt).
      * @return {@code true} si la actualización fue exitosa.
      */
     public boolean cambiarContrasenaJugador(int idJugador, String nuevaContrasena) {
@@ -876,17 +877,18 @@ public class BBDD {
         String sql = "{call actualizar_jugador(?, ?)}";
 
         try (Connection con = conectarBD()) {
-            if (con == null) return false;
+            if (con == null)
+                return false;
 
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 // 1. p_id_jugador
                 cstmt.setInt(1, idJugador);
-                
+
                 // 2. p_contrasena (El procedimiento generará el nuevo Salt y MD5)
                 cstmt.setString(2, nuevaContrasena);
-                
+
                 cstmt.execute();
-                
+
                 System.out.println(" Seguridad: Contraseña actualizada para el jugador ID: " + idJugador);
                 return true;
             }
@@ -918,7 +920,8 @@ public class BBDD {
                 fetchStmt.execute();
                 String line = fetchStmt.getString(1);
                 status = fetchStmt.getInt(2);
-                if (status == 0 && line != null) sb.append(line).append("\n");
+                if (status == 0 && line != null)
+                    sb.append(line).append("\n");
             }
         }
         return sb.toString();
@@ -943,7 +946,8 @@ public class BBDD {
      */
     public String obtenerRankingYErroresDBMS() {
         try (Connection con = conectarBD()) {
-            if (con == null) return "Error de conexión.";
+            if (con == null)
+                return "Error de conexión.";
             habilitarDBMS(con);
             try (Statement stmt = con.createStatement()) {
                 stmt.execute("begin p_ranking_partidas_jugadas(); end;");
@@ -961,7 +965,8 @@ public class BBDD {
      */
     public String obtenerJugadoresConRecordDBMS() {
         try (Connection con = conectarBD()) {
-            if (con == null) return "Error de conexión.";
+            if (con == null)
+                return "Error de conexión.";
             habilitarDBMS(con);
             int record = 0;
             // 1. Obtener el valor del récord mediante función
@@ -982,13 +987,15 @@ public class BBDD {
     }
 
     /**
-     * Muestra el reporte de jugadores que están por encima de la media de victorias.
+     * Muestra el reporte de jugadores que están por encima de la media de
+     * victorias.
      * 
      * @return Informe estadístico DBMS.
      */
     public String obtenerJugadoresEncimaMediaDBMS() {
         try (Connection con = conectarBD()) {
-            if (con == null) return "Error de conexión.";
+            if (con == null)
+                return "Error de conexión.";
             habilitarDBMS(con);
             try (Statement stmt = con.createStatement()) {
                 stmt.execute("begin p_jugadores_encima_media(); end;");
@@ -1007,7 +1014,8 @@ public class BBDD {
      */
     public String obtenerPorcentajeJugadorDBMS(int victorias) {
         try (Connection con = conectarBD()) {
-            if (con == null) return "Error de conexión.";
+            if (con == null)
+                return "Error de conexión.";
             habilitarDBMS(con);
             double pct = 0;
             try (CallableStatement cstmt = con.prepareCall("{? = call fun_pct_inferior(?)}")) {
@@ -1016,8 +1024,8 @@ public class BBDD {
                 cstmt.execute();
                 pct = cstmt.getDouble(1);
             }
-            return "RESULTADO: \n\nTu nivel de victorias (" + victorias + ") supera al " 
-                   + String.format("%.2f", pct) + "% del total de jugadores registrados.";
+            return "RESULTADO: \n\nTu nivel de victorias (" + victorias + ") supera al "
+                    + String.format("%.2f", pct) + "% del total de jugadores registrados.";
         } catch (SQLException e) {
             return "Error al calcular porcentaje: " + e.getMessage();
         }
@@ -1025,6 +1033,7 @@ public class BBDD {
 
     /**
      * Obtiene el número total de victorias de un jugador específico.
+     * 
      * @param idJugador ID del jugador a consultar.
      * @return El número de partidas donde el jugador es el ganador.
      */
@@ -1033,11 +1042,40 @@ public class BBDD {
         try (Connection con = conectarBD(); PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, idJugador);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next())
+                    return rs.getInt(1);
             }
         } catch (SQLException e) {
             System.err.println("Error al obtener victorias: " + e.getMessage());
         }
         return 0;
+    }
+
+    /**
+     * Obtiene el ranking detallado de un jugador específico llamando al procedure Oracle.
+     * 
+     * @param nickname Nombre del jugador a buscar.
+     * @return El reporte detallado capturado del buffer de Oracle.
+     */
+    public String obtenerEstadisticasJugadorDBMS(String nickname) {
+        try (Connection con = conectarBD()) {
+            if (con == null) return "Error de conexión.";
+            habilitarDBMS(con);
+            
+            String sql = "{call p_rankings_completos_por_nombre(?)}";
+            try (CallableStatement cstmt = con.prepareCall(sql)) {
+                cstmt.setString(1, nickname);
+                cstmt.execute();
+            }
+            
+            String log = leerBufferDBMS(con);
+            if (log.isEmpty()) {
+                return "No se han recibido datos para el jugador: " + nickname;
+            }
+            return log;
+            
+        } catch (SQLException e) {
+            return "Error al buscar estadísticas: " + e.getMessage();
+        }
     }
 }

@@ -10,8 +10,8 @@ import datos.BBDD;
  * Controlador para la vista unificada de Rankings y Estadísticas.
  * 
  * <p>
- * Esta clase gestiona la interacción del usuario en la pantalla de rankings, 
- * permitiendo solicitar diferentes tipos de informes estadísticos procesados 
+ * Esta clase gestiona la interacción del usuario en la pantalla de rankings,
+ * permitiendo solicitar diferentes tipos de informes estadísticos procesados
  * directamente en el servidor de base de datos Oracle.
  * </p>
  * 
@@ -32,6 +32,10 @@ public class RankingsController {
     private Button btnMedia;
     @FXML
     private Button btnNivel;
+    @FXML
+    private Button btnSearch;
+    @FXML
+    private javafx.scene.control.TextField searchField;
 
     /** Instancia de acceso a datos. */
     private BBDD bbdd = new BBDD();
@@ -49,10 +53,16 @@ public class RankingsController {
      * Resalta visualmente el botón seleccionado y apaga el resto.
      */
     private void setActiveButton(Button activeButton) {
-        if (btnGeneral != null) btnGeneral.getStyleClass().remove("button-active");
-        if (btnRecord != null) btnRecord.getStyleClass().remove("button-active");
-        if (btnMedia != null) btnMedia.getStyleClass().remove("button-active");
-        if (btnNivel != null) btnNivel.getStyleClass().remove("button-active");
+        if (btnGeneral != null)
+            btnGeneral.getStyleClass().remove("button-active");
+        if (btnRecord != null)
+            btnRecord.getStyleClass().remove("button-active");
+        if (btnMedia != null)
+            btnMedia.getStyleClass().remove("button-active");
+        if (btnNivel != null)
+            btnNivel.getStyleClass().remove("button-active");
+        if (btnSearch != null)
+            btnSearch.getStyleClass().remove("button-active");
 
         if (activeButton != null && !activeButton.getStyleClass().contains("button-active")) {
             activeButton.getStyleClass().add("button-active");
@@ -76,36 +86,60 @@ public class RankingsController {
     @FXML
     private void handleRecordAbsoluto(ActionEvent event) {
         setActiveButton(btnRecord);
-        outputArea.setText(">>> CARGANDO JUGADORES CON EL RÉCORD ABSOLUTO <<<\n\n" + bbdd.obtenerJugadoresConRecordDBMS());
+        outputArea.setText(
+                ">>> CARGANDO JUGADORES CON EL RÉCORD ABSOLUTO <<<\n\n" + bbdd.obtenerJugadoresConRecordDBMS());
     }
 
     /**
-     * Solicita y muestra los jugadores que superan la media de victorias del sistema.
+     * Solicita y muestra los jugadores que superan la media de victorias del
+     * sistema.
      */
     @FXML
     private void handleEncimaMedia(ActionEvent event) {
         setActiveButton(btnMedia);
-        outputArea.setText(">>> JUGADORES POR ENCIMA DE LA MEDIA DE VICTORIAS <<<\n\n" + bbdd.obtenerJugadoresEncimaMediaDBMS());
+        outputArea.setText(
+                ">>> JUGADORES POR ENCIMA DE LA MEDIA DE VICTORIAS <<<\n\n" + bbdd.obtenerJugadoresEncimaMediaDBMS());
     }
 
     /**
-     * Calcula el nivel del usuario actual basado en sus victorias reales en la base de datos.
+     * Calcula el nivel del usuario actual basado en sus victorias reales en la base
+     * de datos.
      */
     @FXML
     private void handleMiNivel(ActionEvent event) {
         setActiveButton(btnNivel);
         // Obtenemos el usuario logueado actualmente
         modelo.Jugador current = GameContext.getInstance().getCurrentUser();
-        
+
         if (current != null) {
             // Buscamos sus victorias reales en la BD
             int victorias = bbdd.obtenerVictoriasTotales(current.getId());
-            
-            outputArea.setText(">>> CÁLCULO DE TU NIVEL DE VICTORIAS (" + victorias + ") <<<\n\n" 
-                + bbdd.obtenerPorcentajeJugadorDBMS(victorias));
+
+            outputArea.setText(">>> CÁLCULO DE TU NIVEL DE VICTORIAS (" + victorias + ") <<<\n\n"
+                    + bbdd.obtenerPorcentajeJugadorDBMS(victorias));
         } else {
             outputArea.setText("No se ha podido identificar al usuario actual.\nPor favor, inicia sesión de nuevo.");
         }
+    }
+
+    /**
+     * Busca a un jugador específico utilizando el procedimiento de estadísticas completas.
+     */
+    @FXML
+    private void handleBuscarJugador(ActionEvent event) {
+        String nickname = searchField.getText().trim();
+
+        if (nickname.isEmpty()) {
+            outputArea.setText(">>> POR FAVOR, ESCRIBE UN NICKNAME PARA BUSCAR <<<");
+            return;
+        }
+
+        setActiveButton(btnSearch);
+        outputArea.setText(">>> SOLICITANDO ESTADÍSTICAS PARA: '" + nickname.toUpperCase() + "' <<<\n\n");
+
+        // Llamamos al procedimiento específico de búsqueda detallada
+        String result = bbdd.obtenerEstadisticasJugadorDBMS(nickname);
+        outputArea.appendText(result);
     }
 
     /**
