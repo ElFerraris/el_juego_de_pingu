@@ -1187,6 +1187,11 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             Jugador ganador = jugadores.get(turnoActual);
             log("¡" + ganador.getNombre() + " HA GANADO LA PARTIDA!");
             
+            // Sincronizamos con BBDD para registrar la victoria y disparar el trigger de estadísticas
+            juegoSimulado.setGanador(ganador);
+            juegoSimulado.setPartidaFinalizada(true);
+            bbdd.actualizarEstadoPartida(tablero.getIdPartida(), juegoSimulado);
+            
             // Guardamos el ganador en el contexto global para la pantalla de victoria
             GameContext.getInstance().setWinner(ganador);
             

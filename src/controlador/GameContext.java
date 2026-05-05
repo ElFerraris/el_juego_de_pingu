@@ -65,6 +65,9 @@ public class GameContext {
     /** El jugador que ha ganado la partida. */
     private Jugador winner;
 
+    /** Mensaje de salida del buffer de base de datos (DBMS_OUTPUT). */
+    private String dbmsOutputMessage;
+
     /**
      * Constructor privado.
      * <p>
@@ -110,6 +113,7 @@ public class GameContext {
         idPartidaCargar = -1;
         turnoModoFuga = 0;
         winner = null;
+        dbmsOutputMessage = null;
         actionToConfirm = ActionConfirmType.NONE;
         System.out.println("► GameContext: Datos reiniciados.");
     }
@@ -203,5 +207,15 @@ public class GameContext {
     /** @param winner El jugador que ha llegado a la meta. */
     public void setWinner(Jugador winner) {
         this.winner = winner;
+    }
+
+    /** @return El mensaje de estadísticas capturado de la BD. */
+    public String getDbmsOutputMessage() {
+        return dbmsOutputMessage;
+    }
+
+    /** @param message Define el mensaje capturado de la BD. */
+    public void setDbmsOutputMessage(String message) {
+        this.dbmsOutputMessage = message;
     }
 }

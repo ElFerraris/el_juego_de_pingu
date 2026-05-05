@@ -28,6 +28,7 @@
                         <Font size="22.0" />
                      </font>
                   </Label>
+                  <Label fx:id="dbStatsLabel" style="-fx-font-style: italic; -fx-font-size: 16px; -fx-text-alignment: center;" text="" textFill="#546e7a" wrapText="true" />
                </children>
             </VBox>
             

@@ -317,6 +317,11 @@ public class BBDD {
             if (con == null)
                 return false;
 
+            // Si hay un ganador, habilitamos el buffer para capturar el trigger
+            if (juego.getGanador() != null) {
+                habilitarDbmsOutput(con);
+            }
+
             try (CallableStatement cstmt = con.prepareCall(sql)) {
                 // 1. p_num_partida: El ID de la fila que queremos actualizar
                 cstmt.setInt(1, idPartida);
@@ -334,12 +339,59 @@ public class BBDD {
                 }
 
                 cstmt.execute();
+
+                // Si hemos detectado un ganador, recuperamos lo que ha soltado el trigger
+                if (juego.getGanador() != null) {
+                    String output = obtenerDbmsOutput(con);
+                    if (!output.isEmpty()) {
+                        System.out.println(" OUTPUT RECIBIDO DE ORACLE: " + output);
+                        controlador.GameContext.getInstance().setDbmsOutputMessage(output);
+                    }
+                }
+
                 return true;
             }
         } catch (SQLException e) {
             System.out.println(" ERROR al actualizar estado de partida: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Habilita el buffer de salida de Oracle para la sesión actual.
+     */
+    private void habilitarDbmsOutput(Connection con) throws SQLException {
+        try (Statement stmt = con.createStatement()) {
+            stmt.executeUpdate("BEGIN DBMS_OUTPUT.ENABLE(NULL); END;");
+        }
+    }
+
+    /**
+     * Recupera todas las líneas acumuladas en el buffer de DBMS_OUTPUT.
+     * 
+     * @param con Conexión activa.
+     * @return El contenido del buffer como una cadena simple.
+     */
+    private String obtenerDbmsOutput(Connection con) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        String sql = "{call DBMS_OUTPUT.GET_LINE(?, ?)}";
+
+        try (CallableStatement cstmt = con.prepareCall(sql)) {
+            cstmt.registerOutParameter(1, java.sql.Types.VARCHAR);
+            cstmt.registerOutParameter(2, java.sql.Types.INTEGER);
+
+            int status = 0; // 0 significa que se ha leído una línea con éxito
+            while (status == 0) {
+                cstmt.execute();
+                String line = cstmt.getString(1);
+                status = cstmt.getInt(2);
+
+                if (status == 0 && line != null) {
+                    sb.append(line).append("\n");
+                }
+            }
+        }
+        return sb.toString().trim();
     }
 
     /**

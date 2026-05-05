@@ -26,6 +26,8 @@ public class VictoryController {
     private ImageView winnerImageView;
     @FXML
     private Label winnerNameLabel;
+    @FXML
+    private Label dbStatsLabel;
 
     /**
      * Inicializa la vista con los datos del ganador almacenados en el contexto.
@@ -52,6 +54,14 @@ public class VictoryController {
                 winnerImageView.setImage(img);
             } catch (Exception e) {
                 System.err.println("Error cargando imagen de victoria: " + e.getMessage());
+            }
+
+            // Mostrar estadísticas de la BBDD si hay mensaje disponible
+            String dbMsg = GameContext.getInstance().getDbmsOutputMessage();
+            if (dbMsg != null && !dbMsg.isEmpty()) {
+                dbStatsLabel.setText(dbMsg);
+            } else {
+                dbStatsLabel.setVisible(false);
             }
         }
     }
