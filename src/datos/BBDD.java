@@ -311,7 +311,7 @@ public class BBDD {
      * @return {@code true} si la actualización fue exitosa.
      */
     public boolean actualizarEstadoPartida(int idPartida, Juego juego) {
-        String sql = "{call actualizar_partida(?, ?, ?)}";
+        String sql = "UPDATE partida SET torn_actual = ?, ganador = ? WHERE num_partida = ?";
 
         try (Connection con = conectarBD()) {
             if (con == null)
@@ -322,23 +322,21 @@ public class BBDD {
                 habilitarDbmsOutput(con);
             }
 
-            try (CallableStatement cstmt = con.prepareCall(sql)) {
-                // 1. p_num_partida: El ID de la fila que queremos actualizar
-                cstmt.setInt(1, idPartida);
+            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+                // 1. p_torn_actual
+                pstmt.setInt(1, juego.getTurnoActual());
 
-                // 2. p_torn_actual: ID del jugador que tiene el turno ahora
-                // Obtenemos el jugador actual de la lista y sacamos su ID de BD
-                cstmt.setInt(2, juego.getTurnoActual());
-
-                // 3. p_ganador: ID del ganador (si existe)
+                // 2. p_ganador
                 if (juego.getGanador() != null) {
-                    cstmt.setInt(3, juego.getGanador().getId());
+                    pstmt.setInt(2, juego.getGanador().getId());
                 } else {
-                    // Si la partida sigue en curso, enviamos NULL a Oracle
-                    cstmt.setNull(3, java.sql.Types.INTEGER);
+                    pstmt.setNull(2, java.sql.Types.INTEGER);
                 }
 
-                cstmt.execute();
+                // 3. p_num_partida
+                pstmt.setInt(3, idPartida);
+
+                pstmt.executeUpdate();
 
                 // Si hemos detectado un ganador, recuperamos lo que ha soltado el trigger
                 if (juego.getGanador() != null) {
@@ -348,7 +346,6 @@ public class BBDD {
                         controlador.GameContext.getInstance().setDbmsOutputMessage(output);
                     }
                 }
-
                 return true;
             }
         } catch (SQLException e) {
@@ -407,7 +404,6 @@ public class BBDD {
      * @return {@code true} si se completó la transacción con éxito.
      */
     public boolean guardarEstadoCompleto(int idPartida, Juego juego) {
-        String sqlPartida = "{call actualizar_partida(?, ?, ?)}";
         String sqlJugador = "{call actualizar_participacion(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
 
         try (Connection con = conectarBD()) {
@@ -417,16 +413,17 @@ public class BBDD {
             // Iniciamos transacción para evitar guardados a medias
             con.setAutoCommit(false);
 
-            // 1. Guardar la Partida
-            try (CallableStatement cstmtP = con.prepareCall(sqlPartida)) {
-                cstmtP.setInt(1, idPartida);
-                cstmtP.setInt(2, juego.getTurnoActual());
+            // 1. Guardar la Partida (Actualizar turno y ganador)
+            String sqlUpdateGame = "UPDATE partida SET torn_actual = ?, ganador = ? WHERE num_partida = ?";
+            try (PreparedStatement pstmtP = con.prepareStatement(sqlUpdateGame)) {
+                pstmtP.setInt(1, juego.getTurnoActual());
                 if (juego.getGanador() != null) {
-                    cstmtP.setInt(3, juego.getGanador().getId());
+                    pstmtP.setInt(2, juego.getGanador().getId());
                 } else {
-                    cstmtP.setNull(3, java.sql.Types.INTEGER);
+                    pstmtP.setNull(2, java.sql.Types.INTEGER);
                 }
-                cstmtP.execute();
+                pstmtP.setInt(3, idPartida);
+                pstmtP.executeUpdate();
             }
 
             // 2. Guardar a todos los Jugadores
@@ -447,7 +444,6 @@ public class BBDD {
             }
 
             con.commit();
-            // Restaurar a true (aunque la conexión se cierra justo abajo)
             con.setAutoCommit(true);
             return true;
 
@@ -748,61 +744,6 @@ public class BBDD {
         }
     }
 
-    /*
-     * public boolean guardarPartida(Connection con, Juego juego) {
-     * 
-     * String sql = "";
-     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-     * 
-     * } catch (SQLException e) {
-     * System.out.println("Error al guardar: " + e.getMessage());
-     * }
-     * }
-     * 
-     * public Juego cargarPartida(Connection conConnection con) {
-     * 
-     * String sql = "";
-     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-     * 
-     * } catch (SQLException e) {
-     * System.out.println("Error al guardar: " + e.getMessage());
-     * }
-     * }
-     * 
-     * public String encriptarDatos(Connection con, String datos) {
-     * 
-     * String sql = "";
-     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-     * 
-     * } catch (SQLException e) {
-     * System.out.println("Error al guardar: " + e.getMessage());
-     * }
-     * 
-     * }
-     * 
-     * public String desencriptarDatos(Connection con, String datos) {
-     * 
-     * String sql = "";
-     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-     * 
-     * } catch (SQLException e) {
-     * System.out.println("Error al guardar: " + e.getMessage());
-     * }
-     * 
-     * }
-     * 
-     * public boolean existePartidaGuardada(Connection con) {
-     * 
-     * String sql = "";
-     * try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-     * 
-     * } catch (SQLException e) {
-     * System.out.println("Error al guardar: " + e.getMessage());
-     * }
-     * 
-     * }
-     */
-
     /**
      * Recupera el listado completo de nombres de jugadores registrados en el
      * sistema
@@ -849,7 +790,6 @@ public class BBDD {
                 pstmt.setInt(1, idPartida);
 
                 int filasAfectadas = pstmt.executeUpdate();
-
                 if (filasAfectadas > 0) {
                     System.out.println(" Partida " + idPartida + " eliminada.");
                     return true;

@@ -159,7 +159,7 @@ public class NavigationController {
      * @param fxmlFile Nombre del archivo .fxml.
      */
     public static void navigateTo(Stage stage, String fxmlFile) {
-        navigateTo(stage, fxmlFile, true);
+        navigateTo(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
     }
 
     /**
