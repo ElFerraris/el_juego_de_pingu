@@ -219,9 +219,10 @@ public class Tablero {
                         casillas.set(i, new CasillaTrineo(i, "Casilla TRINEO", y));
                         trineoSiguienteEncontrado = true;
                     }
+                    y++;
                 }
             }
-            // Si el trineo no tiene siguiente, apunta a sí mismo
+
             if (casillas.get(i).getTipo().equals("Casilla TRINEO")
                     && ((CasillaTrineo) casillas.get(i)).getPosicionSiguienteTrineo() == 0) {
                 casillas.set(i, new CasillaTrineo(i, "Casilla TRINEO", i));
@@ -237,6 +238,7 @@ public class Tablero {
                         casillas.set(i, new CasillaAgujero(i, "Casilla AGUJERO", y));
                         agujeroAnteriorEncontrado = true;
                     }
+                    y--;
                 }
             }
         }
