@@ -12,295 +12,515 @@ import javafx.event.ActionEvent;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.application.Platform;
+import javafx.animation.*;
+import javafx.util.Duration;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 import modelo.Jugador;
-import modelo.CPU;
+import modelo.Foca;
+import modelo.Pinguino;
 import datos.BBDD;
 
 /**
- * PlayerConfigController
+ * Controlador para la vista de configuración de jugadores.
  * 
- * Gestiona la configuración de los jugadores antes de empezar una partida.
- * Permite seleccionar nombres de la BD, elegir colores y añadir la Foca Loca.
+ * <p>
+ * Esta clase gestiona la selección de los participantes de una partida (mínimo
+ * 2,
+ * máximo 4). Permite asignar a cada hueco un jugador humano registrado en la
+ * base de
+ * datos o un bot (Foca Loca), y personalizar el color de su ficha.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class PlayerConfigController {
 
-    @FXML private HBox playerSlotsContainer;
-    @FXML private CheckBox focaCheckbox;
-    @FXML private Label errorLabel;
+    @FXML
+    private HBox playerSlotsContainer;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private VBox focaCard;
+    @FXML
+    private ImageView focaIcon;
+    @FXML
+    private CheckBox focaEnabledCheck;
 
     private List<Slot> slots = new ArrayList<>();
     private List<String> allPlayerNames = new ArrayList<>();
     private static final int MAX_PLAYERS = 4;
-    private static final String[] COLORS = {"Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa"};
+    private static final String[] COLORS = { "Rojo", "Azul", "Verde", "Amarillo", "Naranja", "Morado", "Rosa" };
     private BBDD db = new BBDD();
 
+    /**
+     * Inicializa la vista de configuración.
+     * 
+     * <p>
+     * Carga de forma síncrona los nombres de todos los jugadores registrados
+     * en la base de datos y configura los huecos de la interfaz.
+     * </p>
+     */
     @FXML
     public void initialize() {
-        // Cargamos los nombres de la BD en un hilo secundario para no bloquear la animación
-        new Thread(() -> {
-            try {
-                // Notamos que necesitamos la escena para mostrar el loading
-                Platform.runLater(() -> {
-                    if (playerSlotsContainer.getScene() != null) {
-                        NavigationController.showLoading(playerSlotsContainer.getScene());
-                    }
-                });
-
-                List<String> names = db.obtenerTodosLosJugadores();
-                
-                Platform.runLater(() -> {
-                    allPlayerNames = names;
-                    setupInitialSlots();
-                    NavigationController.hideLoading();
-                });
-            } catch (Exception e) {
-                Platform.runLater(NavigationController::hideLoading);
-                System.err.println("Error cargando jugadores en segundo plano: " + e.getMessage());
-            }
-        }).start();
+        try {
+            // Carga síncrona de jugadores
+            List<String> names = db.obtenerTodosLosJugadores();
+            allPlayerNames = names;
+            setupFixedSlots();
+        } catch (Exception e) {
+            System.err.println("Error cargando jugadores: " + e.getMessage());
+        }
     }
 
-    private void setupInitialSlots() {
+    /**
+     * Prepara y renderiza visualmente los 4 huecos de jugador en pantalla.
+     * <p>
+     * Aplica animaciones de escala y opacidad escalonadas (efecto cascada)
+     * al mostrar las tarjetas por primera vez.
+     * </p>
+     */
+    private void setupFixedSlots() {
         playerSlotsContainer.getChildren().clear();
         slots.clear();
-        
-        // Al menos 2 jugadores obligatorios
-        for (int i = 0; i < 2; i++) {
-            addSlot(true);
-        }
-        updateSlotsUI();
-    }
 
-    private void addSlot(boolean mandatory) {
-        Slot slot = new Slot(mandatory);
-        slots.add(slot);
-    }
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            Slot slot = new Slot(i);
+            slots.add(slot);
+            Node cardNode = slot.getRoot();
+            cardNode.setOpacity(0);
+            cardNode.setScaleX(0.8);
+            cardNode.setScaleY(0.8);
+            playerSlotsContainer.getChildren().add(cardNode);
 
-    private void updateSlotsUI() {
-        playerSlotsContainer.getChildren().clear();
-        for (int i = 0; i < slots.size(); i++) {
-            Slot s = slots.get(i);
-            // Re-indexamos el título (P1, P2...)
-            Label title = (Label) ((HBox) s.getCard().getChildren().get(0)).getChildren().get(0);
-            title.setText("P" + (i + 1));
-            
-            playerSlotsContainer.getChildren().add(s.getCard());
-        }
+            // Animación de entrada escalonada
+            FadeTransition ft = new FadeTransition(Duration.millis(500), cardNode);
+            ft.setToValue(1);
+            ft.setDelay(Duration.millis(i * 150));
 
-        // Si hay menos del máximo, mostramos el botón de añadir "+"
-        if (slots.size() < MAX_PLAYERS) {
-            Button addButton = new Button("+");
-            addButton.getStyleClass().add("add-player-button");
-            addButton.setPrefSize(180, 220);
-            addButton.setOnAction(e -> {
-                addSlot(false);
-                updateSlotsUI();
-            });
-            util.UIUtils.applyHoverAnimation(addButton);
-            playerSlotsContainer.getChildren().add(addButton);
+            ScaleTransition st = new ScaleTransition(Duration.millis(500), cardNode);
+            st.setToX(1);
+            st.setToY(1);
+            st.setDelay(Duration.millis(i * 150));
+            st.setInterpolator(Interpolator.EASE_OUT);
+
+            new ParallelTransition(ft, st).play();
         }
         updateAllComboCells();
+        updateFocaStyle();
+    }
+
+    /**
+     * Alterna el estado de inclusión de la Foca en la partida.
+     */
+    @FXML
+    private void toggleFoca() {
+        util.SoundManager.playConfirm();
+        focaEnabledCheck.setSelected(!focaEnabledCheck.isSelected());
+        updateFocaStyle();
+    }
+
+    private void updateFocaStyle() {
+        if (focaEnabledCheck.isSelected()) {
+            focaCard.getStyleClass().remove("player-card-empty");
+            focaCard.setOpacity(1.0);
+            javafx.scene.effect.DropShadow glow = new javafx.scene.effect.DropShadow();
+            glow.setColor(Color.web("#546e7a"));
+            glow.setRadius(20);
+            focaIcon.setEffect(glow);
+        } else {
+            if (!focaCard.getStyleClass().contains("player-card-empty")) {
+                focaCard.getStyleClass().add("player-card-empty");
+            }
+            focaCard.setOpacity(0.6);
+            focaIcon.setEffect(null);
+        }
     }
 
     private boolean isUpdatingAll = false;
 
+    /**
+     * Refresca el contenido visual de todos los ComboBox de la interfaz.
+     * <p>
+     * Utiliza la bandera isUpdatingAll para evitar llamadas recursivas infinitas
+     * debido a los listeners en los properties de JavaFX.
+     * </p>
+     */
     private void updateAllComboCells() {
-        if (isUpdatingAll) return;
-        isUpdatingAll = true;
-        try {
-            for (Slot s : slots) {
-                s.refreshCombo();
+        if (!isUpdatingAll) {
+            isUpdatingAll = true;
+            try {
+                for (Slot s : slots) {
+                    if (s.isEnabled()) {
+                        s.refreshCombo();
+                    }
+                }
+            } finally {
+                isUpdatingAll = false;
             }
-        } finally {
-            isUpdatingAll = false;
         }
     }
 
+    /**
+     * Valida la configuración actual y avanza a la selección de semilla (tablero).
+     * 
+     * <p>
+     * Comprueba que haya al menos dos participantes, que todos los humanos
+     * tengan nombre asignado y guarda la lista de jugadores en el GameContext.
+     * </p>
+     * 
+     * @param event El evento del botón "Continuar".
+     */
     @FXML
     private void showSeedSelection(ActionEvent event) {
         List<Jugador> configured = new ArrayList<>();
+        boolean errorEncontrado = false;
+
+        // 1. Añadir Jugadores Humanos
         for (Slot s : slots) {
-            String name = s.getName();
-            if (name == null || name.trim().isEmpty()) {
-                errorLabel.setText("Todos los jugadores deben tener nombre");
-                return;
+            if (!errorEncontrado && s.isEnabled()) {
+                String name = s.getName();
+                if (name == null || name.trim().isEmpty()) {
+                    errorLabel.setText("Todos los jugadores seleccionados deben tener nombre");
+                    errorEncontrado = true;
+                } else {
+                    configured.add(new Pinguino(-1, name, s.getColor()));
+                }
             }
-            // Color por defecto en el constructor, se actualizará según el Slot
-            configured.add(new Jugador(-1, name, s.getColor()));
-        }
-        
-        if (focaCheckbox.isSelected()) {
-            configured.add(new CPU(-1, "Foca Loca"));
         }
 
-        if (configured.size() < 2) {
-            errorLabel.setText("Mínimo 2 jugadores para empezar");
-            return;
+        // 2. Añadir Foca si está activada
+        if (!errorEncontrado && focaEnabledCheck.isSelected()) {
+            configured.add(new Foca(-1, "FOCA LOCA"));
         }
 
-        // Guardamos los jugadores configurados en el contexto global
-        GameContext.getInstance().setConfiguredPlayers(configured);
-        
-        // Navegamos a la selección de SEED (Mundo) con transición hacia adelante (sube)
-        NavigationController.navigateTo(event, "SeedSelectionView.fxml", NavigationController.Direction.FORWARD);
+        if (!errorEncontrado) {
+            if (configured.size() < 2) {
+                errorLabel.setText("Mínimo 2 participantes para empezar");
+            } else {
+                GameContext.getInstance().setConfiguredPlayers(configured);
+                NavigationController.navigateTo(event, "SeedSelectionView.fxml",
+                        NavigationController.Direction.FORWARD);
+            }
+        }
     }
 
+    /**
+     * Retrocede al Menú Principal.
+     * 
+     * @param event El evento del botón "Atrás".
+     */
     @FXML
     private void showMainMenu(ActionEvent event) {
-        // Volvemos al menú principal con transición hacia atrás (baja)
-        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
+        NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.RIGHT);
     }
 
-    // --- Clase interna para la gestión de cada "Tarjeta" de jugador ---
+
+
+    /**
+     * Representa un hueco de jugador en la interfaz.
+     * 
+     * <p>
+     * Gestiona la lógica visual y de selección para un único participante,
+     * incluyendo su tipo (Humano/CPU), su nombre y el color de su ficha.
+     * </p>
+     */
     private class Slot {
+        private StackPane root;
         private VBox card;
+        private Region flashOverlay;
+        private Label titleLabel;
+        private CheckBox slotEnabledCheck;
         private ComboBox<String> nameCombo;
-        private Circle colorCircle;
+        private Label fixedNameLabel;
+        private ImageView colorIcon;
         private String selectedColor;
         private GridPane pickerGrid;
+        private int index;
 
-        public Slot(boolean mandatory) {
+        /**
+         * Constructor del hueco de jugador.
+         * 
+         * @param index Índice del hueco (0 para el jugador actual, 1-3 para el resto).
+         */
+        public Slot(int index) {
+            this.index = index;
+            root = new StackPane();
+
             card = new VBox(15);
             card.getStyleClass().add("player-card");
-            
-            // Etiqueta de título
-            Label title = new Label("P?"); 
-            title.setStyle("-fx-font-weight: bold;");
+
+            flashOverlay = new Region();
+            flashOverlay.setStyle("-fx-background-color: white; -fx-background-radius: 15;");
+            flashOverlay.setOpacity(0);
+            flashOverlay.setMouseTransparent(true);
+
+            root.getChildren().addAll(card, flashOverlay);
+
+            titleLabel = new Label("P" + (index + 1));
+            titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0d47a1;");
+
+            if (index == 0) {
+                setupAsCurrentUser();
+            } else {
+                setupWithDropdowns();
+            }
+
+            updateCardStyle();
+        }
+
+        /**
+         * Configura el hueco inicial (índice 0) obligatoriamente para el jugador actual
+         * logueado.
+         */
+        private void setupAsCurrentUser() {
+            Jugador current = GameContext.getInstance().getCurrentUser();
+            String name = (current != null) ? current.getNombre() : "Jugador 1";
+
+            nameCombo = new ComboBox<>();
+            nameCombo.getItems().add(name);
+            nameCombo.setValue(name);
+            nameCombo.setVisible(false);
+            nameCombo.setManaged(false);
+
+            fixedNameLabel = new Label(name.toUpperCase());
+            fixedNameLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+
+            selectedColor = "Azul";
+            setupColorPicker();
+
+            card.getChildren().addAll(titleLabel, fixedNameLabel, colorIcon);
+        }
+
+        /**
+         * Configura los huecos restantes (1 al 2) con un CheckBox para activarlos.
+         */
+        private void setupWithDropdowns() {
+            slotEnabledCheck = new CheckBox("ACTIVAR P" + (index + 1));
+            slotEnabledCheck.getStyleClass().add("premium-checkbox");
+            slotEnabledCheck.setSelected(index == 1); // El P2 activado por defecto
 
             nameCombo = new ComboBox<>();
             nameCombo.getItems().addAll(allPlayerNames);
-            nameCombo.setPromptText("Seleccionar...");
+            nameCombo.setPromptText("Elegir jugador...");
             nameCombo.setPrefWidth(160);
-            
-            // Personalizamos las celdas para deshabilitar nombres ya usados
             nameCombo.setCellFactory(lv -> new PlayerCell());
             nameCombo.setButtonCell(new PlayerCell());
+            nameCombo.valueProperty().addListener((obs, old, nw) -> updateAllComboCells());
 
-            nameCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            selectedColor = (index == 1) ? "Rojo" : "Verde";
+            setupColorPicker();
+
+            slotEnabledCheck.selectedProperty().addListener((obs, old, nw) -> {
+                flashCard();
+                updateVisibility();
+                updateCardStyle();
                 updateAllComboCells();
             });
 
-            // Color inicial (Azul para P1, Rojo para P2, primer color libre para otros)
-            if (mandatory && slots.size() == 0) {
-                selectedColor = "Azul";
-            } else if (mandatory && slots.size() == 1) {
-                selectedColor = "Rojo";
-            } else {
-                boolean taken = false;
-                for (int j = 0; j < COLORS.length && !taken; j++) {
-                    String cName = COLORS[j];
-                    for (int k = 0; k < slots.size() && !taken; k++) {
-                        Slot existingSlot = slots.get(k);
-                        if (cName.equals(existingSlot.getColor())) {
-                            taken = true;
-                        }
-                    }
-                    if (!taken) {
-                        selectedColor = cName;
-                        taken = true; // Forzamos salida del bucle exterior
-                    } else {
-                        taken = false; // Reset para probar el siguiente color
-                    }
-                }
-            }
-            colorCircle = new Circle(25, colorDesdeNombre(selectedColor));
-            colorCircle.getStyleClass().add("color-circle");
-            colorCircle.setCursor(Cursor.HAND);
+            card.getChildren().addAll(titleLabel, slotEnabledCheck, nameCombo, colorIcon);
+            updateVisibility();
+        }
 
-            // Panel de selección de color (Grid emergente)
+        /**
+         * Prepara el selector visual de colores (un menú emergente con iconos).
+         */
+        private void setupColorPicker() {
+            colorIcon = new ImageView();
+            colorIcon.setFitWidth(60);
+            colorIcon.setFitHeight(60);
+            colorIcon.setPreserveRatio(true);
+            colorIcon.setCursor(Cursor.HAND);
+
+            actualizarIcono();
+
             ContextMenu colorMenu = new ContextMenu();
             pickerGrid = new GridPane();
             pickerGrid.setHgap(10);
             pickerGrid.setVgap(10);
             pickerGrid.setPadding(new Insets(10));
             pickerGrid.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
-            
+
             CustomMenuItem customItem = new CustomMenuItem(pickerGrid);
             customItem.setHideOnClick(false);
             colorMenu.getItems().add(customItem);
-
             colorMenu.setOnShowing(e -> populateColorGrid(colorMenu));
 
-            colorCircle.setOnMouseClicked(e -> {
-                colorMenu.show(colorCircle, Side.BOTTOM, 0, 0);
+            colorIcon.setOnMouseClicked(e -> {
+                if (isEnabled()) {
+                    colorMenu.show(colorIcon, Side.BOTTOM, 0, 0);
+                }
             });
+        }
 
-            HBox header = new HBox(title);
-            header.setAlignment(Pos.CENTER);
-            if (!mandatory) {
-                Button removeBtn = new Button("×");
-                removeBtn.getStyleClass().add("remove-slot-button");
-                removeBtn.setOnAction(e -> removeThisSlot());
-                util.UIUtils.applyHoverAnimation(removeBtn);
-                Region spacer = new Region();
-                HBox.setHgrow(spacer, Priority.ALWAYS);
-                header.getChildren().addAll(spacer, removeBtn);
+        /**
+         * Actualiza el icono de pingüino mostrado según el color seleccionado.
+         */
+        private void actualizarIcono() {
+            try {
+                String colorName = selectedColor.toLowerCase();
+                Image img = new Image(
+                        getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                colorIcon.setImage(img);
+            } catch (Exception e) {
+                System.err.println("No se pudo cargar el icono");
             }
 
-            card.getChildren().addAll(header, nameCombo, colorCircle);
+            javafx.scene.effect.DropShadow glow = new javafx.scene.effect.DropShadow();
+            glow.setColor(colorDesdeNombre(selectedColor));
+            glow.setRadius(15);
+            colorIcon.setEffect(glow);
         }
 
-        private void removeThisSlot() {
-            slots.remove(this);
-            updateSlotsUI();
+        /**
+         * Realiza una pequeña animación de destello visual sobre la tarjeta al cambiar
+         * un ajuste.
+         */
+        private void flashCard() {
+            FadeTransition ft = new FadeTransition(Duration.millis(300), flashOverlay);
+            ft.setFromValue(0.8);
+            ft.setToValue(0);
+            ft.play();
         }
 
-        // Celda personalizada para bloquear jugadores ya elegidos
+        /**
+         * Muestra u oculta elementos de la interfaz (combobox de nombres, etiqueta
+         * fija, icono)
+         * dependiendo de si el hueco es para un Jugador, una Foca o está Vacío.
+         */
+        private void updateVisibility() {
+            boolean enabled = isEnabled();
+            if (nameCombo != null) {
+                nameCombo.setVisible(enabled);
+                nameCombo.setManaged(enabled);
+            }
+            if (colorIcon != null) {
+                colorIcon.setVisible(enabled);
+                colorIcon.setManaged(enabled);
+                if (enabled) actualizarIcono();
+            }
+        }
+
+        /**
+         * Actualiza el color del borde y de las sombras de la tarjeta según el tipo
+         * de jugador y su color elegido.
+         */
+        private void updateCardStyle() {
+            card.getStyleClass().removeAll("player-card-empty", "player-card-foca");
+            boolean enabled = isEnabled();
+
+            if (!enabled) {
+                card.getStyleClass().add("player-card-empty");
+                card.setStyle("-fx-border-color: #90a4ae;");
+            } else {
+                Color c = colorDesdeNombre(selectedColor);
+                String hex = String.format("#%02x%02x%02x",
+                        (int) (c.getRed() * 255),
+                        (int) (c.getGreen() * 255),
+                        (int) (c.getBlue() * 255));
+                card.setStyle("-fx-border-color: " + hex + ";");
+                if (colorIcon != null) {
+                    ((javafx.scene.effect.DropShadow) colorIcon.getEffect()).setColor(c);
+                }
+            }
+        }
+
+        /**
+         * Celda personalizada para la lista desplegable de nombres de jugadores.
+         * Deshabilita los nombres que ya han sido seleccionados en otros huecos.
+         */
         private class PlayerCell extends ListCell<String> {
+            /**
+             * Actualiza visualmente el elemento de la celda de la lista desplegable.
+             * 
+             * @param item  El nombre del jugador a mostrar en la celda.
+             * @param empty Verdadero si la celda debe mostarse vacía, falso de lo
+             *              contrario.
+             */
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
-                    setGraphic(null);
-                    setDisable(false);
                 } else {
                     setText(item);
-                    boolean alreadySelected = false;
-                    for (int j = 0; j < slots.size() && !alreadySelected; j++) {
-                        Slot s = slots.get(j);
+                    boolean taken = false;
+                    for (Slot s : slots) {
                         if (s != Slot.this && item.equals(s.getName())) {
-                            alreadySelected = true;
+                            taken = true;
+                            break;
                         }
                     }
-                    if (alreadySelected) {
+                    if (taken) {
                         setDisable(true);
                         setOpacity(0.4);
-                        setStyle("-fx-text-fill: grey;");
                     } else {
                         setDisable(false);
                         setOpacity(1.0);
-                        setStyle("-fx-text-fill: black;");
                     }
                 }
             }
         }
 
-        public VBox getCard() { return card; }
-        public String getName() { return nameCombo.getValue(); }
-        public String getColor() { return selectedColor; }
-        
-        public void refreshCombo() {
-            // Refrescamos la visualización sin disparar eventos de cambio
-            var cellFactory = nameCombo.getCellFactory();
-            nameCombo.setCellFactory(null);
-            nameCombo.setCellFactory(cellFactory);
+        public Node getRoot() {
+            return root;
         }
 
+        public boolean isEnabled() {
+            return (slotEnabledCheck == null) ? true : slotEnabledCheck.isSelected();
+        }
+
+        public String getName() {
+            return (nameCombo != null) ? nameCombo.getValue() : null;
+        }
+
+        public String getColor() {
+            return selectedColor;
+        }
+
+        /**
+         * Refresca el combobox de nombres para forzar a la interfaz a re-evaluar
+         * qué nombres están disponibles y cuáles no.
+         */
+        public void refreshCombo() {
+            if (nameCombo != null) {
+                var factory = nameCombo.getCellFactory();
+                nameCombo.setCellFactory(null);
+                nameCombo.setCellFactory(factory);
+            }
+        }
+
+        /**
+         * Llena la cuadrícula del selector de color desplegable.
+         * Deshabilita los colores que ya están siendo usados por otros jugadores.
+         * 
+         * @param parent El menú contextual que contiene esta cuadrícula.
+         */
         private void populateColorGrid(ContextMenu parent) {
             pickerGrid.getChildren().clear();
-            int col = 0; int row = 0;
+            int col = 0;
+            int row = 0;
             for (String cName : COLORS) {
-                Color color = colorDesdeNombre(cName);
-                Circle c = new Circle(15, color);
-                
+                ImageView c = new ImageView();
+                try {
+                    String colorName = cName.toLowerCase();
+                    Image img = new Image(
+                            getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                    c.setImage(img);
+                } catch (Exception e) {
+                }
+                c.setFitWidth(30);
+                c.setFitHeight(30);
+                c.setPreserveRatio(true);
+
                 boolean taken = false;
-                for (int j = 0; j < slots.size() && !taken; j++) {
-                    Slot s = slots.get(j);
-                    if (s != this && cName.equals(s.getColor())) {
+                for (Slot s : slots) {
+                    if (s != this && s.isEnabled() && cName.equals(s.getColor())) {
                         taken = true;
+                        break;
                     }
                 }
 
@@ -309,31 +529,48 @@ public class PlayerConfigController {
                     c.setCursor(Cursor.DEFAULT);
                 } else {
                     c.setCursor(Cursor.HAND);
-                    c.setOpacity(1.0);
-                    util.UIUtils.applyHoverAnimation(c);
                     c.setOnMouseClicked(e -> {
+                        flashCard();
                         selectedColor = cName;
-                        colorCircle.setFill(color);
+                        actualizarIcono();
+                        updateCardStyle();
                         parent.hide();
                     });
                 }
-                
                 pickerGrid.add(c, col, row);
                 col++;
-                if (col > 2) { col = 0; row++; }
+                if (col > 2) {
+                    col = 0;
+                    row++;
+                }
             }
         }
 
+        /**
+         * Obtiene un objeto {@code Color} estándar de JavaFX a partir de su nombre en
+         * español.
+         * 
+         * @param nombre El nombre del color (ej. "Rojo").
+         * @return El color correspondiente o gris si no coincide.
+         */
         private Color colorDesdeNombre(String nombre) {
             switch (nombre.toLowerCase()) {
-                case "rojo":     return Color.RED;
-                case "azul":     return Color.BLUE;
-                case "verde":    return Color.GREEN;
-                case "amarillo": return Color.YELLOW;
-                case "naranja":  return Color.ORANGE;
-                case "morado":   return Color.PURPLE;
-                case "rosa":     return Color.PINK;
-                default:         return Color.GRAY;
+                case "rojo":
+                    return Color.web("#f44336");
+                case "azul":
+                    return Color.web("#2196f3");
+                case "verde":
+                    return Color.web("#4caf50");
+                case "amarillo":
+                    return Color.web("#ffeb3b");
+                case "naranja":
+                    return Color.web("#ff9800");
+                case "morado":
+                    return Color.web("#9c27b0");
+                case "rosa":
+                    return Color.web("#e91e63");
+                default:
+                    return Color.GRAY;
             }
         }
     }

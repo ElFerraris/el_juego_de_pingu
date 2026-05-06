@@ -1,0 +1,92 @@
+# Registro de Pulido y Mejoras 🐧✨
+
+Este archivo contiene el historial de pequeños ajustes visuales y funcionales solicitados para perfeccionar el juego.
+
+- [x] **1. Rediseño del Icono Hamburguesa**
+    - Líneas más gruesas (el doble que el borde).
+    - Longitud reducida para no tocar los bordes del botón.
+    - Puntas redondeadas según el boceto. 
+- [x] **2. Eliminación de Guardado Redundante en Pausa**
+    - Se ha quitado el forzado de guardado al salir del juego desde el menú de pausa, ya que el sistema ya guarda automáticamente tras cada movimiento del jugador.
+- [x] **3. Animaciones en Menús Overlay**
+    - Añadidas transiciones de fundido (Fade) y deslizamiento (Slide Up/Down) al abrir y cerrar el menú de pausa, opciones y confirmación.
+    - El fondo oscuro (overlayPane) también aparece y desaparece con un fundido suave.
+- [x] **4. Sonidos en Menús In-Game**
+    - Añadidos sonidos de confirmación a los botones de navegar y aplicar cambios.
+    - Añadidos sonidos de retroceso a los botones de "Volver" y "No" en el overlay.
+- [x] **5. Validación en Cargar Partida**
+    - El botón "Jugar Partida" ahora se deshabilita automáticamente si no hay ninguna partida seleccionada en la lista, eliminando el popup de advertencia anterior.
+- [x] **6. GIF de Carga Global (Tongo Dancing)**
+    - Implementación de `util.LoadingOverlay` para mostrar el GIF de carga en la esquina inferior derecha.
+    - Integración en `LoadGameController` (al cargar lista y cargar partida), `PlayerConfigController` (al cargar nombres) y `SeedSelectionController` (al generar la partida).
+    - El GIF utiliza hilos secundarios para no bloquear la interfaz y tiene animaciones de fundido suave.
+- [x] **7. Ajuste de Resolución en Login**
+    - Fijada la resolución del Login a **1200x700** tanto en `Main.java` como en `Login.fxml`.
+    - Asegurada la transición a la resolución guardada en `settings.properties` al entrar en la Intro.
+- [x] **8. Optimización de la Intro (Vídeo)**
+    - Añadido sistema de **Failsafe**: si el vídeo no carga en 5 segundos, salta automáticamente al menú.
+    - Añadido **manejo de errores** para detectar problemas de codecs y evitar pantallas en negro.
+    - Mejorada la gestión de memoria eliminando el reproductor correctamente al finalizar.
+- [x] **9. Carga Asíncrona del Tablero**
+    - Implementado `navigateToBoardAsync` en `NavigationController` para evitar el congelamiento de la UI.
+    - La carga del FXML y la inicialización pesada (BD Oracle) se ejecutan ahora en un hilo secundario (`Task`).
+    - El GIF de carga se renderiza antes de empezar la carga pesada, asegurando que se vea la animación fluida.
+    - Integrado en los flujos de "Nueva Partida" y "Cargar Partida".
+- [x] **10. Eliminación de Sentencias `break` y `return` en Bucles**
+    - Refactorizados todos los bucles en `Tablero`, `Inventario`, `TableroController`, `PlayerConfigController`, `NavigationController` y `Juego` para eliminar el uso de `break` (excepto en bloques `switch`).
+    - Uso de banderas booleanas y condiciones compuestas para controlar el flujo de los bucles de búsqueda y validación.
+- [x] **11. Jerarquía de Clases: Separación de Pinguino y Foca**
+    - Convertida la clase `Jugador` en una clase abstracta base.
+    - Creadas las subclases `Pinguino` (jugador humano) y `Foca` (CPU, anteriormente llamada `CPU`).
+    - Actualizada toda la lógica de instanciación, guardado y carga en base de datos para manejar correctamente los nuevos tipos específicos.
+    - La foca mantiene su color gris por defecto y lógica de ataque personalizada.
+
+### Pulir el Tablero
+- [x] **12. Cambio visual del indicador de turnos**
+    - Sustituir los textos simples "Turno de..." por una representación visual en la barra superior.
+    - Crear una secuencia visual con esferas del color de cada jugador.
+    - Las esferas estarán conectadas por flechas indicando el flujo del turno.
+    - El jugador activo tendrá su esfera iluminada o con un efecto brillante para resaltar su turno.
+- [x] **13. Panel lateral retráctil para el Log de Partida**
+    - Mover el cuadro de "Log de partida" de la parte inferior a un panel lateral izquierdo.
+    - El panel debe poder expandirse y contraerse mediante un botón con una flecha (▶/◀).
+    - Cuando se presiona, el panel se desliza con animación y la flecha cambia de dirección al cerrarse.
+- [x] **14. Optimización visual de Tarjetas de Jugador**
+    - En el panel derecho ("Pingüinos"), mostrar únicamente la tarjeta del jugador cuyo turno está en curso.
+    - Cambiar el contador total de inventario por un listado detallado e interactivo.
+- [x] **15. Inventario Interactivo con Confirmación**
+    - Los objetos en el panel lateral ahora son botones rectangulares (Estilo: Nombre | xCantidad).
+    - Al hacer clic en un objeto, se abre un diálogo de confirmación animado.
+    - Se ha mejorado la lógica para que los dados especiales se usen desde este menú.
+- [x] **16. Sistema de Cámara (Zoom y Pan)**
+    - Implementado un "Viewport" central que permite libertad total de movimiento.
+    - **Zoom**: Controlado con la rueda del ratón (0.4x a 3.0x).
+    - **Desplazamiento**: Mantener pulsado y arrastrar para mover el tablero.
+    - **Reset**: Botón flotante `⌂` para centrar y resetear la vista instantáneamente.
+- [x] **17. Corrección de Superposición y Errores Críticos**
+    - Solucionado error `NullPointerException` al intentar cerrar la partida.
+    - Asegurado que solo se muestre un menú overlay a la vez (evitando el Menú de Pausa detrás de las alertas).
+- [x] **18. Automatización de CPU (Foca Loca)**
+    - Implementada lógica de decisión automática para los jugadores tipo `Foca`.
+    - **IA Básica**: La CPU ahora analiza el entorno:
+        - Prioriza recolectar bolas si tiene menos de 10.
+        - Usa **Dados Rápidos** para intentar saltar agujeros (casillas 3-5 adelante).
+        - Usa **Dados Lentos** para intentar caer en trineos o evitar agujeros cercanos.
+    - Añadido un **overlay animado** ("TURNO DE CPU") sobre los botones de acción para mejorar el feedback visual.
+    - Los botones de acción se **deshabilitan explícitamente** durante el turno de la CPU.
+    - Solucionado error que bloqueaba la partida si la CPU intentaba recolectar con el inventario lleno.
+- [x] **19. Rediseño de Configuración de Personajes**
+    - Se muestran siempre **4 tarjetas fijas** para los jugadores.
+    - **P1**: Bloqueado automáticamente al usuario logueado.
+    - **P2-P4**: Selector de tipo (Jugador, Foca Loca o Vacío).
+    - **Selector de Colores Premium**: El círculo de color ahora está en el centro de la tarjeta y tiene un efecto de brillo.
+    - **Borde Dinámico**: El contorno de cada tarjeta cambia de color automáticamente al seleccionar el color del pingüino.
+    - **Animaciones Premium**: 
+        - Las tarjetas aparecen con una animación escalonada de **escalado y fundido**.
+        - Se ha añadido un **efecto de destello blanco** ("flash") al cambiar el tipo de jugador o el color, suavizando la transición visual.
+    - Las tarjetas vacías o de CPU tienen estilos visuales diferenciados (bordes punteados o grises).
+- [x] **20. Animación de Dado Estilo Mario Party**
+    - Añadida animación de dado rodando (GIF) al realizar una tirada.
+    - El número obtenido aparece en grande en el centro de la pantalla tras la animación.
+    - **Contador Dinámico**: El número disminuye paso a paso mientras el pingüino avanza por el tablero.
+    - **Desvanecimiento**: Al llegar a cero, el contador se desvanece suavemente para no obstruir la vista de los efectos de casilla.

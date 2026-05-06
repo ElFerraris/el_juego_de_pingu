@@ -4,16 +4,23 @@ import java.io.*;
 import java.util.Properties;
 
 /**
- * SettingsManager
+ * Gestor central de la configuración y preferencias del usuario.
  * 
- * Gestiona la configuración del juego (volumen, resolución, pantalla completa).
- * Guarda los datos en la carpeta de documentos del usuario para persistencia.
+ * <p>
+ * Implementa el patrón Singleton para proporcionar un acceso unificado a los
+ * ajustes de resolución, modo de pantalla y volúmenes (música/SFX). Los datos
+ * se persisten en un archivo {@code .properties} ubicado en la carpeta de
+ * documentos del sistema operativo.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class SettingsManager {
 
-    private static final String APP_FOLDER = "pingu";
-    private static final String PROPERTIES_FOLDER = "properties";
-    private static final String FILE_NAME = "settings.properties";
+    private static final String FOLDER_BASE = "juego_pingu";
+    private static final String FOLDER_CONFIG = "config";
+    private static final String FILE_NAME = "opciones.properties";
 
     private Properties props;
     private File settingsFile;
@@ -26,29 +33,43 @@ public class SettingsManager {
         load();
     }
 
-    public static synchronized SettingsManager getInstance() {
+    /**
+     * Obtiene la instancia única del gestor de configuración.
+     * 
+     * @return La instancia Singleton.
+     */
+    public static SettingsManager getInstance() {
         if (instance == null) {
             instance = new SettingsManager();
         }
         return instance;
     }
 
+    /**
+     * Configura la ubicación del archivo de ajustes en la carpeta de documentos del
+     * usuario.
+     */
     private void setupFile() {
-        // Localizamos la carpeta Documentos del usuario
+        // Buscamos la carpeta de documentos del usuario
         String userHome = System.getProperty("user.home");
         File documents = new File(userHome, "Documents");
-        
-        // Creamos la estructura -> Documents/pingu/properties/
-        File appDir = new File(documents, APP_FOLDER);
-        File propsDir = new File(appDir, PROPERTIES_FOLDER);
-        
-        if (!propsDir.exists()) {
-            propsDir.mkdirs();
+
+        // Creamos la carpeta del juego y dentro la de config
+        File appDir = new File(documents, FOLDER_BASE);
+        File configDir = new File(appDir, FOLDER_CONFIG);
+
+        if (!configDir.exists()) {
+            configDir.mkdirs();
         }
-        
-        settingsFile = new File(propsDir, FILE_NAME);
+
+        settingsFile = new File(configDir, FILE_NAME);
     }
 
+    /**
+     * Carga los valores desde el archivo de propiedades. Si no existe, genera uno
+     * con
+     * valores predeterminados.
+     */
     public void load() {
         if (settingsFile.exists()) {
             try (InputStream is = new FileInputStream(settingsFile)) {
@@ -60,12 +81,15 @@ public class SettingsManager {
             // Valores por defecto
             props.setProperty("resolution", "1280x720");
             props.setProperty("fullscreen", "false");
-            props.setProperty("volume.sfx", "0.8");
-            props.setProperty("volume.music", "0.8");
+            props.setProperty("volume.sfx", "0.5");
+            props.setProperty("volume.music", "0.5");
             save();
         }
     }
 
+    /**
+     * Persiste los ajustes actuales en el sistema de archivos.
+     */
     public void save() {
         try (OutputStream os = new FileOutputStream(settingsFile)) {
             props.store(os, "Configuración del Juego de Pingu");
@@ -75,14 +99,36 @@ public class SettingsManager {
     }
 
     // --- GETTERS ---
-    public String getResolution() { return props.getProperty("resolution", "1280x720"); }
-    public boolean isFullscreen() { return Boolean.parseBoolean(props.getProperty("fullscreen", "false")); }
-    public double getSfxVolume() { return Double.parseDouble(props.getProperty("volume.sfx", "0.8")); }
-    public double getMusicVolume() { return Double.parseDouble(props.getProperty("volume.music", "0.8")); }
+    public String getResolution() {
+        return props.getProperty("resolution", "1280x720");
+    }
+
+    public boolean isFullscreen() {
+        return Boolean.parseBoolean(props.getProperty("fullscreen", "false"));
+    }
+
+    public double getSfxVolume() {
+        return Double.parseDouble(props.getProperty("volume.sfx", "0.8"));
+    }
+
+    public double getMusicVolume() {
+        return Double.parseDouble(props.getProperty("volume.music", "0.8"));
+    }
 
     // --- SETTERS ---
-    public void setResolution(String res) { props.setProperty("resolution", res); }
-    public void setFullscreen(boolean fs) { props.setProperty("fullscreen", String.valueOf(fs)); }
-    public void setSfxVolume(double vol) { props.setProperty("volume.sfx", String.valueOf(vol)); }
-    public void setMusicVolume(double vol) { props.setProperty("volume.music", String.valueOf(vol)); }
+    public void setResolution(String res) {
+        props.setProperty("resolution", res);
+    }
+
+    public void setFullscreen(boolean fs) {
+        props.setProperty("fullscreen", String.valueOf(fs));
+    }
+
+    public void setSfxVolume(double vol) {
+        props.setProperty("volume.sfx", String.valueOf(vol));
+    }
+
+    public void setMusicVolume(double vol) {
+        props.setProperty("volume.music", String.valueOf(vol));
+    }
 }

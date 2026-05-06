@@ -1,28 +1,48 @@
 package util;
 
 import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import java.net.URL;
 
 /**
- * SoundManager
+ * Controlador global del sistema de audio y música dinámica.
  * 
- * Gestiona la carga y reproducción de efectos de sonido (SFX).
- * Utiliza AudioClip para una reproducción instantánea ideal para botones.
+ * <p>
+ * Centraliza la gestión de efectos de sonido (SFX) mediante {@link AudioClip}
+ * para baja latencia, y la reproducción de música ambiental mediante
+ * {@link MediaPlayer}.
+ * Implementa un sistema de música dinámica por capas que intensifica la melodía
+ * a medida que los jugadores avanzan en el tablero.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class SoundManager {
 
     private static AudioClip hoverSound;
     private static AudioClip confirmSound;
     private static AudioClip backSound;
-    
-    private static double volume = 0.8; // Volumen por defecto (0.0 a 1.0)
+
+    private static MediaPlayer musicPlayer;
+
+    private static double sfxVolume = 0.5;
+    private static double musicVolume = 0.5;
 
     static {
-        // Cargamos el volumen guardado si existe al iniciar
+        // Cargamos los volúmenes guardados
         try {
-            volume = SettingsManager.getInstance().getSfxVolume();
-        } catch (Exception e) {}
-        
+            SettingsManager sm = SettingsManager.getInstance();
+            sfxVolume = sm.getSfxVolume();
+            musicVolume = sm.getMusicVolume();
+        } catch (Exception e) {
+        }
+
         try {
             hoverSound = loadSound("/assets/sfx/button-hover.wav");
             confirmSound = loadSound("/assets/sfx/button-confirm.wav");
@@ -36,29 +56,192 @@ public class SoundManager {
         URL resource = SoundManager.class.getResource(path);
         if (resource != null) {
             AudioClip clip = new AudioClip(resource.toExternalForm());
-            clip.setVolume(volume); // Aplicamos el volumen actual
+            clip.setVolume(sfxVolume);
             return clip;
         }
-        System.err.println("No se pudo encontrar el sonido: " + path);
         return null;
     }
 
-    public static void setVolume(double newVolume) {
-        volume = newVolume;
-        if (hoverSound != null) hoverSound.setVolume(volume);
-        if (confirmSound != null) confirmSound.setVolume(volume);
-        if (backSound != null) backSound.setVolume(volume);
+    // ==================== GESTIÓN DE SFX ====================
+
+    /**
+     * Ajusta el nivel de volumen global para los efectos de sonido.
+     * 
+     * @param volume Valor decimal entre 0.0 y 1.0.
+     */
+    public static void setSfxVolume(double volume) {
+        sfxVolume = volume;
+        if (hoverSound != null)
+            hoverSound.setVolume(sfxVolume);
+        if (confirmSound != null)
+            confirmSound.setVolume(sfxVolume);
+        if (backSound != null)
+            backSound.setVolume(sfxVolume);
     }
 
+    /** Reproduce el efecto de sonido de navegación (hover). */
     public static void playHover() {
-        if (hoverSound != null) hoverSound.play();
+        if (hoverSound != null)
+            hoverSound.play();
     }
 
+    /** Reproduce el efecto de sonido de confirmación. */
     public static void playConfirm() {
-        if (confirmSound != null) confirmSound.play();
+        if (confirmSound != null)
+            confirmSound.play();
     }
 
+    /** Reproduce el efecto de sonido de retroceso. */
     public static void playBack() {
-        if (backSound != null) backSound.play();
+        if (backSound != null)
+            backSound.play();
+    }
+
+    // ==================== GESTIÓN DE MÚSICA ====================
+
+    private static String currentMusicPath = "";
+    private static MediaPlayer[] gameMusicLayers = new MediaPlayer[7];
+    private static int currentLevel = -1;
+
+    /**
+     * Ajusta el nivel de volumen global para la música de fondo.
+     * 
+     * @param volume Valor decimal entre 0.0 y 1.0.
+     */
+    public static void setMusicVolume(double volume) {
+        musicVolume = volume;
+        if (musicPlayer != null) {
+            musicPlayer.setVolume(musicVolume);
+        }
+        // También actualizamos el volumen de las capas de la partida
+        updateGameMusicLevel(currentLevel);
+    }
+
+    /**
+     * Reproduce la música del menú en bucle.
+     */
+    public static void playMenuMusic() {
+        stopGameMusic(); // Por si venimos de una partida
+        playMusic("/assets/music/Menu/menu.mp3");
+    }
+
+    /**
+     * Carga y reproduce un archivo de música de forma cíclica.
+     * 
+     * @param path Ruta interna del recurso de audio.
+     */
+    public static void playMusic(String path) {
+        if (currentMusicPath.equals(path) && musicPlayer != null) {
+            return;
+        }
+
+        stopMusic();
+
+        try {
+            URL resource = SoundManager.class.getResource(path);
+            if (resource != null) {
+                currentMusicPath = path;
+                Media media = new Media(resource.toExternalForm());
+                musicPlayer = new MediaPlayer(media);
+                musicPlayer.setVolume(musicVolume);
+                musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+                musicPlayer.play();
+            }
+        } catch (Exception e) {
+            System.err.println("Error al reproducir música: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Inicia el sistema de música dinámica para la partida.
+     * Carga las 7 pistas y las pone a reproducir sincronizadas a volumen 0.
+     */
+    public static void startGameMusic() {
+        stopMusic(); // Paramos la música de menú
+        stopGameMusic(); // Limpiamos por si acaso
+
+        for (int i = 0; i < 7; i++) {
+            try {
+                String path = "/assets/music/Partida/" + (i + 1) + ".wav";
+                URL resource = SoundManager.class.getResource(path);
+                if (resource != null) {
+                    Media media = new Media(resource.toExternalForm());
+                    gameMusicLayers[i] = new MediaPlayer(media);
+                    gameMusicLayers[i].setVolume(0); // Empezamos en silencio
+                    gameMusicLayers[i].setCycleCount(MediaPlayer.INDEFINITE);
+                    gameMusicLayers[i].play();
+                }
+            } catch (Exception e) {
+                System.err.println("Error cargando capa " + (i + 1) + ": " + e.getMessage());
+            }
+        }
+        updateGameMusicLevel(1); // Empezamos con el nivel 1
+    }
+
+    /**
+     * Actualiza qué capa de música suena según la posición más avanzada.
+     * 
+     * @param maxPos La posición del jugador más adelantado.
+     */
+    public static void updateGameMusicByPosition(int maxPos) {
+        // Nivel = posición / 7 + 1 (máximo 7)
+        int level = (maxPos / 7) + 1;
+        if (level > 7)
+            level = 7;
+
+        if (level != currentLevel) {
+            updateGameMusicLevel(level);
+        }
+    }
+
+    private static Timeline fadeTimeline;
+
+    private static void updateGameMusicLevel(int level) {
+        currentLevel = level;
+
+        if (fadeTimeline != null) {
+            fadeTimeline.stop();
+        }
+
+        fadeTimeline = new Timeline();
+
+        for (int i = 0; i < 7; i++) {
+            if (gameMusicLayers[i] != null) {
+                // El nivel que toca sube a musicVolume, los demás bajan a 0.0
+                double targetVol = ((i + 1) == level) ? musicVolume : 0.0;
+
+                // Animamos la propiedad de volumen de cada MediaPlayer
+                KeyValue kv = new KeyValue(gameMusicLayers[i].volumeProperty(), targetVol);
+                KeyFrame kf = new KeyFrame(Duration.millis(1500), kv); // 1.5 segundos de fundido
+                fadeTimeline.getKeyFrames().add(kf);
+            }
+        }
+        fadeTimeline.play();
+    }
+
+    /**
+     * Detiene toda la música de la partida.
+     */
+    public static void stopGameMusic() {
+        for (int i = 0; i < 7; i++) {
+            if (gameMusicLayers[i] != null) {
+                gameMusicLayers[i].stop();
+                gameMusicLayers[i].dispose();
+                gameMusicLayers[i] = null;
+            }
+        }
+        currentLevel = -1;
+    }
+
+    /**
+     * Detiene por completo la música ambiental de los menús y libera sus recursos.
+     */
+    public static void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+            musicPlayer.dispose();
+            musicPlayer = null;
+            currentMusicPath = "";
+        }
     }
 }

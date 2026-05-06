@@ -3,14 +3,35 @@ package controlador;
 import modelo.Jugador;
 
 /**
- * Gestiona las guerras de bolas de nieve entre dos jugadores.
+ * Gestiona la resolución de conflictos (Guerra de bolas de nieve) entre
+ * jugadores.
+ * 
+ * <p>
+ * Cuando dos jugadores coinciden en la misma casilla, se dispara una "Guerra".
+ * La resolución se basa en la cantidad de bolas de nieve que posee cada
+ * participante
+ * en su {@link modelo.Inventario}. El ganador mantiene su posición, mientras
+ * que
+ * el perdedor es penalizado retrocediendo tantas casillas como la diferencia de
+ * bolas.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class Guerra {
 
     /**
-     * Inicia una guerra de bolas de nieve. El que más bolas tiene gana,
-     * y el perdedor retrocede la diferencia de casillas.
-     * Ambos jugadores gastan todas sus bolas al final.
+     * Inicia y resuelve una guerra de bolas de nieve entre dos jugadores.
+     * 
+     * <p>
+     * Se comparan las existencias de bolas de nieve. El jugador con menos bolas
+     * retrocede la diferencia. En caso de empate, ambos permanecen en la casilla.
+     * Al finalizar el combate, ambos jugadores agotan sus reservas de proyectiles.
+     * </p>
+     * 
+     * @param j1 El primer jugador (normalmente el que llega a la casilla).
+     * @param j2 El segundo jugador (el que ya ocupaba la casilla).
      */
     public void iniciarGuerra(Jugador j1, Jugador j2) {
         int bolasJ1 = j1.getInventario().getCantidad("BolaNieve");
@@ -34,7 +55,9 @@ public class Guerra {
     }
 
     /**
-     * Elimina todas las bolas de nieve del inventario del jugador.
+     * Vacía por completo el inventario de proyectiles de un jugador.
+     * 
+     * @param jugador El jugador al que se le retirarán las bolas de nieve.
      */
     private void limpiarBolas(Jugador jugador) {
         while (jugador.getInventario().getCantidad("BolaNieve") > 0) {

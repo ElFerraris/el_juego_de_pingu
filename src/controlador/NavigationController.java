@@ -17,53 +17,105 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 /**
- * NavigationController
+ * <h1>NavigationController</h1>
  * 
- * Gestiona el cambio de escenas (ventanas) en la aplicación.
- * Centraliza la carga de FXML para evitar repetir código en cada botón del menú.
+ * <p>
+ * El "cerebro" de la navegación de la aplicación. Centraliza la carga de
+ * archivos FXML,
+ * la gestión de escenas (Scenes) y el control de ventanas (Stages).
+ * </p>
+ * 
+ * <p>
+ * Sus responsabilidades principales incluyen:
+ * </p>
+ * <ul>
+ * <li>Cargar vistas con transiciones animadas (desplazamientos, fundidos).</li>
+ * <li>Gestionar la carga asíncrona del tablero para no bloquear la
+ * interfaz.</li>
+ * <li>Controlar el modo pantalla completa y los atajos de teclado
+ * globales.</li>
+ * <li>Aplicar efectos visuales y de sonido automáticos a los componentes de la
+ * interfaz.</li>
+ * </ul>
+ * 
+ * <h1>Observaciones</h1>
+ * 
+ * <p>
+ * Esta clase utiliza una cosa llamada Sobrecarga de Métodos (o Method
+ * Overloading en inglés). Donde
+ * basicamente creamos varios metodos con el mismo nombre pero con diferentes
+ * parametros, porque para
+ * java no es lo mismo metodo(5) que metodo("hola"), pudiendo gestionar muy
+ * biien ciertas cosas del
+ * proyecto.
+ * </p>
+ * 
+ * @author BadLabs©️
+ * @version 1.0
  */
 public class NavigationController {
 
-    // Rutas base para las vistas y el estilo
+    /** Ruta base dentro de los recursos donde se encuentran los archivos .fxml */
     private static final String VISTA_PATH = "/vista/";
+
+    /** Ruta del archivo CSS principal */
     private static final String CSS_PATH = "/vista/style.css";
+
+    /** Marca de tiempo para controlar el spam de teclas de pantalla completa */
     private static long lastToggleTime = 0;
-    private static final long TOGGLE_COOLDOWN = 300; // ms
+
+    /** Tiempo de espera (ms) entre cambios de pantalla completa */
+    private static final long TOGGLE_COOLDOWN = 300;
 
     /**
-     * Cierra la sesión, limpia el contexto y reinicia la aplicación desde el Login.
+     * Cierra la sesión, limpia el estado del juego y reinicia la aplicación.
+     * 
+     * @param currentStage El Stage actual que debe cerrarse.
      */
     public static void logoutAndRestart(Stage currentStage) {
         System.out.println("► Reiniciando aplicación (Logout)...");
-        
-        // 1. Limpiamos el contexto global
-        GameContext.getInstance().reset();
-        
-        // 2. Cerramos la ventana actual
-        currentStage.close();
-        
-        // 3. Abrimos una nueva ventana desde cero usando la lógica de Main
-        Platform.runLater(() -> {
-            try {
-                Stage newStage = new Stage();
-                newStage.setResizable(false); // <--- DESACTIVAR REDIMENSIÓN
-                new aplicacion.Main().start(newStage);
-            } catch (Exception e) {
-                System.err.println("Error al reiniciar la aplicación: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
-    }
 
-    public enum Direction {
-        LEFT, RIGHT, UP, DOWN, FORWARD, BACKWARD, TO_BOARD, NONE
+        // 1. Limpiamos el contexto global para borrar jugadores, partida actual, etc.
+        GameContext.getInstance().reset();
+
+        // 2. Cerramos la ventana de juego actual
+        currentStage.close();
+
+        // 3. Lanzamos una nueva instancia de la aplicación directamente
+        try {
+            Stage newStage = new Stage();
+            newStage.setResizable(false);
+            new aplicacion.Main().start(newStage);
+        } catch (Exception e) {
+            System.err.println("Error al reiniciar la aplicación: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
-     * Navega a una escena usando el ActionEvent de un botón con una transición.
+     * Direcciones posibles para las transiciones entre pantallas.
      */
-    public static void navigateTo(ActionEvent event, String fxmlFile, Direction dir) {
+    public static class Direction {
+        public static final int LEFT = 0;
+        public static final int RIGHT = 1;
+        public static final int UP = 2;
+        public static final int DOWN = 3;
+        public static final int FORWARD = 4;
+        public static final int BACKWARD = 5;
+        public static final int TO_BOARD = 6;
+        public static final int NONE = 7;
+    }
+
+    /**
+     * Cambia a una nueva escena con una transición animada.
+     * 
+     * @param event    El evento del botón que disparó la navegación.
+     * @param fxmlFile Nombre del archivo .fxml (ej: "MainMenuView.fxml").
+     * @param dir      La dirección de la animación.
+     */
+    public static void navigateTo(ActionEvent event, String fxmlFile, int dir) {
         try {
+            // Obtenemos la ventana (Stage) a partir del componente que disparó el evento
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             loadAndSetWithTransition(stage, fxmlFile, dir);
         } catch (IOException e) {
@@ -73,14 +125,22 @@ public class NavigationController {
     }
 
     /**
-     * Navega a una escena usando el ActionEvent de un botón.
+     * Cambia a una nueva escena sin transición animada.
+     * 
+     * @param event    El evento del botón que disparó la navegación.
+     * @param fxmlFile Nombre del archivo .fxml.
      */
     public static void navigateTo(ActionEvent event, String fxmlFile) {
         navigateTo(event, fxmlFile, Direction.NONE);
     }
 
     /**
-     * Sobrecarga para decidir si queremos pantalla completa o no (sin transición por defecto).
+     * Navega a una escena permitiendo forzar el modo pantalla completa.
+     * 
+     * @param event      El evento del botón.
+     * @param fxmlFile   Nombre del archivo .fxml.
+     * @param fullScreen True para activar pantalla completa, false para modo
+     *                   ventana.
      */
     public static void navigateTo(ActionEvent event, String fxmlFile, boolean fullScreen) {
         try {
@@ -93,14 +153,17 @@ public class NavigationController {
     }
 
     /**
-     * Navega a una escena usando directamente el Stage.
+     * Navega a una escena directamente usando el Stage (sin evento de botón).
+     * 
+     * @param stage    La ventana principal.
+     * @param fxmlFile Nombre del archivo .fxml.
      */
     public static void navigateTo(Stage stage, String fxmlFile) {
-        navigateTo(stage, fxmlFile, true);
+        navigateTo(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
     }
 
     /**
-     * Sobrecarga para decidir si queremos pantalla completa o no.
+     * Navega a una escena usando el Stage y definiendo el modo de pantalla.
      */
     public static void navigateTo(Stage stage, String fxmlFile, boolean fullScreen) {
         try {
@@ -112,278 +175,285 @@ public class NavigationController {
     }
 
     /**
-     * Carga el tablero de forma asíncrona para evitar que el GIF se congele.
+     * Carga el tablero de forma síncrona.
+     * 
+     * <p>
+     * NOTA: Se ha eliminado la carga asíncrona por requisitos del proyecto.
+     * </p>
+     * 
+     * @param event    El evento que dispara la carga.
+     * @param fxmlFile El archivo del tablero.
      */
     public static void navigateToBoardAsync(ActionEvent event, String fxmlFile) {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        showLoading(stage.getScene());
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            String fullPath = VISTA_PATH + fxmlFile;
+            FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
+            Parent root = loader.load();
 
-        // Usamos un retraso mínimo para permitir que el GIF empiece a animarse
-        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.millis(150));
-        pause.setOnFinished(e -> {
-            javafx.concurrent.Task<Parent> loadTask = new javafx.concurrent.Task<>() {
-                @Override
-                protected Parent call() throws Exception {
-                    String fullPath = VISTA_PATH + fxmlFile;
-                    FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
-                    return loader.load();
-                }
-            };
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
+            ensureCssLoaded(scene);
+            applyGlobalEffects(root, fxmlFile);
 
-            loadTask.setOnSucceeded(workerEvent -> {
-                Parent root = loadTask.getValue();
-                Scene scene = stage.getScene();
-                scene.setRoot(root);
-                ensureCssLoaded(scene);
-                applyGlobalEffects(root, fxmlFile);
-                
-                // Aplicar FS si está en opciones
-                stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
-                setupGlobalHotkeys(scene);
-                System.out.println("► Tablero cargado asíncronamente.");
-            });
-
-            loadTask.setOnFailed(workerEvent -> {
-                hideLoading();
-                System.err.println("► Error en carga asíncrona: " + loadTask.getException().getMessage());
-                loadTask.getException().printStackTrace();
-            });
-
-            new Thread(loadTask).start();
-        });
-        pause.play();
-    }
-
-    private static void loadAndSetWithTransition(Stage stage, String fxmlFile, Direction dir) throws IOException {
-        if (dir == Direction.NONE) {
-            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
+            stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
+            setupGlobalHotkeys(scene);
+            System.out.println("► Tablero cargado síncronamente.");
+        } catch (Exception e) {
+            System.err.println("► Error en carga síncrona: " + e.getMessage());
+            e.printStackTrace();
         }
-
-        String fullPath = VISTA_PATH + fxmlFile;
-        System.out.println("► Cargando escena con transición: " + fullPath);
-        
-        FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
-        Parent newRoot = loader.load();
-        Scene scene = stage.getScene();
-
-        // Ahora permitimos cualquier Pane (StackPane, BorderPane, etc.) para la animación
-        if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane) || !(newRoot instanceof javafx.scene.layout.Pane)) {
-            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
-        }
-
-        javafx.scene.layout.Pane currentRoot = (javafx.scene.layout.Pane) scene.getRoot();
-        javafx.scene.layout.Pane nextRoot = (javafx.scene.layout.Pane) newRoot;
-
-        // Comprobamos si ambos tienen el mismo tipo de fondo (por la clase CSS)
-        boolean sameBg = currentRoot.getStyleClass().contains("root-plain-bg") && 
-                        nextRoot.getStyleClass().contains("root-plain-bg");
-
-        if (!sameBg) {
-            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
-        }
-
-        // Aseguramos que el CSS esté cargado en la escena
-        ensureCssLoaded(scene);
-
-        // Si es hacia el tablero, no extraemos el "glass-panel" para no romper el BorderPane
-        if (dir == Direction.TO_BOARD) {
-            // Animamos la raíz completa del tablero
-            currentRoot.getChildren().add(newRoot);
-            newRoot.setOpacity(0);
-            applyGlobalEffects(newRoot, fxmlFile);
-            
-            // Buscamos el contenido viejo para deslizarlo
-            Node oldContentToSlide = null;
-            for (Node n : currentRoot.getChildren()) {
-                if (n.getStyleClass().contains("glass-panel")) {
-                    oldContentToSlide = n;
-                    break;
-                }
-            }
-            
-            double height = scene.getHeight();
-            ParallelTransition pt = new ParallelTransition();
-            pt.setInterpolator(Interpolator.EASE_BOTH);
-            
-            // El menú cae
-            if (oldContentToSlide != null) {
-                TranslateTransition slideDown = new TranslateTransition(Duration.millis(500), oldContentToSlide);
-                slideDown.setToY(height);
-                pt.getChildren().add(slideDown);
-            }
-            
-            // El tablero funde
-            FadeTransition fadeIn = new FadeTransition(Duration.millis(600), newRoot);
-            fadeIn.setToValue(1.0);
-            pt.getChildren().add(fadeIn);
-            
-            pt.setOnFinished(e -> {
-                currentRoot.getChildren().remove(newRoot);
-                scene.setRoot(newRoot);
-                newRoot.setOpacity(1.0);
-                newRoot.layout(); // Forzamos recalculado de layout
-            });
-            pt.play();
-            return;
-        }
-
-        // --- LÓGICA ESTÁNDAR PARA MENÚS (glass-panel) ---
-        // Buscamos el panel de contenido ("glass-panel")
-        Node oldContent = null;
-        for (Node n : currentRoot.getChildren()) {
-            if (n.getStyleClass().contains("glass-panel")) {
-                oldContent = n;
-                break;
-            }
-        }
-
-        Node newContent = null;
-        for (Node n : nextRoot.getChildren()) {
-            if (n.getStyleClass().contains("glass-panel")) {
-                newContent = n;
-                break;
-            }
-        }
-
-        if (oldContent == null || newContent == null) {
-            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
-            return;
-        }
-
-        // Preparamos la escena para el nuevo contenido
-        currentRoot.getChildren().add(newContent);
-        applyGlobalEffects(newContent, fxmlFile);
-
-        double width = scene.getWidth();
-        double height = scene.getHeight();
-
-        // Configuración de las animaciones (usando ParallelTransition para combinar efectos)
-        ParallelTransition pt = new ParallelTransition();
-        pt.setInterpolator(Interpolator.EASE_BOTH);
-
-        switch (dir) {
-            case LEFT:
-                newContent.setTranslateX(width);
-                TranslateTransition outL = new TranslateTransition(Duration.millis(350), oldContent);
-                outL.setToX(-width);
-                TranslateTransition inL = new TranslateTransition(Duration.millis(350), newContent);
-                inL.setToX(0);
-                pt.getChildren().addAll(outL, inL);
-                break;
-            case RIGHT:
-                newContent.setTranslateX(-width);
-                TranslateTransition outR = new TranslateTransition(Duration.millis(350), oldContent);
-                outR.setToX(width);
-                TranslateTransition inR = new TranslateTransition(Duration.millis(350), newContent);
-                inR.setToX(0);
-                pt.getChildren().addAll(outR, inR);
-                break;
-            case FORWARD:
-                newContent.setTranslateY(height);
-                newContent.setOpacity(0);
-                
-                TranslateTransition slideUp = new TranslateTransition(Duration.millis(400), newContent);
-                slideUp.setToY(0);
-                
-                FadeTransition fadeInNew = new FadeTransition(Duration.millis(400), newContent);
-                fadeInNew.setToValue(1.0);
-                
-                FadeTransition fadeOutOld = new FadeTransition(Duration.millis(300), oldContent);
-                fadeOutOld.setToValue(0.0);
-                
-                pt.getChildren().addAll(slideUp, fadeInNew, fadeOutOld);
-                break;
-            case BACKWARD:
-                newContent.setOpacity(0);
-                newContent.setTranslateY(0);
-                
-                TranslateTransition slideDown = new TranslateTransition(Duration.millis(400), oldContent);
-                slideDown.setToY(height);
-                
-                FadeTransition fadeInOlder = new FadeTransition(Duration.millis(400), newContent);
-                fadeInOlder.setToValue(1.0);
-                
-                pt.getChildren().addAll(slideDown, fadeInOlder);
-                break;
-            case UP:
-                newContent.setTranslateY(height);
-                TranslateTransition outU = new TranslateTransition(Duration.millis(350), oldContent);
-                outU.setToY(-height);
-                TranslateTransition inU = new TranslateTransition(Duration.millis(350), newContent);
-                inU.setToY(0);
-                pt.getChildren().addAll(outU, inU);
-                break;
-            case DOWN:
-                newContent.setTranslateY(-height);
-                TranslateTransition outD = new TranslateTransition(Duration.millis(350), oldContent);
-                outD.setToY(height);
-                TranslateTransition inD = new TranslateTransition(Duration.millis(350), newContent);
-                inD.setToY(0);
-                pt.getChildren().addAll(outD, inD);
-                break;
-            case TO_BOARD:
-                // Esta rama ya no se debería alcanzar por el 'return' de arriba, 
-                // pero la mantenemos por coherencia o por si se refactoriza.
-                break;
-            default:
-                break;
-        }
-
-        final Node contentToMoveBack = newContent;
-        final Node contentToRemove = oldContent;
-        pt.setOnFinished(e -> {
-            // Caso estándar de menús (glass-panel)
-            currentRoot.getChildren().remove(contentToMoveBack);
-            currentRoot.getChildren().remove(contentToRemove);
-            
-            contentToMoveBack.setTranslateX(0);
-            contentToMoveBack.setTranslateY(0);
-            contentToMoveBack.setOpacity(1.0);
-            nextRoot.getChildren().add(contentToMoveBack);
-            
-            scene.setRoot(nextRoot);
-            nextRoot.layout();
-        });
-        pt.play();
     }
 
     /**
-     * Carga el archivo FXML y lo pone en la escena actual.
+     * Lógica interna para manejar las transiciones animadas entre escenas.
+     * 
+     * <p>
+     * Detecta si las vistas usan la estructura de "glass-panel" para animar
+     * solo el contenido interno y no el fondo.
+     * </p>
+     * 
+     * @param stage    La ventana principal en la que se realiza la transición.
+     * @param fxmlFile Nombre del archivo de la vista destino a cargar.
+     * @param dir      La dirección de la transición (ej. Direction.RIGHT).
+     * @throws IOException Si ocurre un error al intentar leer el archivo FXML de
+     *                     destino.
+     */
+    private static void loadAndSetWithTransition(Stage stage, String fxmlFile, int dir) throws IOException {
+        // Si no hay dirección, cargamos de forma normal
+        if (dir == Direction.NONE) {
+            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
+        } else {
+            String fullPath = VISTA_PATH + fxmlFile;
+            System.out.println("► Cargando escena con transición: " + fullPath);
+
+            FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
+            Parent newRoot = loader.load();
+            Scene scene = stage.getScene();
+
+            // Verificamos que tanto la escena actual como la nueva sean válidas para animar
+            if (scene == null || !(scene.getRoot() instanceof javafx.scene.layout.Pane)
+                    || !(newRoot instanceof javafx.scene.layout.Pane)) {
+                loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
+            } else {
+                javafx.scene.layout.Pane currentRoot = (javafx.scene.layout.Pane) scene.getRoot();
+                javafx.scene.layout.Pane nextRoot = (javafx.scene.layout.Pane) newRoot;
+
+                // Comprobamos si ambos tienen el mismo tipo de fondo (por la clase CSS) para
+                // evitar saltos visuales
+                boolean sameBg = currentRoot.getStyleClass().contains("root-plain-bg") &&
+                        nextRoot.getStyleClass().contains("root-plain-bg");
+
+                if (!sameBg) {
+                    loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
+                } else {
+                    ensureCssLoaded(scene);
+
+                    // TRANSICIÓN ESPECIAL: Entrada al Tablero
+                    if (dir == Direction.TO_BOARD) {
+                        currentRoot.getChildren().add(newRoot);
+                        newRoot.setOpacity(0);
+                        applyGlobalEffects(newRoot, fxmlFile);
+
+                        // Buscamos el contenido viejo para deslizarlo hacia abajo (el menú "cae")
+                        Node oldContentToSlide = null;
+                        for (Node n : currentRoot.getChildren()) {
+                            if (oldContentToSlide == null && n.getStyleClass().contains("glass-panel")) {
+                                oldContentToSlide = n;
+                            }
+                        }
+
+                        double height = scene.getHeight();
+                        ParallelTransition pt = new ParallelTransition();
+                        pt.setInterpolator(Interpolator.EASE_BOTH);
+
+                        if (oldContentToSlide != null) {
+                            TranslateTransition slideDown = new TranslateTransition(Duration.millis(500),
+                                    oldContentToSlide);
+                            slideDown.setToY(height);
+                            pt.getChildren().add(slideDown);
+                        }
+
+                        // El tablero aparece con un fundido suave
+                        FadeTransition fadeIn = new FadeTransition(Duration.millis(600), newRoot);
+                        fadeIn.setToValue(1.0);
+                        pt.getChildren().add(fadeIn);
+
+                        pt.setOnFinished(e -> {
+                            currentRoot.getChildren().remove(newRoot);
+                            scene.setRoot(newRoot);
+                            newRoot.setOpacity(1.0);
+                            newRoot.layout();
+                        });
+                        pt.play();
+                    } else {
+                        // --- LÓGICA ESTÁNDAR PARA MENÚS (Estructura glass-panel) ---
+                        Node oldContent = null;
+                        for (Node n : currentRoot.getChildren()) {
+                            if (oldContent == null && n.getStyleClass().contains("glass-panel")) {
+                                oldContent = n;
+                            }
+                        }
+
+                        Node newContent = null;
+                        for (Node n : nextRoot.getChildren()) {
+                            if (newContent == null && n.getStyleClass().contains("glass-panel")) {
+                                newContent = n;
+                            }
+                        }
+
+                        // Si no encontramos los paneles internos, cargamos sin animación
+                        if (oldContent == null || newContent == null) {
+                            loadAndSet(stage, fxmlFile, util.SettingsManager.getInstance().isFullscreen());
+                        } else {
+                            // Añadimos el nuevo contenido temporalmente a la escena actual para animarlo
+                            currentRoot.getChildren().add(newContent);
+                            applyGlobalEffects(newContent, fxmlFile);
+
+                            double width = scene.getWidth();
+                            double height = scene.getHeight();
+
+                            ParallelTransition pt = new ParallelTransition();
+                            pt.setInterpolator(Interpolator.EASE_BOTH);
+
+                            // Definimos las animaciones según la dirección solicitada
+                            switch (dir) {
+                                case Direction.LEFT:
+                                    newContent.setTranslateX(width);
+                                    TranslateTransition outL = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
+                                    outL.setToX(-width);
+                                    TranslateTransition inL = new TranslateTransition(Duration.millis(350), newContent);
+                                    inL.setToX(0);
+                                    pt.getChildren().addAll(outL, inL);
+                                    break;
+                                case Direction.RIGHT:
+                                    newContent.setTranslateX(-width);
+                                    TranslateTransition outR = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
+                                    outR.setToX(width);
+                                    TranslateTransition inR = new TranslateTransition(Duration.millis(350), newContent);
+                                    inR.setToX(0);
+                                    pt.getChildren().addAll(outR, inR);
+                                    break;
+                                case Direction.FORWARD:
+                                    newContent.setTranslateY(height);
+                                    newContent.setOpacity(0);
+                                    TranslateTransition slideUp = new TranslateTransition(Duration.millis(400),
+                                            newContent);
+                                    slideUp.setToY(0);
+                                    FadeTransition fadeInNew = new FadeTransition(Duration.millis(400), newContent);
+                                    fadeInNew.setToValue(1.0);
+                                    FadeTransition fadeOutOld = new FadeTransition(Duration.millis(300), oldContent);
+                                    fadeOutOld.setToValue(0.0);
+                                    pt.getChildren().addAll(slideUp, fadeInNew, fadeOutOld);
+                                    break;
+                                case Direction.BACKWARD:
+                                    newContent.setOpacity(0);
+                                    newContent.setTranslateY(0);
+                                    TranslateTransition slideDown = new TranslateTransition(Duration.millis(400),
+                                            oldContent);
+                                    slideDown.setToY(height);
+                                    FadeTransition fadeInOlder = new FadeTransition(Duration.millis(400), newContent);
+                                    fadeInOlder.setToValue(1.0);
+                                    pt.getChildren().addAll(slideDown, fadeInOlder);
+                                    break;
+                                case Direction.UP:
+                                    newContent.setTranslateY(height);
+                                    TranslateTransition outU = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
+                                    outU.setToY(-height);
+                                    TranslateTransition inU = new TranslateTransition(Duration.millis(350), newContent);
+                                    inU.setToY(0);
+                                    pt.getChildren().addAll(outU, inU);
+                                    break;
+                                case Direction.DOWN:
+                                    newContent.setTranslateY(-height);
+                                    TranslateTransition outD = new TranslateTransition(Duration.millis(350),
+                                            oldContent);
+                                    outD.setToY(height);
+                                    TranslateTransition inD = new TranslateTransition(Duration.millis(350), newContent);
+                                    inD.setToY(0);
+                                    pt.getChildren().addAll(outD, inD);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            final Node contentToMoveBack = newContent;
+                            final Node contentToRemove = oldContent;
+                            pt.setOnFinished(e -> {
+                                // Al terminar la animación, limpiamos los nodos temporales y cambiamos el Root
+                                // de la escena
+                                currentRoot.getChildren().remove(contentToMoveBack);
+                                currentRoot.getChildren().remove(contentToRemove);
+
+                                contentToMoveBack.setTranslateX(0);
+                                contentToMoveBack.setTranslateY(0);
+                                contentToMoveBack.setOpacity(1.0);
+                                nextRoot.getChildren().add(contentToMoveBack);
+
+                                scene.setRoot(nextRoot);
+                                nextRoot.layout();
+                            });
+                            pt.play();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Carga física del archivo FXML y configuración inicial de la escena.
+     * 
+     * <p>
+     * Este método es la base de toda la carga. Se asegura de:
+     * </p>
+     * <ul>
+     * <li>Cargar el FXML.</li>
+     * <li>Configurar o actualizar la escena del Stage.</li>
+     * <li>Limpiar y reaplicar hojas de estilo.</li>
+     * <li>Configurar atajos de teclado y persistencia de pantalla completa.</li>
+     * <li>Aplicar la resolución configurada si no estamos en pantalla
+     * completa.</li>
+     * </ul>
+     * 
+     * @param stage      La ventana (Stage) donde se establecerá la escena.
+     * @param fxmlFile   Nombre del archivo de la vista a cargar.
+     * @param fullScreen Determina si la ventana debe configurarse en modo pantalla
+     *                   completa.
+     * @throws IOException Si ocurre un error leyendo el archivo FXML o construyendo
+     *                     su jerarquía.
      */
     private static void loadAndSet(Stage stage, String fxmlFile, boolean fullScreen) throws IOException {
         String fullPath = VISTA_PATH + fxmlFile;
         System.out.println("► Cargando escena: " + fullPath);
-        
+
         FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
         Parent root = loader.load();
-        
+
         Scene scene = stage.getScene();
         if (scene == null) {
             scene = new Scene(root);
             stage.setScene(scene);
         } else {
-            // LIMPIEZA DE ESTILOS PREVIOS
+            // Limpiamos estilos para evitar acumulación al cambiar de vista
             scene.getStylesheets().clear();
             scene.setRoot(root);
         }
 
         ensureCssLoaded(scene);
         applyGlobalEffects(root, fxmlFile);
-        
-        // CONFIGURAR HOTKEYS GLOBALES (F / F11 para Fullscreen)
         setupGlobalHotkeys(scene);
-        
-        // APLICAR CONFIGURACIÓN GLOBAL
+
         util.SettingsManager sm = util.SettingsManager.getInstance();
         stage.setFullScreen(fullScreen);
-        
-        // Listener para PERSISTIR el cambio de pantalla completa
+
+        // Listener para sincronizar el estado de pantalla completa con el archivo de
+        // configuración
         if (stage.getUserData() == null || !stage.getUserData().equals("LISTENER_ADDED")) {
             stage.fullScreenProperty().addListener((obs, wasFull, isFull) -> {
-                // Sincronizar siempre el manager con el estado real del Stage
                 if (sm.isFullscreen() != isFull) {
                     sm.setFullscreen(isFull);
                     sm.save();
@@ -393,51 +463,70 @@ public class NavigationController {
             stage.setUserData("LISTENER_ADDED");
         }
 
+        // Si no estamos en pantalla completa, aplicamos la resolución guardada en
+        // opciones
         if (!isFullWindowed(stage)) {
             applyResolution(stage, sm);
         }
     }
 
     /**
-     * Alterna el modo pantalla completa del Stage y lo guarda en preferencias.
+     * Alterna entre modo ventana y pantalla completa.
+     * 
+     * @param stage La ventana a modificar.
      */
     public static void toggleFullscreen(Stage stage) {
-        if (stage == null) return;
-        boolean newState = !stage.isFullScreen();
-        stage.setFullScreen(newState);
-        
-        // El listener añadido en loadAndSet se encargará de guardar en SettingsManager
+        if (stage != null) {
+            boolean newState = !stage.isFullScreen();
+            stage.setFullScreen(newState);
+        }
     }
 
     /**
-     * Configura los atajos de teclado globales para una escena.
-     * Evita duplicados comprobando una propiedad personalizada en la escena.
+     * Configura los atajos de teclado globales (F11) para la escena.
+     * 
+     * @param scene La escena donde se aplicarán los hotkeys.
      */
     public static void setupGlobalHotkeys(Scene scene) {
-        if (scene == null) return;
-        
-        // Evitar añadir múltiples veces el mismo filtro si se reutiliza la Scene
-        if (scene.getProperties().containsKey("HOTKEYS_ADDED")) return;
-        
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.F || event.getCode() == KeyCode.F11) {
-                long now = System.currentTimeMillis();
-                if (now - lastToggleTime > TOGGLE_COOLDOWN) {
-                    lastToggleTime = now;
-                    Stage stage = (Stage) scene.getWindow();
-                    toggleFullscreen(stage);
-                }
-                event.consume();
+        if (scene != null) {
+            // Evitamos añadir el filtro más de una vez a la misma Scene
+            if (!scene.getProperties().containsKey("HOTKEYS_ADDED")) {
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                    if (event.getCode() == KeyCode.F11) {
+                        long now = System.currentTimeMillis();
+                        // Control de spam para evitar parpadeos
+                        if (now - lastToggleTime > TOGGLE_COOLDOWN) {
+                            lastToggleTime = now;
+                            Stage stage = (Stage) scene.getWindow();
+                            toggleFullscreen(stage);
+                        }
+                        event.consume();
+                    }
+                });
+
+                scene.getProperties().put("HOTKEYS_ADDED", true);
             }
-        });
-        
-        scene.getProperties().put("HOTKEYS_ADDED", true);
+        }
     }
 
+    /**
+     * Verifica si la ventana está actualmente en pantalla completa.
+     * 
+     * @param stage La ventana a comprobar.
+     * @return true si la ventana se encuentra en pantalla completa, false en caso
+     *         contrario.
+     */
     private static boolean isFullWindowed(Stage stage) {
         return stage.isFullScreen();
     }
 
+    /**
+     * Aplica la resolución de pantalla guardada en las preferencias.
+     * 
+     * @param stage La ventana a la que se le aplicará la resolución.
+     * @param sm    Instancia del gestor de ajustes para extraer la resolución
+     *              deseada.
+     */
     private static void applyResolution(Stage stage, util.SettingsManager sm) {
         String[] dimensions = sm.getResolution().split("x");
         try {
@@ -445,52 +534,76 @@ public class NavigationController {
             stage.setHeight(Double.parseDouble(dimensions[1]));
             stage.centerOnScreen();
         } catch (Exception e) {
+            // Silenciamos errores de parseo de resolución
         }
     }
 
     /**
-     * Garantiza que el archivo de estilos principal esté cargado en la escena.
+     * Asegura que el archivo CSS principal esté cargado en la escena.
+     * 
+     * @param scene La escena en la que se inyectará la hoja de estilos global.
      */
     private static void ensureCssLoaded(Scene scene) {
-        if (scene == null) return;
-        try {
-            String cssPath = NavigationController.class.getResource(CSS_PATH).toExternalForm();
-            if (!scene.getStylesheets().contains(cssPath)) {
-                scene.getStylesheets().add(cssPath);
+        if (scene != null) {
+            try {
+                String cssPath = NavigationController.class.getResource(CSS_PATH).toExternalForm();
+                if (!scene.getStylesheets().contains(cssPath)) {
+                    scene.getStylesheets().add(cssPath);
+                }
+            } catch (Exception e) {
+                System.err.println("Error cargando CSS: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error cargando CSS: " + e.getMessage());
         }
     }
 
     /**
-     * Busca elementos interactivos en la nueva escena y les pone animaciones y sonidos.
+     * Aplica automáticamente animaciones de hover y sonidos a todos los botones de
+     * una vista.
+     * 
+     * <p>
+     * Este método usa selectores CSS (.button, .add-player-button, etc.) para
+     * inyectar
+     * comportamiento sin tener que escribir código en cada controlador.
+     * </p>
+     * 
+     * @param root     El nodo raíz de la vista (Parent) a analizar.
+     * @param fxmlFile Nombre del archivo FXML para comprobar exclusiones de sonido
+     *                 en ciertas pantallas.
      */
     private static void applyGlobalEffects(Parent root, String fxmlFile) {
-        if (root == null) return;
+        if (root != null) {
+            // Desactivamos sonidos en pantallas específicas para evitar ruidos molestos
+            boolean menuSoundsEnabled = fxmlFile != null &&
+                    !fxmlFile.equalsIgnoreCase("LoginView.fxml") &&
+                    !fxmlFile.equalsIgnoreCase("TableroJuego.fxml") &&
+                    !fxmlFile.equalsIgnoreCase("Intro.fxml");
 
-        // Filtramos para NO aplicar estos sonidos en Login o Tablero
-        boolean menuSoundsEnabled = fxmlFile != null && 
-                                   !fxmlFile.equalsIgnoreCase("LoginView.fxml") && // Ajustar según nombre real
-                                   !fxmlFile.equalsIgnoreCase("TableroJuego.fxml") &&
-                                   !fxmlFile.equalsIgnoreCase("Intro.fxml");
+            // Buscamos todos los botones y aplicamos lógica
+            root.lookupAll(".button").forEach(node -> {
+                util.UIUtils.applyHoverAnimation(node);
+                if (menuSoundsEnabled)
+                    attachMenuSounds(node);
+            });
 
-        root.lookupAll(".button").forEach(node -> {
-            util.UIUtils.applyHoverAnimation(node);
-            if (menuSoundsEnabled) attachMenuSounds(node);
-        });
+            root.lookupAll(".remove-slot-button").forEach(node -> {
+                util.UIUtils.applyHoverAnimation(node);
+                if (menuSoundsEnabled)
+                    attachMenuSounds(node);
+            });
 
-        root.lookupAll(".remove-slot-button").forEach(node -> {
-            util.UIUtils.applyHoverAnimation(node);
-            if (menuSoundsEnabled) attachMenuSounds(node);
-        });
-
-        root.lookupAll(".add-player-button").forEach(node -> {
-            util.UIUtils.applyHoverAnimation(node);
-            if (menuSoundsEnabled) attachMenuSounds(node);
-        });
+            root.lookupAll(".add-player-button").forEach(node -> {
+                util.UIUtils.applyHoverAnimation(node);
+                if (menuSoundsEnabled)
+                    attachMenuSounds(node);
+            });
+        }
     }
 
+    /**
+     * Adjunta los sonidos de clic a un nodo basándose en su texto o clase CSS.
+     * 
+     * @param node El componente visual de la interfaz de usuario.
+     */
     private static void attachMenuSounds(Node node) {
         node.setOnMouseClicked(e -> {
             String text = "";
@@ -498,30 +611,35 @@ public class NavigationController {
                 text = ((javafx.scene.control.Button) node).getText().toUpperCase();
             }
 
-            // CASOS ESPECIALES POR TEXTO (Prioridad)
+            // --- REGLAS DE SONIDO ---
+            // Acciones afirmativas / avance
             if (text.equals("SALIR") || text.contains("SÍ") || text.contains("CONFIRMAR")) {
                 util.SoundManager.playConfirm();
-            } 
+            }
+            // Acciones negativas / retroceso
             else if (text.contains("VOLVER") || text.contains("ATRÁS") || text.contains("NO")) {
                 util.SoundManager.playBack();
             }
-            // CASOS POR CLASE CSS (Segunda opción)
-            else if (node.getStyleClass().contains("button-primary") || 
-                     node.getStyleClass().contains("button-danger") ||
-                     node.getStyleClass().contains("add-player-button")) {
+            // Por clase CSS si no hay texto claro
+            else if (node.getStyleClass().contains("button-primary") ||
+                    node.getStyleClass().contains("button-danger") ||
+                    node.getStyleClass().contains("add-player-button")) {
                 util.SoundManager.playConfirm();
-            } 
-            else if (node.getStyleClass().contains("button-secondary") || 
-                       node.getStyleClass().contains("remove-slot-button")) {
+            } else if (node.getStyleClass().contains("button-secondary") ||
+                    node.getStyleClass().contains("remove-slot-button")) {
                 util.SoundManager.playBack();
-            } 
-            else {
-                // Sonido por defecto si no tiene clase específica
+            } else {
                 util.SoundManager.playConfirm();
             }
         });
     }
 
+    /**
+     * Sobrecarga para aplicar efectos si el nodo es un Parent.
+     * 
+     * @param node     El nodo en el cual verificar si es del tipo Parent.
+     * @param fxmlFile Nombre de la vista, utilizado para condiciones de audio.
+     */
     private static void applyGlobalEffects(Node node, String fxmlFile) {
         if (node instanceof Parent) {
             applyGlobalEffects((Parent) node, fxmlFile);
@@ -529,15 +647,16 @@ public class NavigationController {
     }
 
     /**
-     * Muestra el GIF de carga en la escena actual.
+     * Muestra el overlay de carga.
+     * 
+     * @param scene La escena sobre la cual se desplegará el overlay (pantalla de
+     *              espera).
      */
     public static void showLoading(Scene scene) {
         LoadingOverlay.show(scene);
     }
 
-    /**
-     * Oculta el GIF de carga.
-     */
+    /** Oculta el overlay de carga. */
     public static void hideLoading() {
         LoadingOverlay.hide();
     }
