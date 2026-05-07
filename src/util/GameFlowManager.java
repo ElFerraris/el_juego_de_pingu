@@ -90,6 +90,28 @@ public class GameFlowManager {
     }
 
     /**
+     * Procesa efectos que ocurren mientras un jugador se desplaza (sin detenerse).
+     * Especialmente diseñado para el ataque de la Foca al pasar sobre otros pingüinos.
+     * 
+     * @param mover El jugador que se está moviendo.
+     * @param pos   La posición actual del paso de movimiento.
+     */
+    public void processPassingEffects(Jugador mover, int pos) {
+        // Solo la Foca ataca al pasar (golpe y robo de inventario)
+        if (mover instanceof Foca && pos > 0 && pos < Tablero.TAMANYO_TABLERO - 1) {
+            Foca foca = (Foca) mover;
+            for (Jugador p : jugadores) {
+                // Solo atacamos a pingüinos humanos (no a otras focas)
+                if (!(p instanceof Foca) && p.getPosicion() == pos) {
+                    ui.log("¡GOLPE! " + foca.getNombre() + " pasa sobre " + p.getNombre() + " y le roba medio inventario.");
+                    ui.notifyEvent("¡PIERDES MEDIO INVENTARIO!", p);
+                    foca.atacarJugador(p);
+                }
+            }
+        }
+    }
+
+    /**
      * Comprueba si el jugador debe iniciar una batalla (Guerra) tras aplicar los efectos.
      */
     public void checkCollision(Jugador jActual) {
