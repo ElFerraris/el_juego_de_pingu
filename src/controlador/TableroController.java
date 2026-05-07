@@ -991,6 +991,11 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 diceNumberLabel.setText(String.valueOf(pasosRestantes - 1));
                 util.SoundManager.playConfirm(); 
                 
+                // Procesar efectos al pasar (ej: ataque de la foca) - Solo si no es la casilla final
+                if (pasosRestantes - 1 > 0) {
+                    gameFlow.processPassingEffects(j, j.getPosicion());
+                }
+                
                 if (camera.isAutoMode()) {
                     camera.smoothCenterOnPlayer(j, 0.4);
                 }
