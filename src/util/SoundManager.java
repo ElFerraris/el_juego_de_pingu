@@ -36,6 +36,7 @@ public class SoundManager {
     private static AudioClip rompedizaSound;
     private static AudioClip trineoSound;
     private static AudioClip osoSound;
+    private static AudioClip latigoSound;
 
     private static MediaPlayer musicPlayer;
 
@@ -63,6 +64,7 @@ public class SoundManager {
             rompedizaSound = loadSound("/assets/sfx/partida/rompediza.wav");
             trineoSound = loadSound("/assets/sfx/partida/trineo.wav");
             osoSound = loadSound("/assets/sfx/partida/oso.wav");
+            latigoSound = loadSound("/assets/sfx/partida/latigo.wav");
         } catch (Exception e) {
             System.err.println("Error cargando SFX: " + e.getMessage());
         }
@@ -109,6 +111,8 @@ public class SoundManager {
             trineoSound.setVolume(sfxVolume);
         if (osoSound != null)
             osoSound.setVolume(sfxVolume);
+        if (latigoSound != null)
+            latigoSound.setVolume(sfxVolume);
     }
 
     /** Reproduce el efecto de sonido de navegación (hover). */
@@ -175,6 +179,12 @@ public class SoundManager {
     public static void playOso() {
         if (osoSound != null)
             osoSound.play();
+    }
+
+    /** Reproduce el sonido del látigo. */
+    public static void playLatigo() {
+        if (latigoSound != null)
+            latigoSound.play();
     }
 
     // ==================== GESTIÓN DE MÚSICA ====================

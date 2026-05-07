@@ -95,16 +95,23 @@ public class GameFlowManager {
                 String tipo = c.getTipo().replace("Casilla ", "");
                 
                 if (tipo.equals("ROMPEDIZAS") || tipo.equals("INTERROGANTE")) {
-                    String titulo = tipo.equals("ROMPEDIZAS") ? "SUELO INESTABLE" : "EVENTO ALEATORIO";
                     String mensaje = (logEfecto != null && logEfecto.contains(":")) 
                                      ? logEfecto.substring(logEfecto.indexOf(":") + 1).trim() 
                                      : logEfecto;
                     
                     if (tipo.equals("ROMPEDIZAS")) {
                         SoundManager.playRompediza();
-                        ui.playShakeAnimation(posAntes, () -> ui.showEventDialog(titulo, mensaje, () -> checkCollision(j), j));
+                        ui.playShakeAnimation(posAntes, () -> {
+                            if (mensaje != null && !mensaje.isEmpty()) {
+                                ui.notifyEvent(mensaje, j);
+                            }
+                            checkCollision(j);
+                        });
                     } else {
-                        ui.showEventDialog(titulo, mensaje, () -> checkCollision(j), j);
+                        if (mensaje != null && !mensaje.isEmpty()) {
+                            ui.notifyEvent(mensaje, j);
+                        }
+                        checkCollision(j);
                     }
                 } else {
                     checkCollision(j);
@@ -128,6 +135,7 @@ public class GameFlowManager {
             for (Jugador p : jugadores) {
                 // Solo atacamos a pingüinos humanos (no a otras focas)
                 if (!(p instanceof Foca) && p.getPosicion() == pos) {
+                    SoundManager.playLatigo();
                     ui.log("¡GOLPE! " + foca.getNombre() + " pasa sobre " + p.getNombre() + " y le roba medio inventario.");
                     ui.notifyEvent("¡PIERDES MEDIO INVENTARIO!", p);
                     foca.atacarJugador(p);
