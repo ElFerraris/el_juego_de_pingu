@@ -50,6 +50,21 @@ public class GameFlowManager {
         PauseTransition effectDelay = new PauseTransition(Duration.seconds(1));
         effectDelay.setOnFinished(ev -> {
             int posAntes = j.getPosicion();
+            
+            // Comprobar si hay colisión inmediata para decidir si sonar la casilla o no
+            boolean hayColisionInmediata = false;
+            for (Jugador p : jugadores) {
+                if (p != j && p.getPosicion() == posAntes) {
+                    hayColisionInmediata = true;
+                    // No hacemos break para estar seguros, pero con uno basta
+                }
+            }
+
+            Casilla cActual = tablero.getCasilla(posAntes);
+            if (!hayColisionInmediata && cActual != null && cActual.getTipo().toUpperCase().contains("INTERROGANTE")) {
+                SoundManager.playInterrogante();
+            }
+
             String logEfecto = tablero.aplicarEfectoCasilla(j);
             
             if (logEfecto != null && !logEfecto.isEmpty()) {
@@ -59,7 +74,12 @@ public class GameFlowManager {
             int posDespues = j.getPosicion();
 
             if (posAntes != posDespues) {
-                String tipo = tablero.getCasilla(posAntes).getTipo().replace("Casilla ", "").toUpperCase();
+                String tipoRaw = tablero.getCasilla(posAntes).getTipo().toUpperCase();
+                if (tipoRaw.contains("AGUJERO")) SoundManager.playAgujero();
+                else if (tipoRaw.contains("TRINEO")) SoundManager.playTrineo();
+                else if (tipoRaw.contains("OSO")) SoundManager.playOso();
+
+                String tipo = tipoRaw.replace("CASILLA ", "");
                 String msg = "¡" + tipo + "!";
                 
                 // Si es interrogante, intentamos mostrar el mensaje detallado (ej: Moto de Nieve)
@@ -81,6 +101,7 @@ public class GameFlowManager {
                                      : logEfecto;
                     
                     if (tipo.equals("ROMPEDIZAS")) {
+                        SoundManager.playRompediza();
                         ui.playShakeAnimation(posAntes, () -> ui.showEventDialog(titulo, mensaje, () -> checkCollision(j), j));
                     } else {
                         ui.showEventDialog(titulo, mensaje, () -> checkCollision(j), j);
@@ -130,8 +151,9 @@ public class GameFlowManager {
             }
 
             if (oponente != null) {
+                SoundManager.playWar();
                 ui.log("¡COLISIÓN en casilla " + jActual.getPosicion() + "!");
-                ui.notifyEvent("¡COLISIÓN!", jActual);
+                // Eliminamos la notificación efímera para no saturar, ya que viene el diálogo
                 resolveCombat(jActual, oponente);
             } else {
                 ui.finishTurn();
@@ -146,6 +168,11 @@ public class GameFlowManager {
         boolean esFoca = (atacante instanceof Foca || defensor instanceof Foca);
         String titulo = esFoca ? "ATAQUE FOCA" : "COMBATE";
         StringBuilder mensaje = new StringBuilder();
+        
+        // Variables para la acción diferida (animación)
+        Jugador aMover = null;
+        int pDesde = -1;
+        int pHasta = -1;
 
         if (esFoca) {
             Jugador humano = (atacante instanceof Foca) ? defensor : atacante;
@@ -165,7 +192,7 @@ public class GameFlowManager {
                     }
                 }
 
-                int posAntigua = humano.getPosicion();
+                pDesde = humano.getPosicion();
                 if (casillaAgujero != -1) {
                     humano.setPosicion(casillaAgujero);
                     mensaje.append(" RETROCEDE A CASILLA ").append(casillaAgujero);
@@ -173,7 +200,8 @@ public class GameFlowManager {
                     humano.setPosicion(0);
                     mensaje.append(" RETROCEDE AL INICIO");
                 }
-                ui.moveTokenDirect(humano, posAntigua, humano.getPosicion(), null);
+                pHasta = humano.getPosicion();
+                aMover = humano;
             }
         } else {
             int bolasAtacante = atacante.getInventario().getCantidad("BolaNieve");
@@ -184,18 +212,20 @@ public class GameFlowManager {
 
             if (bolasAtacante > bolasDefensor) {
                 int diff = bolasAtacante - bolasDefensor;
-                int posAntigua = defensor.getPosicion();
-                defensor.setPosicion(Math.max(0, posAntigua - diff));
+                pDesde = defensor.getPosicion();
+                defensor.setPosicion(Math.max(0, pDesde - diff));
                 mensaje.append("GANADOR: ").append(atacante.getNombre()).append(". ").append(defensor.getNombre())
-                        .append(" RETROCEDE ").append(posAntigua - defensor.getPosicion());
-                ui.moveTokenDirect(defensor, posAntigua, defensor.getPosicion(), null);
+                        .append(" RETROCEDE ").append(pDesde - defensor.getPosicion());
+                aMover = defensor;
+                pHasta = defensor.getPosicion();
             } else if (bolasDefensor > bolasAtacante) {
                 int diff = bolasDefensor - bolasAtacante;
-                int posAntigua = atacante.getPosicion();
-                atacante.setPosicion(Math.max(0, posAntigua - diff));
+                pDesde = atacante.getPosicion();
+                atacante.setPosicion(Math.max(0, pDesde - diff));
                 mensaje.append("GANADOR: ").append(defensor.getNombre()).append(". ").append(atacante.getNombre())
-                        .append(" RETROCEDE ").append(posAntigua - atacante.getPosicion());
-                ui.moveTokenDirect(atacante, posAntigua, atacante.getPosicion(), null);
+                        .append(" RETROCEDE ").append(pDesde - atacante.getPosicion());
+                aMover = atacante;
+                pHasta = atacante.getPosicion();
             } else {
                 mensaje.append("EMPATE: SIN MOVIMIENTO.");
             }
@@ -208,6 +238,14 @@ public class GameFlowManager {
         }
 
         ui.log(mensaje.toString().replace("\n", " | "));
-        ui.showEventDialog(titulo, mensaje.toString(), ui::finishTurn, atacante, defensor);
+        
+        // Si hay movimiento, esperamos a que termine para mostrar el diálogo final
+        if (aMover != null) {
+            ui.moveTokenDirect(aMover, pDesde, pHasta, () -> {
+                ui.showEventDialog(titulo, mensaje.toString(), ui::finishTurn, atacante, defensor);
+            });
+        } else {
+            ui.showEventDialog(titulo, mensaje.toString(), ui::finishTurn, atacante, defensor);
+        }
     }
 }

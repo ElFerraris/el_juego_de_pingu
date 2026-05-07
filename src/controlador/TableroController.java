@@ -1035,7 +1035,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             jumpAnim.setOnFinished(e -> {
                 // Sincronizamos el número al aterrizar
                 diceNumberLabel.setText(String.valueOf(pasosRestantes - 1));
-                util.SoundManager.playConfirm(); 
+                util.SoundManager.playSteps(); 
                 
                 // Procesar efectos al pasar (ej: ataque de la foca) - Solo si no es la casilla final
                 if (pasosRestantes - 1 > 0) {
@@ -1304,6 +1304,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
      */
     private void ejecutarTurnoCPU(Foca foca) {
         log("La CPU (" + foca.getNombre() + ") está pensando...");
+        util.SoundManager.playFocaTurn();
 
         PauseTransition delay = new PauseTransition(Duration.seconds(2));
         delay.setOnFinished(e -> {

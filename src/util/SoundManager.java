@@ -28,6 +28,14 @@ public class SoundManager {
     private static AudioClip hoverSound;
     private static AudioClip confirmSound;
     private static AudioClip backSound;
+    private static AudioClip stepsSound;
+    private static AudioClip focaTurnSound;
+    private static AudioClip warSound;
+    private static AudioClip interroganteSound;
+    private static AudioClip agujeroSound;
+    private static AudioClip rompedizaSound;
+    private static AudioClip trineoSound;
+    private static AudioClip osoSound;
 
     private static MediaPlayer musicPlayer;
 
@@ -47,6 +55,14 @@ public class SoundManager {
             hoverSound = loadSound("/assets/sfx/button-hover.wav");
             confirmSound = loadSound("/assets/sfx/button-confirm.wav");
             backSound = loadSound("/assets/sfx/button-back.wav");
+            stepsSound = loadSound("/assets/sfx/partida/sonido_pasos.wav");
+            focaTurnSound = loadSound("/assets/sfx/partida/sonido_foca.wav");
+            warSound = loadSound("/assets/sfx/partida/sonido_guerra.wav");
+            interroganteSound = loadSound("/assets/sfx/partida/sonido_interrogante.wav");
+            agujeroSound = loadSound("/assets/sfx/partida/agujero.wav");
+            rompedizaSound = loadSound("/assets/sfx/partida/rompediza.wav");
+            trineoSound = loadSound("/assets/sfx/partida/trineo.wav");
+            osoSound = loadSound("/assets/sfx/partida/oso.wav");
         } catch (Exception e) {
             System.err.println("Error cargando SFX: " + e.getMessage());
         }
@@ -77,6 +93,22 @@ public class SoundManager {
             confirmSound.setVolume(sfxVolume);
         if (backSound != null)
             backSound.setVolume(sfxVolume);
+        if (stepsSound != null)
+            stepsSound.setVolume(sfxVolume);
+        if (focaTurnSound != null)
+            focaTurnSound.setVolume(sfxVolume);
+        if (warSound != null)
+            warSound.setVolume(sfxVolume);
+        if (interroganteSound != null)
+            interroganteSound.setVolume(sfxVolume);
+        if (agujeroSound != null)
+            agujeroSound.setVolume(sfxVolume);
+        if (rompedizaSound != null)
+            rompedizaSound.setVolume(sfxVolume);
+        if (trineoSound != null)
+            trineoSound.setVolume(sfxVolume);
+        if (osoSound != null)
+            osoSound.setVolume(sfxVolume);
     }
 
     /** Reproduce el efecto de sonido de navegación (hover). */
@@ -95,6 +127,54 @@ public class SoundManager {
     public static void playBack() {
         if (backSound != null)
             backSound.play();
+    }
+
+    /** Reproduce el sonido de pasos al caminar. */
+    public static void playSteps() {
+        if (stepsSound != null)
+            stepsSound.play();
+    }
+
+    /** Reproduce el sonido temático de la foca. */
+    public static void playFocaTurn() {
+        if (focaTurnSound != null)
+            focaTurnSound.play();
+    }
+
+    /** Reproduce el sonido de inicio de guerra/combate. */
+    public static void playWar() {
+        if (warSound != null)
+            warSound.play();
+    }
+
+    /** Reproduce el sonido de caída en casilla interrogante. */
+    public static void playInterrogante() {
+        if (interroganteSound != null)
+            interroganteSound.play();
+    }
+
+    /** Reproduce el sonido de caída en agujero. */
+    public static void playAgujero() {
+        if (agujeroSound != null)
+            agujeroSound.play();
+    }
+
+    /** Reproduce el sonido de suelo rompiéndose. */
+    public static void playRompediza() {
+        if (rompedizaSound != null)
+            rompedizaSound.play();
+    }
+
+    /** Reproduce el sonido del trineo. */
+    public static void playTrineo() {
+        if (trineoSound != null)
+            trineoSound.play();
+    }
+
+    /** Reproduce el sonido del oso polar. */
+    public static void playOso() {
+        if (osoSound != null)
+            osoSound.play();
     }
 
     // ==================== GESTIÓN DE MÚSICA ====================
