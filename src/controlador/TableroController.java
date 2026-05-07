@@ -204,8 +204,10 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     private boolean animacionEnCurso = false;
 
     private Map<Integer, StackPane> casillaNodes = new HashMap<>();
-    private Map<Jugador, ImageView> playerTokens = new HashMap<>(); // Fichas en el tablero
+    private Map<Jugador, StackPane> playerTokens = new HashMap<>(); // Fichas en el tablero (Contenedor)
+    private Map<Jugador, ImageView> playerStatusIcons = new HashMap<>(); // Iconos de estado en el tablero
     private Map<Jugador, ImageView> turnCircles = new HashMap<>(); // Círculos del indicador superior
+    private Map<Jugador, ImageView> orderStatusIcons = new HashMap<>(); // Iconos de estado en el orden superior
     private Pane tokensPane = new Pane(); // Capa superior para que los jugadores no queden detrás
 
     // GESTIÓN DE FLUJO Y REGLAS (Delegada)
@@ -564,6 +566,10 @@ public class TableroController implements GameFlowManager.GameUIHandler {
      */
     private void crearFichasJugadores() {
         for (Jugador j : jugadores) {
+            StackPane tokenContainer = new StackPane();
+            tokenContainer.setPickOnBounds(false);
+            tokenContainer.getStyleClass().add("player-token-container");
+
             ImageView token = new ImageView();
             try {
                 String colorName = j.getColor() != null ? j.getColor().toLowerCase() : "gris";
@@ -590,7 +596,26 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             ds.setSpread(1.0);
             token.setEffect(ds);
 
-            playerTokens.put(j, token);
+            // Icono de Prohibido (Status)
+            ImageView statusIcon = new ImageView();
+            try {
+                Image prohibidoImg = new Image(getClass().getResourceAsStream("/assets/iconos/prohibido.png"));
+                statusIcon.setImage(prohibidoImg);
+            } catch (Exception e) {
+                System.err.println("No se pudo cargar icono prohibido.");
+            }
+            statusIcon.setFitWidth(24);
+            statusIcon.setFitHeight(24);
+            statusIcon.setPreserveRatio(true);
+            statusIcon.setVisible(false); // Oculto por defecto
+            // Posicionarlo un poco arriba a la derecha del pinguino
+            StackPane.setAlignment(statusIcon, Pos.TOP_RIGHT);
+            statusIcon.setTranslateY(-15);
+            statusIcon.setTranslateX(10);
+
+            tokenContainer.getChildren().addAll(token, statusIcon);
+            playerTokens.put(j, tokenContainer);
+            playerStatusIcons.put(j, statusIcon);
         }
         // Posicionamos a todos (por si hay varios en la 0)
         for (int i = 0; i < Tablero.TAMANYO_TABLERO; i++) {
@@ -638,7 +663,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         int num = jugadoresEnCasilla.size();
         for (int k = 0; k < num; k++) {
             Jugador j = jugadoresEnCasilla.get(k);
-            ImageView token = playerTokens.get(j);
+            StackPane token = playerTokens.get(j);
 
             double offsetX = 0;
             double offsetY = 0;
@@ -715,6 +740,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             HBox playerTurnInfo = new HBox(8);
             playerTurnInfo.setAlignment(Pos.CENTER);
 
+            StackPane circleContainer = new StackPane();
+
             ImageView circle = new ImageView();
             try {
                 String colorName = j.getColor() != null ? j.getColor().toLowerCase() : "gris";
@@ -735,6 +762,25 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             ds.setColor(Color.BLACK);
             circle.setEffect(ds);
 
+            // Icono de Prohibido en el indicador superior
+            ImageView statusIcon = new ImageView();
+            try {
+                Image prohibidoImg = new Image(getClass().getResourceAsStream("/assets/iconos/prohibido.png"));
+                statusIcon.setImage(prohibidoImg);
+            } catch (Exception e) {
+                // Silencioso
+            }
+            statusIcon.setFitWidth(20);
+            statusIcon.setFitHeight(20);
+            statusIcon.setPreserveRatio(true);
+            statusIcon.setVisible(false);
+            StackPane.setAlignment(statusIcon, Pos.BOTTOM_RIGHT);
+            statusIcon.setTranslateX(5);
+            statusIcon.setTranslateY(5);
+
+            circleContainer.getChildren().addAll(circle, statusIcon);
+            orderStatusIcons.put(j, statusIcon);
+
             Label nameLabel = new Label(j.getNombre().toUpperCase());
             Color pColor = getColorFromString(j.getColor());
             nameLabel.setTextFill(pColor);
@@ -742,7 +788,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             nameLabel.setStyle("-fx-font-weight: 900; -fx-font-size: 22px; " +
                              "-fx-effect: dropshadow(three-pass-box, white, 3, 0.8, 0, 0);");
 
-            playerTurnInfo.getChildren().addAll(circle, nameLabel);
+            playerTurnInfo.getChildren().addAll(circleContainer, nameLabel);
 
             turnCircles.put(j, circle);
             turnIndicatorBox.getChildren().add(playerTurnInfo);
@@ -949,7 +995,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             int posAntigua = j.getPosicion();
             int posNueva = posAntigua + 1;
 
-            ImageView token = playerTokens.get(j);
+            StackPane token = playerTokens.get(j);
             double startX = token.getTranslateX();
             double startY = token.getTranslateY();
 
@@ -1065,7 +1111,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     private void moverFichaDirecta(Jugador j, int desde, int hasta, Runnable onComplete) {
         Casilla cOrig = tablero.getCasilla(desde);
         String tipo = (cOrig != null) ? cOrig.getTipo().toUpperCase() : "";
-        Node token = playerTokens.get(j);
+        StackPane token = playerTokens.get(j);
         Node pilar = casillaNodes.get(desde);
 
         if (tipo.contains("AGUJERO") || tipo.contains("ROMPEDIZAS")) {
@@ -1135,7 +1181,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
      * @param onComplete Acción tras aterrizar.
      */
     private void animarSalto(Jugador j, int desde, int hasta, int duracionMs, Runnable onComplete) {
-        Node token = playerTokens.get(j);
+        StackPane token = playerTokens.get(j);
 
         // Calcular posiciones exactas usando posicionarToken para evitar errores de
         // offset
@@ -1239,6 +1285,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         Jugador j = jugadores.get(turnoActual);
         if (j.estaBloqueado()) {
             log(j.getNombre() + " está bloqueado. Saltando turno...");
+            notifyEvent("¡TURNO BLOQUEADO!", j);
             j.setTurnosBloqueados(j.getTurnosBloqueados() - 1);
 
             PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
@@ -1289,6 +1336,16 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         mostrarOverlayCPU(jActual instanceof Foca);
 
         turnCircles.forEach((j, circle) -> {
+            boolean bloqueado = j.estaBloqueado();
+            
+            // Actualizar icono de prohibido en el tablero
+            ImageView boardStatus = playerStatusIcons.get(j);
+            if (boardStatus != null) boardStatus.setVisible(bloqueado);
+
+            // Actualizar icono de prohibido en el orden superior
+            ImageView orderStatus = orderStatusIcons.get(j);
+            if (orderStatus != null) orderStatus.setVisible(bloqueado);
+
             if (j == jActual) {
                 DropShadow glow = new DropShadow();
                 glow.setRadius(20);
@@ -1393,8 +1450,15 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         Label nameLabel = new Label(j.getNombre());
         nameLabel.getStyleClass().add("secondary-player-name");
 
-        Label infoLabel = new Label("Pos: " + j.getPosicion() + " | Obj: " + j.getInventario().getCantidad("Total"));
+        String statusTxt = "Pos: " + j.getPosicion() + " | Obj: " + j.getInventario().getCantidad("Total");
+        if (j.estaBloqueado()) {
+            statusTxt += " | 🚫 BLOQUEADO (" + j.getTurnosBloqueados() + ")";
+        }
+        Label infoLabel = new Label(statusTxt);
         infoLabel.getStyleClass().add("secondary-player-info");
+        if (j.estaBloqueado()) {
+            infoLabel.setStyle("-fx-text-fill: #e53935; -fx-font-weight: bold;");
+        }
 
         card.getChildren().addAll(nameLabel, infoLabel);
         return card;
@@ -1809,7 +1873,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         highlightLayer.getChildren().clear();
 
         for (Jugador j : involucrados) {
-            ImageView token = playerTokens.get(j);
+            StackPane token = playerTokens.get(j);
             if (token != null) {
                 // Cast explícito a Pane para evitar que el compilador se queje de visibilidad
                 Pane originalParent = (Pane) token.getParent();
@@ -1824,8 +1888,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
 
                 // Reposicionar visualmente
                 javafx.geometry.Point2D localP = highlightLayer.sceneToLocal(bounds.getMinX(), bounds.getMinY());
-                token.setTranslateX(localP.getX() + token.getFitWidth() / 2);
-                token.setTranslateY(localP.getY() + token.getFitHeight() / 2);
+                token.setTranslateX(localP.getX() + 18); // Mitad de 36
+                token.setTranslateY(localP.getY() + 18);
 
                 token.setEffect(new DropShadow(25, Color.WHITE));
             }
@@ -1858,7 +1922,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         for (Map.Entry<Jugador, Pane> entry : highlightingBackups.entrySet()) {
             Jugador j = entry.getKey();
             Pane originalParent = entry.getValue();
-            ImageView token = playerTokens.get(j);
+            StackPane token = playerTokens.get(j);
 
             highlightLayer.getChildren().remove(token);
             token.setEffect(null);

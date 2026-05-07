@@ -46,13 +46,17 @@ public class CasillaInterrogante extends Casilla {
         if (probabilidad < 0.10) {
             return new Evento("MotoNeu"); // 10%
         } else if (probabilidad < 0.20) {
-            return new Evento("DadoRapido"); // 10% (0.10 a 0.20)
-        } else if (probabilidad < 0.50) {
-            return new Evento("Pez"); // 30% (0.20 a 0.50)
-        } else if (probabilidad < 0.80) {
-            return new Evento("BolaNieve"); // 30% (0.50 a 0.80)
+            return new Evento("DadoRapido"); // 10%
+        } else if (probabilidad < 0.40) {
+            return new Evento("Pez"); // 20%
+        } else if (probabilidad < 0.60) {
+            return new Evento("BolaNieve"); // 20%
+        } else if (probabilidad < 0.70) {
+            return new Evento("DadoLento"); // 10%
+        } else if (probabilidad < 0.85) {
+            return new Evento("PerderTurno"); // 15%
         } else {
-            return new Evento("DadoLento"); // 20% (0.80 a 1.00)
+            return new Evento("PerderObjeto"); // 15%
         }
     }
 

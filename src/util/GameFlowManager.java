@@ -74,13 +74,17 @@ public class GameFlowManager {
                 Casilla c = tablero.getCasilla(posAntes);
                 String tipo = c.getTipo().replace("Casilla ", "");
                 
-                if (tipo.equals("ROMPEDIZAS")) {
-                    ui.playShakeAnimation(posAntes, () -> checkCollision(j));
-                } else if (tipo.equals("INTERROGANTE") && logEfecto != null && logEfecto.contains(":")) {
-                    // Extraer solo la parte del mensaje después del separador :
-                    String soloMensaje = logEfecto.substring(logEfecto.indexOf(":") + 1).trim();
-                    ui.notifyEvent(soloMensaje, j);
-                    checkCollision(j);
+                if (tipo.equals("ROMPEDIZAS") || tipo.equals("INTERROGANTE")) {
+                    String titulo = tipo.equals("ROMPEDIZAS") ? "SUELO INESTABLE" : "EVENTO ALEATORIO";
+                    String mensaje = (logEfecto != null && logEfecto.contains(":")) 
+                                     ? logEfecto.substring(logEfecto.indexOf(":") + 1).trim() 
+                                     : logEfecto;
+                    
+                    if (tipo.equals("ROMPEDIZAS")) {
+                        ui.playShakeAnimation(posAntes, () -> ui.showEventDialog(titulo, mensaje, () -> checkCollision(j), j));
+                    } else {
+                        ui.showEventDialog(titulo, mensaje, () -> checkCollision(j), j);
+                    }
                 } else {
                     checkCollision(j);
                 }

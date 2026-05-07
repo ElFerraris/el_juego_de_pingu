@@ -1,5 +1,7 @@
 package modelo;
 
+import java.util.Random;
+
 /**
  * Casilla de suelo inestable que penaliza el exceso de carga en el inventario.
  * 
@@ -29,7 +31,26 @@ public class CasillaRompedizas extends Casilla {
 
     @Override
     public String activarEfecto(Jugador jugador) {
-        return calcularPenalizacion(jugador);
+        String mensajeBase = calcularPenalizacion(jugador);
+
+        // Si total == 0, pasamos sin penalización y no hay evento adicional
+        if (jugador.getInventario().getCantidad("Total") == 0) {
+            return mensajeBase;
+        }
+
+        // Evento adicional: Perder turno o perder objeto
+        Random rand = new Random();
+        Evento adicional;
+        if (rand.nextBoolean()) {
+            adicional = new Evento("PerderTurno");
+        } else {
+            adicional = new Evento("PerderObjeto");
+        }
+
+        // El tablero no es necesario para estos dos eventos específicos, pasamos null
+        String mensajeAdicional = adicional.aplicarEfecto(jugador, null);
+
+        return mensajeBase + " | " + mensajeAdicional;
     }
 
     private String calcularPenalizacion(Jugador jugador) {

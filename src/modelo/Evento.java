@@ -82,6 +82,16 @@ public class Evento {
                     }
                 }
                 return "MOTO DE NIEVE: SIN DESTINO";
+            case "PerderTurno":
+                jugador.setTurnosBloqueados(jugador.getTurnosBloqueados() + 1);
+                return "¡QUÉ MALA SUERTE! PIERDES 1 TURNO";
+            case "PerderObjeto":
+                String objetoPerdido = jugador.getInventario().eliminarObjetoAleatorio();
+                if (!objetoPerdido.equals("NADA")) {
+                    return "¡MALA SUERTE! PIERDES: " + objetoPerdido;
+                } else {
+                    return "IBAS A PERDER UN OBJETO, PERO ERES POBRE";
+                }
         }
         return "No hay objeto.";
     }

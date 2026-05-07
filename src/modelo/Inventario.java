@@ -265,4 +265,40 @@ public class Inventario {
         return agregados;
     }
 
+    /**
+     * Elimina un objeto aleatorio del inventario si existe al menos uno.
+     * 
+     * @return El nombre del objeto eliminado o "NADA" si el inventario estaba vacío.
+     */
+    public String eliminarObjetoAleatorio() {
+        ArrayList<String> opciones = new ArrayList<>();
+        if (peces > 0) {
+            opciones.add("Pez");
+        }
+        if (bolasNieve > 0) {
+            opciones.add("BolaNieve");
+        }
+        if (!dados.isEmpty()) {
+            opciones.add("Dados");
+        }
+
+        if (opciones.isEmpty()) {
+            return "NADA";
+        }
+
+        int index = (int) (Math.random() * opciones.size());
+        String tipo = opciones.get(index);
+        this.eliminarObjeto(tipo);
+
+        String result = "NADA";
+        if (tipo.equals("Pez")) {
+            result = "PEZ";
+        } else if (tipo.equals("BolaNieve")) {
+            result = "BOLA DE NIEVE";
+        } else if (tipo.equals("Dados")) {
+            result = "DADO ESPECIAL";
+        }
+        return result;
+    }
+
 }
