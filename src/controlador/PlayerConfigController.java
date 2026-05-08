@@ -448,10 +448,10 @@ public class PlayerConfigController {
                 } else {
                     setText(item);
                     boolean taken = false;
-                    for (Slot s : slots) {
+                    for (int k = 0; k < slots.size() && !taken; k++) {
+                        Slot s = slots.get(k);
                         if (s != Slot.this && item.equals(s.getName())) {
                             taken = true;
-                            break;
                         }
                     }
                     if (taken) {
@@ -517,10 +517,10 @@ public class PlayerConfigController {
                 c.setPreserveRatio(true);
 
                 boolean taken = false;
-                for (Slot s : slots) {
+                for (int k = 0; k < slots.size() && !taken; k++) {
+                    Slot s = slots.get(k);
                     if (s != this && s.isEnabled() && cName.equals(s.getColor())) {
                         taken = true;
-                        break;
                     }
                 }
 

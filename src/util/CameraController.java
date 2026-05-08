@@ -143,33 +143,36 @@ public class CameraController {
      * Centra el tablero con una animación suave.
      */
     public void centerBoardSmooth(double duration) {
-        if (board == null || viewport == null) return;
+        if (board != null && viewport != null) {
+            double viewWidth = viewport.getWidth();
+            double viewHeight = viewport.getHeight();
+            if (viewWidth <= 0)
+                viewWidth = 1280;
+            if (viewHeight <= 0)
+                viewHeight = 720;
 
-        double viewWidth = viewport.getWidth();
-        double viewHeight = viewport.getHeight();
-        if (viewWidth <= 0) viewWidth = 1280;
-        if (viewHeight <= 0) viewHeight = 720;
+            // Calculamos el centro visual restando el panel lateral derecho (300px) si existe
+            double visualCenterX = (viewWidth - 300) / 2.0;
+            double visualCenterY = viewHeight / 2.0;
 
-        // Calculamos el centro visual restando el panel lateral derecho (300px) si existe
-        double visualCenterX = (viewWidth - 300) / 2.0;
-        double visualCenterY = viewHeight / 2.0;
+            // Punto central del tablero (ajuste empírico basado en el rombo)
+            double targetTX = visualCenterX - 1200;
+            double targetTY = visualCenterY - 950;
 
-        // Punto central del tablero (ajuste empírico basado en el rombo)
-        double targetTX = visualCenterX - 1200;
-        double targetTY = visualCenterY - 950;
-
-        if (duration <= 0) {
-            board.setTranslateX(targetTX);
-            board.setTranslateY(targetTY);
-            clampCamera();
-        } else {
-            if (transition != null) transition.stop();
-            transition = new TranslateTransition(Duration.seconds(duration), board);
-            transition.setToX(targetTX);
-            transition.setToY(targetTY);
-            transition.setInterpolator(Interpolator.EASE_BOTH);
-            transition.setOnFinished(e -> clampCamera());
-            transition.play();
+            if (duration <= 0) {
+                board.setTranslateX(targetTX);
+                board.setTranslateY(targetTY);
+                clampCamera();
+            } else {
+                if (transition != null)
+                    transition.stop();
+                transition = new TranslateTransition(Duration.seconds(duration), board);
+                transition.setToX(targetTX);
+                transition.setToY(targetTY);
+                transition.setInterpolator(Interpolator.EASE_BOTH);
+                transition.setOnFinished(e -> clampCamera());
+                transition.play();
+            }
         }
     }
 
@@ -197,30 +200,34 @@ public class CameraController {
      * Permite libertad casi total siempre que quede un trozo visible.
      */
     public void clampCamera() {
-        if (board == null || viewport == null) return;
+        if (board != null && viewport != null) {
+            double s = zoomProperty.get();
+            double viewW = viewport.getWidth() / s;
+            double viewH = viewport.getHeight() / s;
 
-        double s = zoomProperty.get();
-        double viewW = viewport.getWidth() / s;
-        double viewH = viewport.getHeight() / s;
+            // Margen mínimo de seguridad (en píxeles del tablero) para no perderlo de vista
+            double margin = 200.0;
 
-        // Margen mínimo de seguridad (en píxeles del tablero) para no perderlo de vista
-        double margin = 200.0; 
+            // Límites relajados: el tablero puede salir de pantalla
+            // siempre que el borde opuesto no pase del margen de seguridad.
+            double minTX = margin - BG_MAX_X;
+            double maxTX = viewW - margin - BG_MIN_X;
+            double minTY = margin - BG_MAX_Y;
+            double maxTY = viewH - margin - BG_MIN_Y;
 
-        // Límites relajados: el tablero puede salir de pantalla 
-        // siempre que el borde opuesto no pase del margen de seguridad.
-        double minTX = margin - BG_MAX_X;
-        double maxTX = viewW - margin - BG_MIN_X;
-        double minTY = margin - BG_MAX_Y;
-        double maxTY = viewH - margin - BG_MIN_Y;
+            double currentTX = board.getTranslateX();
+            double currentTY = board.getTranslateY();
 
-        double currentTX = board.getTranslateX();
-        double currentTY = board.getTranslateY();
+            if (currentTX < minTX)
+                board.setTranslateX(minTX);
+            else if (currentTX > maxTX)
+                board.setTranslateX(maxTX);
 
-        if (currentTX < minTX) board.setTranslateX(minTX);
-        else if (currentTX > maxTX) board.setTranslateX(maxTX);
-
-        if (currentTY < minTY) board.setTranslateY(minTY);
-        else if (currentTY > maxTY) board.setTranslateY(maxTY);
+            if (currentTY < minTY)
+                board.setTranslateY(minTY);
+            else if (currentTY > maxTY)
+                board.setTranslateY(maxTY);
+        }
     }
 
     /**

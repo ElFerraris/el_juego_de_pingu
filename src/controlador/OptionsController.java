@@ -260,27 +260,23 @@ public class OptionsController {
         if (pass.isEmpty()) {
             passwordErrorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
             passwordErrorLabel.setText("La contraseña no puede estar vacía.");
-            return;
-        }
-
-        if (!pass.equals(confirm)) {
+        } else if (!pass.equals(confirm)) {
             passwordErrorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
             passwordErrorLabel.setText("Las contraseñas no coinciden.");
-            return;
-        }
-
-        int userId = controlador.GameContext.getInstance().getCurrentUser().getId();
-        boolean success = bbdd.cambiarContrasenaJugador(userId, pass);
-
-        if (success) {
-            passwordErrorLabel.setStyle("-fx-text-fill: #388e3c; -fx-font-size: 14px; -fx-font-weight: bold;");
-            passwordErrorLabel.setText("¡Contraseña cambiada exitosamente!");
-            // Limpiar los campos por seguridad
-            newPasswordField.clear();
-            confirmPasswordField.clear();
         } else {
-            passwordErrorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
-            passwordErrorLabel.setText("Error al conectar con la base de datos.");
+            int userId = controlador.GameContext.getInstance().getCurrentUser().getId();
+            boolean success = bbdd.cambiarContrasenaJugador(userId, pass);
+
+            if (success) {
+                passwordErrorLabel.setStyle("-fx-text-fill: #388e3c; -fx-font-size: 14px; -fx-font-weight: bold;");
+                passwordErrorLabel.setText("¡Contraseña cambiada exitosamente!");
+                // Limpiar los campos por seguridad
+                newPasswordField.clear();
+                confirmPasswordField.clear();
+            } else {
+                passwordErrorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+                passwordErrorLabel.setText("Error al conectar con la base de datos.");
+            }
         }
     }
 }

@@ -654,74 +654,73 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         }
 
         StackPane cell = casillaNodes.get(pos);
-        if (cell == null || jugadoresEnCasilla.isEmpty())
-            return;
+        if (cell != null && !jugadoresEnCasilla.isEmpty()) {
+            double cellX = cell.getLayoutX();
+            double cellY = cell.getLayoutY();
 
-        double cellX = cell.getLayoutX();
-        double cellY = cell.getLayoutY();
+            int num = jugadoresEnCasilla.size();
+            for (int k = 0; k < num; k++) {
+                Jugador j = jugadoresEnCasilla.get(k);
+                StackPane token = playerTokens.get(j);
 
-        int num = jugadoresEnCasilla.size();
-        for (int k = 0; k < num; k++) {
-            Jugador j = jugadoresEnCasilla.get(k);
-            StackPane token = playerTokens.get(j);
+                double offsetX = 0;
+                double offsetY = 0;
 
-            double offsetX = 0;
-            double offsetY = 0;
-
-            // PATRONES DE DISPERSIÓN SEGÚN BORRADOR DEL USUARIO
-            switch (num) {
-                case 1:
-                    // Un solo jugador: Centrado
-                    offsetX = 0;
-                    offsetY = 0;
-                    break;
-                case 2:
-                    // Dos jugadores: Uno a cada lado
-                    offsetX = (k == 0) ? -18 : 18;
-                    offsetY = -5;
-                    break;
-                case 3:
-                    // Tres jugadores: Formación de triángulo
-                    if (k == 0) {
+                // PATRONES DE DISPERSIÓN SEGÚN BORRADOR DEL USUARIO
+                switch (num) {
+                    case 1:
+                        // Un solo jugador: Centrado
                         offsetX = 0;
-                        offsetY = -15;
-                    } else if (k == 1) {
-                        offsetX = -18;
-                        offsetY = 5;
-                    } else {
-                        offsetX = 18;
-                        offsetY = 5;
-                    }
-                    break;
-                case 4:
-                    // Cuatro jugadores: Cuadrado / Diamante
-                    if (k == 0) {
-                        offsetX = -18;
-                        offsetY = -12;
-                    } else if (k == 1) {
-                        offsetX = 18;
-                        offsetY = -12;
-                    } else if (k == 2) {
-                        offsetX = -18;
-                        offsetY = 12;
-                    } else {
-                        offsetX = 18;
-                        offsetY = 12;
-                    }
-                    break;
-            }
+                        offsetY = 0;
+                        break;
+                    case 2:
+                        // Dos jugadores: Uno a cada lado
+                        offsetX = (k == 0) ? -18 : 18;
+                        offsetY = -5;
+                        break;
+                    case 3:
+                        // Tres jugadores: Formación de triángulo
+                        if (k == 0) {
+                            offsetX = 0;
+                            offsetY = -15;
+                        } else if (k == 1) {
+                            offsetX = -18;
+                            offsetY = 5;
+                        } else {
+                            offsetX = 18;
+                            offsetY = 5;
+                        }
+                        break;
+                    case 4:
+                        // Cuatro jugadores: Cuadrado / Diamante
+                        if (k == 0) {
+                            offsetX = -18;
+                            offsetY = -12;
+                        } else if (k == 1) {
+                            offsetX = 18;
+                            offsetY = -12;
+                        } else if (k == 2) {
+                            offsetX = -18;
+                            offsetY = 12;
+                        } else {
+                            offsetX = 18;
+                            offsetY = 12;
+                        }
+                        break;
+                }
 
-            // 55 es el centro horizontal del pilar (110/2)
-            // 35 es el ajuste de altura para que los pingüinos queden centrados en la parte
-            // superior
-            double targetX = cellX + 55 + offsetX;
-            double targetY = cellY + 35 + offsetY;
+                // 55 es el centro horizontal del pilar (110/2)
+                // 35 es el ajuste de altura para que los pingüinos queden centrados en la parte
+                // superior
+                double targetX = cellX + 55 + offsetX;
+                double targetY = cellY + 35 + offsetY;
 
-            token.setTranslateX(targetX);
-            token.setTranslateY(targetY);
+                token.setTranslateX(targetX);
+                token.setTranslateY(targetY);
 
-            if (!tokensPane.getChildren().contains(token)) {
-                tokensPane.getChildren().add(token);
+                if (!tokensPane.getChildren().contains(token)) {
+                    tokensPane.getChildren().add(token);
+                }
             }
         }
     }
@@ -1770,20 +1769,19 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                     mostrarNotificacionEvento("ERROR AL GUARDAR PARTIDA", jugadores.get(turnoActual));
                 }
             }
-            return;
-        }
+        } else {
+            // GUARDADO MANUAL ANTES DE SALIR
+            int idPartida = tablero.getIdPartida();
+            if (idPartida > 0) {
+                System.out.println("► Guardando partida #" + idPartida + " antes de salir...");
+                bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
+            }
 
-        // GUARDADO MANUAL ANTES DE SALIR
-        int idPartida = tablero.getIdPartida();
-        if (idPartida > 0) {
-            System.out.println("► Guardando partida #" + idPartida + " antes de salir...");
-            bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
-        }
-
-        if (pendingAction == GameContext.ActionConfirmType.LOGOUT) {
-            NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
-        } else if (pendingAction == GameContext.ActionConfirmType.QUIT) {
-            Platform.exit();
+            if (pendingAction == GameContext.ActionConfirmType.LOGOUT) {
+                NavigationController.navigateTo(event, "MainMenuView.fxml", NavigationController.Direction.BACKWARD);
+            } else if (pendingAction == GameContext.ActionConfirmType.QUIT) {
+                Platform.exit();
+            }
         }
     }
 
@@ -1913,41 +1911,39 @@ public class TableroController implements GameFlowManager.GameUIHandler {
      */
     @FXML
     private void handleCloseEvent() {
-        if (!eventOverlay.isVisible() || eventOverlay.getOpacity() < 1.0) {
-            return; // Ya se está cerrando, ignorar múltiples clics
-        }
+        if (eventOverlay.isVisible() && eventOverlay.getOpacity() >= 1.0) {
+            util.SoundManager.playBack();
 
-        util.SoundManager.playBack();
+            // Restaurar fichas
+            for (Map.Entry<Jugador, Pane> entry : highlightingBackups.entrySet()) {
+                Jugador j = entry.getKey();
+                Pane originalParent = entry.getValue();
+                StackPane token = playerTokens.get(j);
 
-        // Restaurar fichas
-        for (Map.Entry<Jugador, Pane> entry : highlightingBackups.entrySet()) {
-            Jugador j = entry.getKey();
-            Pane originalParent = entry.getValue();
-            StackPane token = playerTokens.get(j);
-
-            highlightLayer.getChildren().remove(token);
-            token.setEffect(null);
-            if (!originalParent.getChildren().contains(token)) {
-                originalParent.getChildren().add(token);
+                highlightLayer.getChildren().remove(token);
+                token.setEffect(null);
+                if (!originalParent.getChildren().contains(token)) {
+                    originalParent.getChildren().add(token);
+                }
+                posicionarToken(j);
             }
-            posicionarToken(j);
+            highlightingBackups.clear();
+
+            FadeTransition ft = new FadeTransition(Duration.millis(300), eventOverlay);
+            ft.setFromValue(1);
+            ft.setToValue(0);
+            ft.setOnFinished(e -> {
+                eventOverlay.setVisible(false);
+                if (onEventContinue != null) {
+                    Runnable action = onEventContinue;
+                    onEventContinue = null; // Prevenir doble ejecución
+                    action.run();
+                }
+            });
+            ft.play();
+
+            animateOut(eventDialogueBox, null);
         }
-        highlightingBackups.clear();
-
-        FadeTransition ft = new FadeTransition(Duration.millis(300), eventOverlay);
-        ft.setFromValue(1);
-        ft.setToValue(0);
-        ft.setOnFinished(e -> {
-            eventOverlay.setVisible(false);
-            if (onEventContinue != null) {
-                Runnable action = onEventContinue;
-                onEventContinue = null; // Prevenir doble ejecución
-                action.run();
-            }
-        });
-        ft.play();
-
-        animateOut(eventDialogueBox, null);
     }
 
     // --- LÓGICA DE ANIMACIONES ---
@@ -2272,27 +2268,23 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         if (pass.isEmpty()) {
             passErrorLabelOverlay.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
             passErrorLabelOverlay.setText("La contraseña no puede estar vacía.");
-            return;
-        }
-
-        if (!pass.equals(confirm)) {
+        } else if (!pass.equals(confirm)) {
             passErrorLabelOverlay.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
             passErrorLabelOverlay.setText("Las contraseñas no coinciden.");
-            return;
-        }
-
-        int userId = GameContext.getInstance().getCurrentUser().getId();
-        boolean success = bbdd.cambiarContrasenaJugador(userId, pass);
-
-        if (success) {
-            passErrorLabelOverlay.setStyle("-fx-text-fill: #388e3c; -fx-font-size: 14px; -fx-font-weight: bold;");
-            passErrorLabelOverlay.setText("¡Contraseña cambiada exitosamente!");
-            // Limpiar los campos por seguridad
-            newPassFieldOverlay.clear();
-            confirmPassFieldOverlay.clear();
         } else {
-            passErrorLabelOverlay.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
-            passErrorLabelOverlay.setText("Error al conectar con la base de datos.");
+            int userId = GameContext.getInstance().getCurrentUser().getId();
+            boolean success = bbdd.cambiarContrasenaJugador(userId, pass);
+
+            if (success) {
+                passErrorLabelOverlay.setStyle("-fx-text-fill: #388e3c; -fx-font-size: 14px; -fx-font-weight: bold;");
+                passErrorLabelOverlay.setText("¡Contraseña cambiada exitosamente!");
+                // Limpiar los campos por seguridad
+                newPassFieldOverlay.clear();
+                confirmPassFieldOverlay.clear();
+            } else {
+                passErrorLabelOverlay.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+                passErrorLabelOverlay.setText("Error al conectar con la base de datos.");
+            }
         }
     }
 }

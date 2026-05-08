@@ -131,15 +131,14 @@ public class RankingsController {
 
         if (nickname.isEmpty()) {
             outputArea.setText(">>> POR FAVOR, ESCRIBE UN NICKNAME PARA BUSCAR <<<");
-            return;
+        } else {
+            setActiveButton(btnSearch);
+            outputArea.setText(">>> SOLICITANDO ESTADÍSTICAS PARA: '" + nickname.toUpperCase() + "' <<<\n\n");
+
+            // Llamamos al procedimiento específico de búsqueda detallada
+            String result = bbdd.obtenerEstadisticasJugadorDBMS(nickname);
+            outputArea.appendText(result);
         }
-
-        setActiveButton(btnSearch);
-        outputArea.setText(">>> SOLICITANDO ESTADÍSTICAS PARA: '" + nickname.toUpperCase() + "' <<<\n\n");
-
-        // Llamamos al procedimiento específico de búsqueda detallada
-        String result = bbdd.obtenerEstadisticasJugadorDBMS(nickname);
-        outputArea.appendText(result);
     }
 
     /**

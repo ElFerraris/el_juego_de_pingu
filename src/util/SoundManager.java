@@ -221,24 +221,22 @@ public class SoundManager {
      * @param path Ruta interna del recurso de audio.
      */
     public static void playMusic(String path) {
-        if (currentMusicPath.equals(path) && musicPlayer != null) {
-            return;
-        }
+        if (!currentMusicPath.equals(path) || musicPlayer == null) {
+            stopMusic();
 
-        stopMusic();
-
-        try {
-            URL resource = SoundManager.class.getResource(path);
-            if (resource != null) {
-                currentMusicPath = path;
-                Media media = new Media(resource.toExternalForm());
-                musicPlayer = new MediaPlayer(media);
-                musicPlayer.setVolume(musicVolume);
-                musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-                musicPlayer.play();
+            try {
+                URL resource = SoundManager.class.getResource(path);
+                if (resource != null) {
+                    currentMusicPath = path;
+                    Media media = new Media(resource.toExternalForm());
+                    musicPlayer = new MediaPlayer(media);
+                    musicPlayer.setVolume(musicVolume);
+                    musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+                    musicPlayer.play();
+                }
+            } catch (Exception e) {
+                System.err.println("Error al reproducir música: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error al reproducir música: " + e.getMessage());
         }
     }
 
