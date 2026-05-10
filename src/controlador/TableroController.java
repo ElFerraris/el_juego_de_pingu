@@ -1761,6 +1761,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         if (pendingAction == GameContext.ActionConfirmType.SAVE) {
             int idPartida = tablero.getIdPartida();
             if (idPartida > 0) {
+                juegoSimulado.setTurnoActual(this.turnoActual);
                 boolean exito = bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
                 if (exito) {
                     mostrarNotificacionEvento("PARTIDA GUARDADA CON ÉXITO", jugadores.get(turnoActual));
@@ -1774,6 +1775,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             int idPartida = tablero.getIdPartida();
             if (idPartida > 0) {
                 System.out.println("► Guardando partida #" + idPartida + " antes de salir...");
+                juegoSimulado.setTurnoActual(this.turnoActual);
                 bbdd.guardarEstadoCompleto(idPartida, juegoSimulado);
             }
 
