@@ -219,7 +219,6 @@ public class Tablero {
                         casillas.set(i, new CasillaTrineo(i, "Casilla TRINEO", y));
                         trineoSiguienteEncontrado = true;
                     }
-                    y++;
                 }
             }
 
@@ -238,7 +237,6 @@ public class Tablero {
                         casillas.set(i, new CasillaAgujero(i, "Casilla AGUJERO", y));
                         agujeroAnteriorEncontrado = true;
                     }
-                    y--;
                 }
             }
         }
