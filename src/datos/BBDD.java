@@ -410,6 +410,11 @@ public class BBDD {
             if (con == null)
                 return false;
 
+            // Habilitamos el buffer si hay un ganador para capturar el mensaje del trigger global
+            if (juego.getGanador() != null) {
+                habilitarDbmsOutput(con);
+            }
+
             // Iniciamos transacción para evitar guardados a medias
             con.setAutoCommit(false);
 
@@ -445,6 +450,16 @@ public class BBDD {
 
             con.commit();
             con.setAutoCommit(true);
+
+            // Recuperamos el mensaje del trigger si ha habido un ganador
+            if (juego.getGanador() != null) {
+                String output = obtenerDbmsOutput(con);
+                if (!output.isEmpty()) {
+                    System.out.println(" OUTPUT RECIBIDO DE ORACLE (Victoria): " + output);
+                    controlador.GameContext.getInstance().setDbmsOutputMessage(output);
+                }
+            }
+
             return true;
 
         } catch (SQLException e) {
