@@ -171,7 +171,7 @@ public class SeedSelectionController {
 
                     System.out.println("► Partida: " + name + " | Seed: " + seed);
 
-                    NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
+                    NavigationController.navigateTo(event, "TableroJuego.fxml", NavigationController.Direction.TO_BOARD);
                 }
             }
         }

@@ -37,6 +37,13 @@ public class GameFlowManager {
     private final List<Jugador> jugadores;
     private final GameUIHandler ui;
 
+    /**
+     * Constructor del gestor de flujo de juego.
+     * 
+     * @param tablero   El tablero de juego activo.
+     * @param jugadores La lista de jugadores que participan en la partida.
+     * @param ui        La interfaz de manejo de eventos visuales y de registro.
+     */
     public GameFlowManager(Tablero tablero, List<Jugador> jugadores, GameUIHandler ui) {
         this.tablero = tablero;
         this.jugadores = jugadores;
@@ -45,6 +52,8 @@ public class GameFlowManager {
 
     /**
      * Evalúa y aplica las reglas especiales de la casilla donde ha caído el jugador.
+     * 
+     * @param j El jugador que ha caído en la casilla.
      */
     public void processCellEffects(Jugador j) {
         PauseTransition effectDelay = new PauseTransition(Duration.seconds(1));
@@ -145,6 +154,8 @@ public class GameFlowManager {
 
     /**
      * Comprueba si el jugador debe iniciar una batalla (Guerra) tras aplicar los efectos.
+     * 
+     * @param jActual El jugador que acaba de terminar su movimiento y cuyos efectos se han procesado.
      */
     public void checkCollision(Jugador jActual) {
         if (jActual.getPosicion() <= 0 || jActual.getPosicion() >= Tablero.TAMANYO_TABLERO - 1) {
@@ -170,6 +181,9 @@ public class GameFlowManager {
 
     /**
      * Ejecuta la resolución de un conflicto entre dos jugadores en la misma casilla.
+     * 
+     * @param atacante El jugador que llega a la casilla e inicia la colisión.
+     * @param defensor El jugador que ya se encontraba en la casilla.
      */
     private void resolveCombat(Jugador atacante, Jugador defensor) {
         boolean esFoca = (atacante instanceof Foca || defensor instanceof Foca);

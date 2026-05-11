@@ -1750,7 +1750,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
     /**
      * Ejecuta la acción confirmada (salir, volver al menú o guardar) guardando la partida.
      * 
-     * @param event El evento de acción.
+     * @param event El evento de acción originado por el botón de confirmación.
      */
     @FXML
     private void handleConfirmYes(ActionEvent event) {

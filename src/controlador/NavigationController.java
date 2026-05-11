@@ -174,36 +174,7 @@ public class NavigationController {
         }
     }
 
-    /**
-     * Carga el tablero de forma síncrona.
-     * 
-     * <p>
-     * NOTA: Se ha eliminado la carga asíncrona por requisitos del proyecto.
-     * </p>
-     * 
-     * @param event    El evento que dispara la carga.
-     * @param fxmlFile El archivo del tablero.
-     */
-    public static void navigateToBoardAsync(ActionEvent event, String fxmlFile) {
-        try {
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            String fullPath = VISTA_PATH + fxmlFile;
-            FXMLLoader loader = new FXMLLoader(NavigationController.class.getResource(fullPath));
-            Parent root = loader.load();
 
-            Scene scene = stage.getScene();
-            scene.setRoot(root);
-            ensureCssLoaded(scene);
-            applyGlobalEffects(root, fxmlFile);
-
-            stage.setFullScreen(util.SettingsManager.getInstance().isFullscreen());
-            setupGlobalHotkeys(scene);
-            System.out.println("► Tablero cargado síncronamente.");
-        } catch (Exception e) {
-            System.err.println("► Error en carga síncrona: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Lógica interna para manejar las transiciones animadas entre escenas.

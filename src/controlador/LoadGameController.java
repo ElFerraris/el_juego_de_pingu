@@ -218,7 +218,7 @@ public class LoadGameController {
                     context.setConfiguredPlayers(juegoTemp.getJugadores());
                     context.setTurnoCargado(juegoTemp.getTurnoActual());
 
-                    NavigationController.navigateToBoardAsync(event, "TableroJuego.fxml");
+                    NavigationController.navigateTo(event, "TableroJuego.fxml", NavigationController.Direction.TO_BOARD);
                 } else {
                     mostrarAlerta("Error de Carga", "No se pudo cargar la partida seleccionada.",
                             Alert.AlertType.ERROR);
