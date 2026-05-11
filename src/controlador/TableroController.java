@@ -705,6 +705,25 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                             offsetY = 12;
                         }
                         break;
+                    default:
+                        // Cinco o más jugadores: Cara de dado 5 (4 esquinas y 1 centro)
+                        if (k == 0) {
+                            offsetX = -20;
+                            offsetY = -15;
+                        } else if (k == 1) {
+                            offsetX = 20;
+                            offsetY = -15;
+                        } else if (k == 2) {
+                            offsetX = 0;
+                            offsetY = 0;
+                        } else if (k == 3) {
+                            offsetX = -20;
+                            offsetY = 15;
+                        } else {
+                            offsetX = 20;
+                            offsetY = 15;
+                        }
+                        break;
                 }
 
                 // 55 es el centro horizontal del pilar (110/2)
