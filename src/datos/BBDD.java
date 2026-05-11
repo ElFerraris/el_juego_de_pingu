@@ -77,15 +77,12 @@ public class BBDD {
      * @return El ID de la partida generado por la base de datos, o 0 si falla.
      */
     public int guardarNuevaPartida(Juego juego) {
-        // 1. Intentamos conectar. Al ponerlo en el paréntesis del try,
-        // se cerrará solo al llegar a la llave final }.
+
         try (Connection con = conectarBD()) {
 
             if (con == null)
                 return 0;
 
-            // 2. Preparamos la llamada al procedimiento de Oracle
-            // Ahora recibe dos parámetros: seed y nombre
             String sql = "{? = call insertar_partida(?, ?)}";
 
             try (CallableStatement cstmt = con.prepareCall(sql)) {
