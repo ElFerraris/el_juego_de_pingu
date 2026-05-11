@@ -60,19 +60,7 @@ public class Cpu {
         int posActual = foca.getPosicion();
         int bolas = inv.getCantidad("BolaNieve");
 
-        // --- 1. PRIORIDAD: RECOLECTAR BOLAS ---
-        // Si tiene pocas bolas y no está al final, recolecta (pero solo si no tiene el
-        // máximo)
-        if (bolas < 10 && posActual < Tablero.TAMANYO_TABLERO - 10) {
-            if (bolas < Inventario.MAX_BOLAS_NIEVE) {
-                // 70% de probabilidad de recolectar si le faltan bolas
-                if (random.nextDouble() < 0.7) {
-                    return Accion.RECOLECTAR_BOLAS;
-                }
-            }
-        }
-
-        // --- 2. ANÁLISIS DEL TABLERO PRÓXIMO (6 casillas adelante) ---
+        // --- 1. ANÁLISIS DEL TABLERO PRÓXIMO (6 casillas adelante) ---
         boolean hayAgujeroCerca = false;
         boolean hayTrineoCerca = false;
         int distAgujero = -1;
@@ -92,7 +80,7 @@ public class Cpu {
             }
         }
 
-        // --- 3. USO DE DADOS ESPECIALES ---
+        // --- 2. USO DE DADOS ESPECIALES ---
 
         // Si hay un trineo muy cerca (1-3), intentar caer en él con dado lento
         if (hayTrineoCerca && distTrineo <= 3 && inv.tieneObjetoEspecifico("Lento")) {
@@ -114,7 +102,7 @@ public class Cpu {
                 return Accion.USAR_DADO_LENTO;
         }
 
-        // --- 4. DECISIÓN POR DEFECTO ---
+        // --- 3. DECISIÓN POR DEFECTO ---
         // Si tiene dados rápidos y está lejos de la meta, usarlos a veces para avanzar
         if (inv.tieneObjetoEspecifico("Rapido") && posActual < Tablero.TAMANYO_TABLERO - 15) {
             if (random.nextDouble() < 0.3)
