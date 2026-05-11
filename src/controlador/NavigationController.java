@@ -12,7 +12,7 @@ import javafx.application.Platform;
 import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.layout.StackPane;
-import util.LoadingOverlay;
+
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -646,18 +646,5 @@ public class NavigationController {
         }
     }
 
-    /**
-     * Muestra el overlay de carga.
-     * 
-     * @param scene La escena sobre la cual se desplegará el overlay (pantalla de
-     *              espera).
-     */
-    public static void showLoading(Scene scene) {
-        LoadingOverlay.show(scene);
-    }
 
-    /** Oculta el overlay de carga. */
-    public static void hideLoading() {
-        LoadingOverlay.hide();
-    }
 }

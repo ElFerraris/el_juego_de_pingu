@@ -56,7 +56,6 @@ public class GameFlowManager {
             for (Jugador p : jugadores) {
                 if (p != j && p.getPosicion() == posAntes) {
                     hayColisionInmediata = true;
-                    // No hacemos break para estar seguros, pero con uno basta
                 }
             }
 

@@ -330,8 +330,6 @@ public class TableroController implements GameFlowManager.GameUIHandler {
 
         actualizarUI();
 
-        // OCULTAR GIF DE CARGA
-        NavigationController.hideLoading();
 
         comprobarBloqueoInicioTurno();
     }
