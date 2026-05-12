@@ -10,8 +10,6 @@ module el_juego_de_pingu {
     opens aplicacion to javafx.graphics, javafx.fxml;
     opens vista to javafx.fxml;
     opens controlador to javafx.fxml, javafx.graphics;
-    opens assets.fuentes to javafx.graphics, javafx.fxml;
-    opens assets.imagenes to javafx.graphics, javafx.fxml;
 
     exports aplicacion;
     exports vista;

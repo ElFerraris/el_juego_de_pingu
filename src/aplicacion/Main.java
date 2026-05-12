@@ -35,8 +35,8 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		// REGISTRO GLOBAL DE FUENTES
 		try {
-			Font.loadFont(getClass().getResourceAsStream("/assets/fuentes/GrapeSoda.ttf"), 12);
-			Font.loadFont(getClass().getResourceAsStream("/assets/fuentes/upheavtt.ttf"), 12);
+			Font.loadFont(new java.io.FileInputStream(new java.io.File("assets/fuentes/GrapeSoda.ttf")), 12);
+			Font.loadFont(new java.io.FileInputStream(new java.io.File("assets/fuentes/upheavtt.ttf")), 12);
 		} catch (Exception e) {
 			System.err.println("No se pudieron cargar las fuentes desde Main: " + e.getMessage());
 		}
@@ -45,8 +45,11 @@ public class Main extends Application {
 		try {
 			Random rand = new Random();
 			int iconNum = rand.nextInt(8) + 1; // Genera un número entre 1 y 8
-			String iconPath = "/assets/iconos/" + iconNum + ".png";
-			primaryStage.getIcons().add(new Image(getClass().getResourceAsStream(iconPath)));
+			String iconPath = "assets/iconos/" + iconNum + ".png";
+			java.io.File iconFile = new java.io.File(iconPath);
+			if (iconFile.exists()) {
+				primaryStage.getIcons().add(new Image(iconFile.toURI().toString()));
+			}
 		} catch (Exception e) {
 			System.err.println("Aviso: No se pudo cargar el icono aleatorio: " + e.getMessage());
 		}

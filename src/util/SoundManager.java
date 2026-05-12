@@ -8,6 +8,7 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import java.net.URL;
+import java.io.File;
 
 /**
  * Controlador global del sistema de audio y música dinámica.
@@ -71,11 +72,16 @@ public class SoundManager {
     }
 
     private static AudioClip loadSound(String path) {
-        URL resource = SoundManager.class.getResource(path);
-        if (resource != null) {
-            AudioClip clip = new AudioClip(resource.toExternalForm());
-            clip.setVolume(sfxVolume);
-            return clip;
+        try {
+            String sanitizedPath = path.startsWith("/") ? path.substring(1) : path;
+            File file = new File(sanitizedPath);
+            if (file.exists()) {
+                AudioClip clip = new AudioClip(file.toURI().toString());
+                clip.setVolume(sfxVolume);
+                return clip;
+            }
+        } catch (Exception e) {
+            System.err.println("Error cargando sonido: " + path + " -> " + e.getMessage());
         }
         return null;
     }
@@ -225,10 +231,11 @@ public class SoundManager {
             stopMusic();
 
             try {
-                URL resource = SoundManager.class.getResource(path);
-                if (resource != null) {
+                String sanitizedPath = path.startsWith("/") ? path.substring(1) : path;
+                File file = new File(sanitizedPath);
+                if (file.exists()) {
                     currentMusicPath = path;
-                    Media media = new Media(resource.toExternalForm());
+                    Media media = new Media(file.toURI().toString());
                     musicPlayer = new MediaPlayer(media);
                     musicPlayer.setVolume(musicVolume);
                     musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
@@ -250,10 +257,10 @@ public class SoundManager {
 
         for (int i = 0; i < 7; i++) {
             try {
-                String path = "/assets/music/Partida/" + (i + 1) + ".wav";
-                URL resource = SoundManager.class.getResource(path);
-                if (resource != null) {
-                    Media media = new Media(resource.toExternalForm());
+                String path = "assets/music/Partida/" + (i + 1) + ".wav";
+                File file = new File(path);
+                if (file.exists()) {
+                    Media media = new Media(file.toURI().toString());
                     gameMusicLayers[i] = new MediaPlayer(media);
                     gameMusicLayers[i].setVolume(0); // Empezamos en silencio
                     gameMusicLayers[i].setCycleCount(MediaPlayer.INDEFINITE);

@@ -27,7 +27,7 @@
             <HBox alignment="CENTER" spacing="30" style="-fx-padding: 0 40;">
                 <ImageView fx:id="focaIcon" fitHeight="65" fitWidth="65" preserveRatio="true">
                     <image>
-                        <Image url="@../assets/ico_jugadores/ico_gris.png" />
+                        <Image url="file:assets/ico_jugadores/ico_gris.png" />
                     </image>
                 </ImageView>
                 <Label text="FOCA LOCA (CPU)" style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #546e7a;" />

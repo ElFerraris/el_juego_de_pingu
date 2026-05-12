@@ -24,7 +24,7 @@
                 <graphic>
                     <ImageView fitWidth="30.0" preserveRatio="true">
                         <image>
-                            <Image url="@../assets/iconos/trash.png" />
+                            <Image url="file:assets/iconos/trash.png" />
                         </image>
                     </ImageView>
                 </graphic>

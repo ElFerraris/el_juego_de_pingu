@@ -16,13 +16,13 @@
 
 /* SCREEN BACKGROUNDS */
 .root-main-bg {
-    -fx-background-image: url("../assets/imagenes/TITULO_CON_FONDO.png");
+    -fx-background-image: url("file:assets/imagenes/TITULO_CON_FONDO.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }
 
 .root-plain-bg {
-    -fx-background-image: url("../assets/imagenes/FONDO_SOLO_BORROSO.png");
+    -fx-background-image: url("file:assets/imagenes/FONDO_SOLO_BORROSO.png");
     -fx-background-size: cover;
     -fx-background-position: center;
 }

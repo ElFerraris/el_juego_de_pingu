@@ -16,7 +16,7 @@
             
             <ImageView fx:id="winnerImageView" fitHeight="300.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../assets/jugadores/Azul.png" />
+                  <Image url="file:assets/jugadores/Azul.png" />
                </image>
             </ImageView>
             

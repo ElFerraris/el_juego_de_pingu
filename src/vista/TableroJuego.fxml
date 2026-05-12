@@ -83,7 +83,7 @@
                         <graphic>
                             <ImageView fitWidth="30.0" preserveRatio="true">
                                 <image>
-                                    <Image url="@../assets/iconos/camera.png" />
+                                    <Image url="file:assets/iconos/camera.png" />
                                 </image>
                             </ImageView>
                         </graphic>
@@ -210,7 +210,7 @@
                         <VBox alignment="CENTER" styleClass="tab-content-area" style="-fx-padding: 20;">
                             <ImageView pickOnBounds="true" preserveRatio="true" fitHeight="280">
                                 <image>
-                                    <Image url="@../assets/creditos/team.png" />
+                                    <Image url="file:assets/creditos/team.png" />
                                 </image>
                             </ImageView>
                         </VBox>

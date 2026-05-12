@@ -18,7 +18,7 @@ import javafx.scene.image.ImageView;
 import modelo.PartidaGuardada;
 import datos.BBDD;
 import util.UIUtils;
-
+import util.AssetLoader;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,8 +152,7 @@ public class LoadGameController {
                             String colorNormalizado = (colorName != null && !colorName.trim().isEmpty())
                                     ? colorName.toLowerCase()
                                     : "gris";
-                            Image img = new Image(getClass()
-                                    .getResourceAsStream("/assets/ico_jugadores/ico_" + colorNormalizado + ".png"));
+                            Image img = AssetLoader.loadImage("/assets/ico_jugadores/ico_" + colorNormalizado + ".png");
                             icon.setImage(img);
                         } catch (Exception e) {
                         }

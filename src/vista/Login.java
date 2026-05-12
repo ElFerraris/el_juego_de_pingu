@@ -13,6 +13,7 @@ import controlador.GameContext;
 import controlador.NavigationController;
 import modelo.Jugador;
 import modelo.Pinguino;
+import util.AssetLoader;
 import java.sql.Connection;
 
 /**
@@ -77,9 +78,9 @@ public class Login {
 		try {
 			double sfxVol = util.SettingsManager.getInstance().getSfxVolume();
 
-			soundButton = new AudioClip(getClass().getResource("/assets/login/login_button.wav").toExternalForm());
-			soundCorrect = new AudioClip(getClass().getResource("/assets/login/login_correct.wav").toExternalForm());
-			soundError = new AudioClip(getClass().getResource("/assets/login/login_error.wav").toExternalForm());
+			soundButton = new AudioClip(AssetLoader.loadUrl("/assets/login/login_button.wav"));
+			soundCorrect = new AudioClip(AssetLoader.loadUrl("/assets/login/login_correct.wav"));
+			soundError = new AudioClip(AssetLoader.loadUrl("/assets/login/login_error.wav"));
 
 			// Aplicar volumen actual
 			soundButton.setVolume(sfxVol);

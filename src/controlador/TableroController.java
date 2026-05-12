@@ -36,6 +36,8 @@ import modelo.*;
 import datos.BBDD;
 import util.SettingsManager;
 import util.SoundManager;
+import util.AssetLoader;
+import java.io.File;
 import util.CameraController;
 import util.GameFlowManager;
 
@@ -352,11 +354,11 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         try {
             String fondoPath = "/assets/tablero/fondo_tablero/fondo_tablero.png";
             String marPath = "/assets/tablero/fondo_tablero/fondo_tablero_mar.png";
-            java.net.URL fondoUrl = getClass().getResource(fondoPath);
-            java.net.URL marUrl = getClass().getResource(marPath);
+            String fondoUrl = AssetLoader.loadUrl(fondoPath);
+            String marUrl = AssetLoader.loadUrl(marPath);
 
-            if (fondoUrl != null) {
-                Image fondoImg = new Image(fondoUrl.toExternalForm(), true);
+            if (!fondoUrl.isEmpty()) {
+                Image fondoImg = new Image(fondoUrl, true);
                 ImageView fondoView = new ImageView();
 
                 // Carga y posicionamiento del fondo base
@@ -378,8 +380,8 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 boardPane.getChildren().add(0, fondoView);
             }
 
-            if (marUrl != null) {
-                Image marImg = new Image(marUrl.toExternalForm(), true);
+            if (!marUrl.isEmpty()) {
+                Image marImg = new Image(marUrl, true);
                 
                 // Carga y posicionamiento de la capa de mar (delante de las casillas)
                 marImg.progressProperty().addListener((obs, oldV, newV) -> {
@@ -538,7 +540,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
         pane.setAlignment(Pos.BOTTOM_CENTER);
 
         try {
-            Image img = new Image(getClass().getResourceAsStream(c.getSpritePath()));
+            Image img = AssetLoader.loadImage(c.getSpritePath());
             ImageView view = new ImageView(img);
             view.setFitWidth(110);
             view.setPreserveRatio(true);
@@ -573,7 +575,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 String colorName = j.getColor() != null ? j.getColor().toLowerCase() : "gris";
                 if (j instanceof Foca)
                     colorName = "gris";
-                Image img = new Image(getClass().getResourceAsStream("/assets/jugadores/" + colorName + ".png"));
+                Image img = AssetLoader.loadImage("/assets/jugadores/" + colorName + ".png");
                 token.setImage(img);
             } catch (Exception e) {
                 System.err.println("No se pudo cargar la imagen para " + j.getColor());
@@ -597,7 +599,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             // Icono de Prohibido (Status)
             ImageView statusIcon = new ImageView();
             try {
-                Image prohibidoImg = new Image(getClass().getResourceAsStream("/assets/iconos/prohibido.png"));
+                Image prohibidoImg = AssetLoader.loadImage("/assets/iconos/prohibido.png");
                 statusIcon.setImage(prohibidoImg);
             } catch (Exception e) {
                 System.err.println("No se pudo cargar icono prohibido.");
@@ -763,8 +765,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                 String colorName = j.getColor() != null ? j.getColor().toLowerCase() : "gris";
                 if (j instanceof Foca)
                     colorName = "gris";
-                Image img = new Image(
-                        getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                Image img = AssetLoader.loadImage("/assets/ico_jugadores/ico_" + colorName + ".png");
                 circle.setImage(img);
             } catch (Exception e) {
                 System.err.println("No se pudo cargar el icono para " + j.getColor());
@@ -781,7 +782,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
             // Icono de Prohibido en el indicador superior
             ImageView statusIcon = new ImageView();
             try {
-                Image prohibidoImg = new Image(getClass().getResourceAsStream("/assets/iconos/prohibido.png"));
+                Image prohibidoImg = AssetLoader.loadImage("/assets/iconos/prohibido.png");
                 statusIcon.setImage(prohibidoImg);
             } catch (Exception e) {
                 // Silencioso
@@ -948,7 +949,7 @@ public class TableroController implements GameFlowManager.GameUIHandler {
                     gifPath = "/assets/tablero/dados/dado_" + pasos + ".gif";
                 }
                 
-                Image rollingGif = new Image(getClass().getResource(gifPath).toExternalForm());
+                Image rollingGif = AssetLoader.loadImage(gifPath);
                 diceImageView.setImage(rollingGif);
             } catch (Exception e) {
                 System.err.println("No se pudo cargar el GIF del dado: " + e.getMessage());

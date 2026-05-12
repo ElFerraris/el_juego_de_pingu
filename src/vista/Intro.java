@@ -62,7 +62,7 @@ public class Intro {
         util.SoundManager.stopMusic();
 
         // Configuramos la ruta del vídeo
-        String path = "src/assets/BadLabsIntro/BadLabsIntro.mp4";
+        String path = "assets/BadLabsIntro/BadLabsIntro.mp4";
         File file = new File(path);
 
         if (file.exists()) {

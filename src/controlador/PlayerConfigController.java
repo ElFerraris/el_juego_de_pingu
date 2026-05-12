@@ -16,6 +16,7 @@ import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import util.AssetLoader;
 import java.util.ArrayList;
 import java.util.List;
 import modelo.Jugador;
@@ -362,8 +363,7 @@ public class PlayerConfigController {
         private void actualizarIcono() {
             try {
                 String colorName = selectedColor.toLowerCase();
-                Image img = new Image(
-                        getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                Image img = AssetLoader.loadImage("/assets/ico_jugadores/ico_" + colorName + ".png");
                 colorIcon.setImage(img);
             } catch (Exception e) {
                 System.err.println("No se pudo cargar el icono");
@@ -507,8 +507,7 @@ public class PlayerConfigController {
                 ImageView c = new ImageView();
                 try {
                     String colorName = cName.toLowerCase();
-                    Image img = new Image(
-                            getClass().getResourceAsStream("/assets/ico_jugadores/ico_" + colorName + ".png"));
+                    Image img = AssetLoader.loadImage("/assets/ico_jugadores/ico_" + colorName + ".png");
                     c.setImage(img);
                 } catch (Exception e) {
                 }

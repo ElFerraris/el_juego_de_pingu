@@ -8,6 +8,7 @@ import javafx.scene.image.ImageView;
 import modelo.Jugador;
 import modelo.Foca;
 import util.SoundManager;
+import util.AssetLoader;
 
 /**
  * Controlador para la pantalla de victoria.
@@ -50,7 +51,7 @@ public class VictoryController {
             try {
                 // El nombre del archivo en /assets/jugadores/ empieza con Mayúscula (ej: Azul.png)
                 String formattedColor = colorName.substring(0, 1).toUpperCase() + colorName.substring(1).toLowerCase();
-                Image img = new Image(getClass().getResourceAsStream("/assets/jugadores/" + formattedColor + ".png"));
+                Image img = AssetLoader.loadImage("/assets/jugadores/" + formattedColor + ".png");
                 winnerImageView.setImage(img);
             } catch (Exception e) {
                 System.err.println("Error cargando imagen de victoria: " + e.getMessage());

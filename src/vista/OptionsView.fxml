@@ -92,7 +92,7 @@
                     <VBox alignment="CENTER" styleClass="tab-content-area" style="-fx-padding: 30;">
                         <ImageView pickOnBounds="true" preserveRatio="true" fitHeight="320">
                             <image>
-                                <Image url="@../assets/creditos/team.png" />
+                                <Image url="file:assets/creditos/team.png" />
                             </image>
                         </ImageView>
                     </VBox>
