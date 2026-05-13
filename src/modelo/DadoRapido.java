@@ -4,7 +4,7 @@ package modelo;
  * Dado especial diseñado para cubrir grandes distancias rápidamente.
  * 
  * <p>
- * Su rango de valores oscila entre [5, 10], ideal para adelantar oponentes
+ * Dado con los valores entre [5 - 10], ideal para adelantar oponentes
  * o alejarse de zonas peligrosas.
  * </p>
  * 

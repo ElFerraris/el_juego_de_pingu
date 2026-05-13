@@ -4,7 +4,7 @@ package modelo;
  * Dado especial diseñado para movimientos cortos y precisos.
  * 
  * <p>
- * Su rango de valores está limitado a [1, 3], permitiendo al jugador
+ * Dado con los valores entre [1 - 3], permitiendo al jugador
  * aterrizar en casillas cercanas con mayor probabilidad.
  * </p>
  * 
